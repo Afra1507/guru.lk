@@ -47,22 +47,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       User user = userRepository.findByUsername(username).orElse(null);
 
       if (user != null && jwtService.isTokenValid(jwt, user)) {
-        // Convert enum role to Spring Security authority format
         String authority = "ROLE_" + user.getRole().name();
         var authorities = List.of(new SimpleGrantedAuthority(authority));
 
         var authToken = new UsernamePasswordAuthenticationToken(
-            user, // Principal (contains user object with ID)
-            null, // Credentials
+            user,
+            null,
             authorities);
 
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
-        // NEW: Set user ID as request attribute for downstream use
+        // Set user attributes for downstream use
         request.setAttribute("userId", user.getUserId());
         request.setAttribute("username", user.getUsername());
         request.setAttribute("role", user.getRole().name());
+        request.setAttribute("email", user.getEmail());
       }
     }
 

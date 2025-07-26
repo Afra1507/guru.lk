@@ -30,9 +30,10 @@ public class JwtService {
 
   public String generateToken(User user) {
     Map<String, Object> claims = new HashMap<>();
-    claims.put("role", user.getRole().name()); // Store enum name as string
-    claims.put("preferredLanguage", user.getPreferredLanguage() != null ? user.getPreferredLanguage().name() : null);
+    claims.put("role", user.getRole().name());
     claims.put("userId", user.getUserId());
+    claims.put("email", user.getEmail());
+    claims.put("preferredLanguage", user.getPreferredLanguage() != null ? user.getPreferredLanguage().name() : null);
 
     return Jwts.builder()
         .setSubject(user.getUsername())
@@ -51,12 +52,16 @@ public class JwtService {
     return extractClaim(token, claims -> claims.get("role", String.class));
   }
 
-  public String extractPreferredLanguage(String token) {
-    return extractClaim(token, claims -> claims.get("preferredLanguage", String.class));
+  public String extractEmail(String token) {
+    return extractClaim(token, claims -> claims.get("email", String.class));
   }
 
   public Long extractUserId(String token) {
     return extractClaim(token, claims -> claims.get("userId", Long.class));
+  }
+
+  public String extractPreferredLanguage(String token) {
+    return extractClaim(token, claims -> claims.get("preferredLanguage", String.class));
   }
 
   public boolean isTokenValid(String token, User user) {

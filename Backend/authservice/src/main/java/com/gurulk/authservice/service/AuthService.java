@@ -19,6 +19,9 @@ public class AuthService {
         if (userRepository.findByUsername(request.getUsername()).isPresent())
             throw new RuntimeException("Username already exists");
 
+        if (userRepository.findByEmail(request.getEmail()).isPresent())
+            throw new RuntimeException("Email already exists");
+
         // Convert string role to enum
         User.Role role;
         try {
@@ -67,21 +70,21 @@ public class AuthService {
         try {
             String username = jwtService.extractUsername(token);
             String role = jwtService.extractRole(token);
-            Long userId = jwtService.extractUserId(token); // Extract user ID
+            Long userId = jwtService.extractUserId(token);
+            String email = jwtService.extractEmail(token);
 
-            if (username == null || role == null || userId == null) {
-                return new TokenValidationResponse(false, null, null, null, "Invalid token claims");
+            if (username == null || role == null || userId == null || email == null) {
+                return new TokenValidationResponse(false, null, null, null, null, "Invalid token claims");
             }
 
             var userOpt = userRepository.findByUsername(username);
             if (userOpt.isEmpty()) {
-                return new TokenValidationResponse(false, null, null, null, "User not found");
+                return new TokenValidationResponse(false, null, null, null, null, "User not found");
             }
 
-            return new TokenValidationResponse(true, userId, username, role, "Token valid");
+            return new TokenValidationResponse(true, userId, username, role, email, "Token valid");
         } catch (Exception e) {
-            return new TokenValidationResponse(false, null, null, null, "Invalid token: " + e.getMessage());
+            return new TokenValidationResponse(false, null, null, null, null, "Invalid token: " + e.getMessage());
         }
     }
-
 }
