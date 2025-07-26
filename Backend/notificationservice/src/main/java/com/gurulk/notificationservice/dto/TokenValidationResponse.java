@@ -12,6 +12,7 @@ public class TokenValidationResponse {
     private Long userId;
     private String username;
     private String role;
+    private String email;
     private String preferredLanguage;
     private String message;
 }

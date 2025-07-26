@@ -21,9 +21,11 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
+  private final EmailService emailService;
 
   @Transactional
-  public NotificationResponse createNotification(NotificationRequest request) {
+  public NotificationResponse createNotification(NotificationRequest request, String senderRole,
+      String recipientEmail) {
     validateNotificationRequest(request);
 
     Notification notification = Notification.builder()
@@ -35,6 +37,20 @@ public class NotificationService {
         .build();
 
     Notification saved = notificationRepository.save(notification);
+
+    // Send email only if sender is admin AND recipient email is provided
+    if ("ADMIN".equals(senderRole) && recipientEmail != null) {
+      try {
+        emailService.sendNotificationEmail(
+            recipientEmail,
+            request.getType(),
+            request.getMessage());
+      } catch (Exception e) {
+        // Log email failure but don't fail the operation
+        // Consider adding: log.error("Failed to send notification email", e);
+      }
+    }
+
     return mapToResponse(saved);
   }
 

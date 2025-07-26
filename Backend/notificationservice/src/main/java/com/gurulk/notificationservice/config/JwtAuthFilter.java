@@ -58,6 +58,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       request.setAttribute("userId", responseBody.getUserId());
       request.setAttribute("username", responseBody.getUsername());
       request.setAttribute("role", responseBody.getRole());
+      request.setAttribute("email", responseBody.getEmail());
       request.setAttribute("preferredLanguage", responseBody.getPreferredLanguage());
 
       filterChain.doFilter(request, response);
