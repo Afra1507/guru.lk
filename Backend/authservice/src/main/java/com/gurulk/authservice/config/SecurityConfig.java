@@ -14,8 +14,6 @@ public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-  // Constructor injection for JwtAuthenticationFilter
-  // This filter will handle JWT authentication
   public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
   }
@@ -25,7 +23,17 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/**").permitAll()
+            // Public endpoints
+            .requestMatchers(
+                "/auth/register",
+                "/auth/login",
+                "/auth/validate-token")
+            .permitAll()
+
+            // Email endpoint - Admin only
+            .requestMatchers("/users/*/email").hasRole("ADMIN")
+
+            // All other endpoints require authentication
             .anyRequest().authenticated())
         .addFilterBefore(jwtAuthenticationFilter,
             org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);

@@ -24,12 +24,11 @@ public class NotificationController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<NotificationResponse> createNotification(
       @RequestBody NotificationRequest request,
-      @RequestAttribute String role,
-      @RequestAttribute(required = false) String email) {
-    if (!"ADMIN".equals(role)) {
-      throw new UnauthorizedException("Only admins can create notifications");
-    }
-    return ResponseEntity.ok(notificationService.createNotification(request, role, email));
+      @RequestHeader("Authorization") String authToken,
+      @RequestAttribute String role) {
+
+    return ResponseEntity.ok(
+        notificationService.createNotification(request, role, authToken));
   }
 
   // All other endpoints remain exactly the same

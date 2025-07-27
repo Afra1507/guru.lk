@@ -2,6 +2,7 @@ package com.gurulk.authservice.service;
 
 import com.gurulk.authservice.dto.*;
 import com.gurulk.authservice.entity.User;
+import com.gurulk.authservice.exception.ResourceNotFoundException;
 import com.gurulk.authservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -86,5 +87,11 @@ public class AuthService {
         } catch (Exception e) {
             return new TokenValidationResponse(false, null, null, null, null, "Invalid token: " + e.getMessage());
         }
+    }
+
+    public String getUserEmail(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId))
+                .getEmail();
     }
 }

@@ -27,4 +27,9 @@ public class AuthController {
         return authService.validateToken(request.getToken());
     }
 
+    @GetMapping("/users/{userId}/email")
+    public String getUserEmail(@PathVariable Long userId) {
+        return authService.getUserEmail(userId);
+    }
+
 }

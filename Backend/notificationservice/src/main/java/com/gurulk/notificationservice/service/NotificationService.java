@@ -1,5 +1,6 @@
 package com.gurulk.notificationservice.service;
 
+import com.gurulk.notificationservice.client.UserServiceClient;
 import com.gurulk.notificationservice.dto.NotificationRequest;
 import com.gurulk.notificationservice.dto.NotificationResponse;
 import com.gurulk.notificationservice.entity.Notification;
@@ -7,25 +8,35 @@ import com.gurulk.notificationservice.exception.NotificationException;
 import com.gurulk.notificationservice.exception.ResourceNotFoundException;
 import com.gurulk.notificationservice.exception.UnauthorizedException;
 import com.gurulk.notificationservice.repository.NotificationRepository;
+
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationService {
 
   private final NotificationRepository notificationRepository;
   private final EmailService emailService;
+  private final UserServiceClient userServiceClient;
+  private final JavaMailSender mailSender;
 
   @Transactional
-  public NotificationResponse createNotification(NotificationRequest request, String senderRole,
-      String recipientEmail) {
+  public NotificationResponse createNotification(
+      NotificationRequest request,
+      String senderRole,
+      String authToken) {
+
     validateNotificationRequest(request);
 
     Notification notification = Notification.builder()
@@ -38,16 +49,22 @@ public class NotificationService {
 
     Notification saved = notificationRepository.save(notification);
 
-    // Send email only if sender is admin AND recipient email is provided
-    if ("ADMIN".equals(senderRole) && recipientEmail != null) {
+    if ("ADMIN".equals(senderRole)) {
       try {
-        emailService.sendNotificationEmail(
-            recipientEmail,
-            request.getType(),
-            request.getMessage());
+        log.info("Fetching email for user {} from auth-service", request.getUserId());
+        String email = userServiceClient.getUserEmail(request.getUserId(), authToken);
+
+        if (email != null && !email.isBlank()) {
+          log.info("Sending email to {}", email);
+          emailService.sendNotificationEmail(
+              email,
+              "Notification: " + request.getType(),
+              request.getMessage());
+        } else {
+          log.warn("Empty email returned for user {}", request.getUserId());
+        }
       } catch (Exception e) {
-        // Log email failure but don't fail the operation
-        // Consider adding: log.error("Failed to send notification email", e);
+        log.error("Failed to process email for user {}: {}", request.getUserId(), e.toString());
       }
     }
 
@@ -119,6 +136,12 @@ public class NotificationService {
         .collect(Collectors.toList());
   }
 
+  @PostConstruct
+  public void checkMailConfig() {
+    log.info("JavaMailSender initialized: {}", mailSender != null);
+    log.info("Mail password present in environment: {}", System.getenv("GMAIL_APP_PASSWORD") != null);
+  }
+
   private void validateNotificationRequest(NotificationRequest request) {
     if (request.getUserId() == null) {
       throw new NotificationException("User ID is required");
@@ -140,6 +163,16 @@ public class NotificationService {
         .referenceId(notification.getReferenceId())
         .isRead(notification.getIsRead())
         .createdAt(notification.getCreatedAt())
+        .build();
+  }
+
+  private Notification buildNotification(NotificationRequest request) {
+    return Notification.builder()
+        .userId(request.getUserId())
+        .type(request.getType())
+        .message(request.getMessage())
+        .referenceId(request.getReferenceId())
+        .isRead(false)
         .build();
   }
 }
