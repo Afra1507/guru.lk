@@ -1,7 +1,9 @@
+// auth/Register.jsx
 import React, { useState } from "react";
 import { Form, Button, Card, Alert, Col, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { FaUserPlus } from "react-icons/fa";
+import { registerUser } from "../../services/authService";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -37,15 +39,10 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // TODO: Replace with actual registration API call
-      console.log("Registration data:", formData);
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // On successful registration, redirect to login
+      await registerUser(formData);
       navigate("/login");
     } catch (err) {
-      setError("Failed to create account. Please try again.");
+      setError(err.response?.data?.message || "Registration failed.");
     }
 
     setLoading(false);
@@ -121,7 +118,8 @@ const Register = () => {
                   onChange={handleChange}
                 >
                   <option value="learner">Learner</option>
-                  <option value="contributor">Content Contributor</option>
+                  <option value="contributor">Contributor</option>
+                  <option value="admin">Admin</option>
                 </Form.Select>
               </Form.Group>
 
@@ -140,7 +138,7 @@ const Register = () => {
             </Row>
 
             <Form.Group className="mb-3" controlId="formRegion">
-              <Form.Label>Region (Optional)</Form.Label>
+              <Form.Label>Region</Form.Label>
               <Form.Control
                 type="text"
                 name="region"
@@ -152,7 +150,7 @@ const Register = () => {
             <Form.Group className="mb-3" controlId="formLowIncome">
               <Form.Check
                 type="checkbox"
-                label="I require offline access due to limited internet connectivity"
+                label="Limited internet connectivity"
                 name="isLowIncome"
                 checked={formData.isLowIncome}
                 onChange={handleChange}

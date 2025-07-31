@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Row, Col, Card, Tab, Tabs } from "react-bootstrap";
+import { Container, Row, Col, Tab, Tabs } from "react-bootstrap";
 import Sidebar from "../components/layout/Sidebar";
 import UserManagement from "../components/admin/UserManagement";
 import PlatformAnalytics from "../components/admin/PlatformAnalytics";
@@ -14,7 +14,7 @@ const AdminDashboard = () => {
         <Col md={10} className="py-4">
           <h2 className="mb-4">Admin Dashboard</h2>
 
-          <Tabs defaultActiveKey="users" className="mb-3">
+          <Tabs defaultActiveKey="users" className="mb-3" id="admin-tabs">
             <Tab eventKey="users" title="User Management">
               <UserManagement />
             </Tab>

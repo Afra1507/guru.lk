@@ -3,7 +3,6 @@ import {
   Container,
   Row,
   Col,
-  Card,
   Tab,
   Tabs,
   Spinner,
@@ -19,11 +18,8 @@ const ContributorDashboard = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Simulate loading contributor data
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-
+    // Simulate data loading (replace with real API call)
+    const timer = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -52,7 +48,11 @@ const ContributorDashboard = () => {
         <Col md={10} className="py-4">
           <h2 className="mb-4">Contributor Dashboard</h2>
 
-          <Tabs defaultActiveKey="uploads" className="mb-3">
+          <Tabs
+            defaultActiveKey="uploads"
+            className="mb-3"
+            id="contributor-tabs"
+          >
             <Tab eventKey="uploads" title="My Uploads">
               <MyUploads />
             </Tab>

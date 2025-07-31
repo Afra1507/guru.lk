@@ -1,13 +1,13 @@
+// auth/Login.jsx
 import React, { useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSignInAlt } from "react-icons/fa";
+import { loginUser, fetchUserProfile } from "../../services/authService";
+import { setAuthToken, setCurrentUser } from "../../utils/auth";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -23,15 +23,22 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // TODO: Replace with actual authentication API call
-      console.log("Login data:", formData);
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { token } = await loginUser(formData);
+      setAuthToken(token);
 
-      // On successful login, redirect based on user role
-      navigate("/learner"); // Default to learner dashboard
+      const user = await fetchUserProfile(token);
+      setCurrentUser(user);
+
+      const role = user.role?.toLowerCase() || "learner";
+      navigate(
+        role === "admin"
+          ? "/admin"
+          : role === "contributor"
+          ? "/contributor"
+          : "/learner"
+      );
     } catch (err) {
-      setError("Failed to log in. Please check your credentials.");
+      setError(err.response?.data?.message || "Login failed.");
     }
 
     setLoading(false);
@@ -50,12 +57,12 @@ const Login = () => {
           </h2>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="formEmail">
-              <Form.Label>Email Address</Form.Label>
+            <Form.Group className="mb-3" controlId="formUsername">
+              <Form.Label>Username</Form.Label>
               <Form.Control
-                type="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
                 required
               />

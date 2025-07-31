@@ -1,92 +1,49 @@
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
+import axios from "axios";
 
-// Simulated user data - replace with actual API calls
-const users = [
-  {
-    id: 1,
-    username: "admin",
-    email: "admin@guru.lk",
-    role: "admin",
-    preferredLanguage: "sinhala",
-    region: "Colombo",
-    isLowIncome: false,
-    joinDate: "2023-01-01",
-    lastLogin: new Date().toISOString(),
-    stats: {
-      lessonsUploaded: 0,
-      lessonsDownloaded: 0,
-      questionsAsked: 0,
-      answersProvided: 0,
-      likesReceived: 0,
-      reputationScore: 0,
-    },
+const API = axios.create({
+  baseURL: process.env.REACT_APP_AUTH_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
   },
-  // Add more test users as needed
-];
+});
 
-export const login = async (email, password) => {
-  // Simulate API call
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const user = users.find((u) => u.email === email);
-      if (user && password === "password") {
-        // Simple mock validation
-        resolve({
-          success: true,
-          user,
-          token: "mock-jwt-token",
-        });
-      } else {
-        reject(new Error("Invalid email or password"));
-      }
-    }, 1000);
-  });
+export const registerUser = async (data) => {
+  const payload = {
+    ...data,
+    role: data.role.toUpperCase(), // convert to LEARNER / CONTRIBUTOR
+    preferredLanguage: data.preferredLanguage.toUpperCase(), // SINHALA / TAMIL
+  };
+  const response = await API.post("/auth/register", payload);
+  return response.data;
 };
 
-export const register = async (userData) => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newUser = {
-        ...userData,
-        id: users.length + 1,
-        joinDate: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-        stats: {
-          lessonsUploaded: 0,
-          lessonsDownloaded: 0,
-          questionsAsked: 0,
-          answersProvided: 0,
-          likesReceived: 0,
-          reputationScore: 0,
-        },
-      };
-      users.push(newUser);
-      resolve({
-        success: true,
-        user: newUser,
-        token: "mock-jwt-token",
-      });
-    }, 1000);
-  });
+export const loginUser = async (data) => {
+  const payload = {
+    username: data.username,
+    password: data.password,
+  };
+  const response = await API.post("/auth/login", payload);
+  return response.data;
 };
 
-export const getProfile = async () => {
-  // Simulate API call - in a real app, this would use the authenticated user's token
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(users[0]); // Return the first user as mock profile
-    }, 800);
-  });
+export const validateToken = async (token) => {
+  const response = await API.post("/auth/validate-token", { token });
+  return response.data;
 };
 
-export const updateProfile = async (updatedData) => {
-  // Simulate API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const updatedUser = { ...users[0], ...updatedData };
-      users[0] = updatedUser;
-      resolve(updatedUser);
-    }, 800);
+export const fetchUserProfile = async (token) => {
+  const response = await API.get("/user/profile", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+  return response.data;
 };
+// export const updateUserProfile = async (token, data) => {
+//   const response = await API.put('/user/profile', data, {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
+//   return response.data;
+// };

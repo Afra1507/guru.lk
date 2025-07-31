@@ -16,9 +16,9 @@ const Profile = () => {
         setLoading(true);
         const data = await getProfile();
         setProfile(data);
-        setLoading(false);
-      } catch (err) {
+      } catch {
         setError("Failed to load profile. Please try again.");
+      } finally {
         setLoading(false);
       }
     };
@@ -46,7 +46,7 @@ const Profile = () => {
     <Container fluid>
       <Row>
         <Col md={2} className="px-0">
-          <Sidebar role={profile?.role || "learner"} />
+          <Sidebar role={profile?.role?.toLowerCase() || "learner"} />
         </Col>
         <Col md={10} className="py-4">
           <h2 className="mb-4">My Profile</h2>

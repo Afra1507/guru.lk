@@ -3,7 +3,7 @@ import { Container, Row, Col, Tab, Tabs } from "react-bootstrap";
 import ContentCard from "../components/content/ContentCard";
 
 const LearnerDashboard = () => {
-  // Sample data - will be replaced with API calls
+  // Example static data — replace with API calls
   const recentLessons = [
     {
       id: 3,
@@ -45,7 +45,7 @@ const LearnerDashboard = () => {
         </Col>
       </Row>
 
-      <Tabs defaultActiveKey="recent" className="mb-3">
+      <Tabs defaultActiveKey="recent" className="mb-3" id="learner-tabs">
         <Tab eventKey="recent" title="Recent Lessons">
           <Row className="mt-3">
             {recentLessons.map((lesson) => (
@@ -55,6 +55,7 @@ const LearnerDashboard = () => {
             ))}
           </Row>
         </Tab>
+
         <Tab eventKey="downloads" title="My Downloads">
           <Row className="mt-3">
             {downloadedLessons.map((lesson) => (
@@ -64,6 +65,7 @@ const LearnerDashboard = () => {
             ))}
           </Row>
         </Tab>
+
         <Tab eventKey="questions" title="My Questions">
           <Row className="mt-3">
             <Col>
