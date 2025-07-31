@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contentservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: contentservice
+  template:
+    metadata:
+      labels:
+        app: contentservice
+    spec:
+      containers:
+        - name: contentservice
+          image: afra1507/contentservice:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/guru_contentdb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contentservice
+spec:
+  selector:
+    app: contentservice
+  ports:
+    - port: 8082
+      targetPort: 8082

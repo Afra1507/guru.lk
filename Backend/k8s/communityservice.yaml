@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: communityservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: communityservice
+  template:
+    metadata:
+      labels:
+        app: communityservice
+    spec:
+      containers:
+        - name: communityservice
+          image: afra1507/communityservice:latest
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/guru_communitydb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: ""
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: communityservice
+spec:
+  selector:
+    app: communityservice
+  ports:
+    - port: 8083
+      targetPort: 8083
