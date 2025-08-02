@@ -3,7 +3,7 @@ import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
 import Sidebar from "../components/layout/Sidebar";
 import ProfileInfo from "../components/profile/ProfileInfo";
 import ProfileStats from "../components/profile/ProfileStats";
-import { getProfile } from "../services/authService";
+import { fetchUserProfile as getProfile } from '../services/authService';
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
