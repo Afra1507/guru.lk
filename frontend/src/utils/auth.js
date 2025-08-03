@@ -5,7 +5,8 @@ import axios from "axios";
 // ======================
 // Backend base URL (port 8081)
 // ======================
-const AUTH_BASE_URL = process.env.REACT_APP_AUTH_BASE_URL || "http://localhost:8081";
+const AUTH_BASE_URL =
+  process.env.REACT_APP_AUTH_BASE_URL || "http://localhost:8081";
 
 // ======================
 // LocalStorage Utilities
@@ -54,25 +55,21 @@ if (token) {
 }
 
 // ======================
-// Route Guards (HOCs)
+// Route Guards (Components)
 // ======================
-export const withAuth = (Component) => {
-  return (props) => {
-    if (!isAuthenticated()) {
-      return <Navigate to="/login" replace />;
-    }
-    return <Component {...props} />;
-  };
+export const RequireAuth = ({ children }) => {
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
 };
 
-export const withRole = (allowedRoles) => (Component) => {
-  return (props) => {
-    const role = getUserRole();
-    if (!allowedRoles.includes(role)) {
-      return <Navigate to="/unauthorized" replace />;
-    }
-    return <Component {...props} />;
-  };
+export const RequireRole = ({ allowedRoles, children }) => {
+  const role = getUserRole();
+  if (!allowedRoles.includes(role)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+  return children;
 };
 
 // ======================

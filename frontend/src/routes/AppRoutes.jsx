@@ -1,13 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import Login from "../auth/Login";
 import Register from "../auth/Register";
 import AdminDashboard from "../pages/AdminDashboard";
 import ContributorDashboard from "../pages/ContributorDashboard";
 import LearnerDashboard from "../pages/LearnerDashboard";
 import Unauthorized from "../pages/Unauthorized";
-import { withAuth, withRole } from "../utils/auth";
 
+import { RequireAuth, RequireRole } from "../utils/auth";
 
 const AppRoutes = () => {
   return (
@@ -17,16 +18,36 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
 
         {/* Protected routes */}
-        <Route path="/admin" element={withRole(["ADMIN"])(AdminDashboard)} />
+        <Route
+          path="/admin"
+          element={
+            <RequireRole allowedRoles={["ADMIN"]}>
+              <AdminDashboard />
+            </RequireRole>
+          }
+        />
+
         <Route
           path="/contributor"
-          element={withRole(["CONTRIBUTOR"])(ContributorDashboard)}
+          element={
+            <RequireRole allowedRoles={["CONTRIBUTOR"]}>
+              <ContributorDashboard />
+            </RequireRole>
+          }
         />
-        <Route path="/learner" element={withAuth(LearnerDashboard)} />
+
+        <Route
+          path="/learner"
+          element={
+            <RequireAuth>
+              <LearnerDashboard />
+            </RequireAuth>
+          }
+        />
 
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-        {/* Default route can redirect or show landing */}
+        {/* Default route fallback */}
         <Route path="*" element={<Login />} />
       </Routes>
     </Router>

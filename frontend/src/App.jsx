@@ -2,28 +2,37 @@ import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Container } from "react-bootstrap";
 
-// Layout components
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import NotFound from "./pages/NotFound";
 
-// Auth & Role middleware
-import { withAuth, withRole } from "./utils/auth";
+import { RequireAuth, RequireRole } from "./utils/auth";
 import "./styles/main.scss";
 
-// Lazy-loaded pages (corrected paths)
 const Home = lazy(() => import("./pages/Home"));
 const Lessons = lazy(() => import("./pages/Lessons"));
 const QnA = lazy(() => import("./pages/QnA"));
 const Profile = lazy(() => import("./pages/Profile"));
 const LearnerDashboard = lazy(() => import("./pages/LearnerDashboard"));
-const ContributorDashboard = lazy(() => import("./pages/ContributorDashboard"));
+// Remove this: const ContributorDashboard = lazy(() => import("./pages/ContributorDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
-// 🔧 Corrected auth path based on your structure
 const Login = lazy(() => import("./components/auth/Login.jsx"));
 const Register = lazy(() => import("./components/auth/Register.jsx"));
+
+const ContributorLayout = lazy(() =>
+  import("./components/contributor/ContributorLayout")
+);
+const ContributorUploads = lazy(() =>
+  import("./components/contributor/ContributorUploads")
+);
+const ContributorStats = lazy(() =>
+  import("./components/contributor/ContributorStats")
+);
+const ContributorNewUpload = lazy(() =>
+  import("./components/contributor/ContributorNewUpload")
+);
 
 function App() {
   return (
@@ -31,7 +40,7 @@ function App() {
       <ScrollToTop />
       <Header />
       <main className="py-4">
-        <Container>
+        <Container fluid>
           <Suspense fallback={<p>Loading...</p>}>
             <Routes>
               {/* Public Routes */}
@@ -42,15 +51,45 @@ function App() {
               <Route path="/register" element={<Register />} />
 
               {/* Protected Routes */}
-              <Route path="/profile" element={withAuth(Profile)} />
-              <Route path="/learner" element={withAuth(LearnerDashboard)} />
               <Route
-                path="/contributor"
-                element={withRole(["CONTRIBUTOR"])(ContributorDashboard)}
+                path="/profile"
+                element={
+                  <RequireAuth>
+                    <Profile />
+                  </RequireAuth>
+                }
               />
               <Route
+                path="/learner"
+                element={
+                  <RequireAuth>
+                    <LearnerDashboard />
+                  </RequireAuth>
+                }
+              />
+
+              {/* New contributor nested routes */}
+              <Route
+                path="/contributor/*"
+                element={
+                  <RequireRole allowedRoles={["CONTRIBUTOR"]}>
+                    <ContributorLayout />
+                  </RequireRole>
+                }
+              >
+                <Route path="uploads" element={<ContributorUploads />} />
+                <Route path="stats" element={<ContributorStats />} />
+                <Route path="new" element={<ContributorNewUpload />} />
+                {/* Default route redirect or fallback can be added here */}
+              </Route>
+
+              <Route
                 path="/admin"
-                element={withRole(["ADMIN"])(AdminDashboard)}
+                element={
+                  <RequireRole allowedRoles={["ADMIN"]}>
+                    <AdminDashboard />
+                  </RequireRole>
+                }
               />
 
               {/* 404 fallback */}

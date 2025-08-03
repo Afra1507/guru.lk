@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import {
@@ -8,10 +8,18 @@ import {
   FaUser,
   FaUpload,
   FaUsersCog,
-  FaChartBar,
 } from "react-icons/fa";
 
-const Sidebar = ({ role = "learner" }) => {
+const Sidebar = () => {
+  const [role, setRole] = useState("learner");
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.role) {
+      setRole(user.role.toLowerCase());
+    }
+  }, []);
+
   const learnerLinks = [
     { path: "/learner", icon: <FaHome />, text: "Dashboard" },
     { path: "/lessons", icon: <FaBook />, text: "Browse Lessons" },
@@ -20,29 +28,33 @@ const Sidebar = ({ role = "learner" }) => {
   ];
 
   const contributorLinks = [
-    ...learnerLinks,
-    { path: "/upload", icon: <FaUpload />, text: "Upload Content" },
+    { path: "/contributor/uploads", icon: <FaHome />, text: "Dashboard" },
+    { path: "/lessons", icon: <FaBook />, text: "Browse Lessons" },
+    { path: "/qna", icon: <FaQuestionCircle />, text: "Q&A Forum" },
+    { path: "/profile", icon: <FaUser />, text: "My Profile" },
+    { path: "/contributor/new", icon: <FaUpload />, text: "Upload Content" },
   ];
 
   const adminLinks = [
-    ...contributorLinks,
-    { path: "/admin/users", icon: <FaUsersCog />, text: "User Management" },
-    { path: "/admin/stats", icon: <FaChartBar />, text: "Platform Analytics" },
+    { path: "/admin", icon: <FaUsersCog />, text: "Admin Dashboard" },
+    { path: "/admin/users", icon: <FaUsersCog />, text: "Manage Users" },
+    { path: "/admin/content", icon: <FaBook />, text: "Review Content" },
+    { path: "/profile", icon: <FaUser />, text: "My Profile" },
   ];
 
-  const links =
-    role === "admin"
-      ? adminLinks
-      : role === "contributor"
-      ? contributorLinks
-      : learnerLinks;
+  let links = learnerLinks;
+  if (role === "contributor") links = contributorLinks;
+  else if (role === "admin") links = adminLinks;
 
   return (
-    <Nav className="flex-column sidebar">
+    <Nav
+      className="flex-column sidebar bg-light p-3"
+      style={{ minHeight: "100vh" }}
+    >
       {links.map((link, index) => (
         <LinkContainer to={link.path} key={index}>
-          <Nav.Link className="d-flex align-items-center py-3 px-3">
-            <span className="me-3 sidebar-icon">{link.icon}</span>
+          <Nav.Link className="d-flex align-items-center py-2 px-3">
+            <span className="me-3">{link.icon}</span>
             {link.text}
           </Nav.Link>
         </LinkContainer>

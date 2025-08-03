@@ -1,62 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
-import Sidebar from "../components/layout/Sidebar";
-import ProfileInfo from "../components/profile/ProfileInfo";
-import ProfileStats from "../components/profile/ProfileStats";
-import { fetchUserProfile as getProfile } from '../services/authService';
+import React, { useEffect, useState } from "react";
+import ProfileInfo from '../components/profile/ProfileInfo';
+import UserManagement from '../components/admin/UserManagement';
+import Sidebar from '../components/layout/Sidebar';
+import { Container, Row, Col } from "react-bootstrap";
 
 const Profile = () => {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const data = await getProfile();
-        setProfile(data);
-      } catch {
-        setError("Failed to load profile. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
+    // Load user from localStorage (you can also fetch fresh profile from backend)
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
   }, []);
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center my-5">
-        <Spinner animation="border" />
-      </div>
-    );
+  if (!user) {
+    return <div>Loading...</div>;
   }
 
-  if (error) {
-    return (
-      <Container className="my-5">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
-    );
-  }
+  const role = user.role?.toUpperCase();
 
   return (
     <Container fluid>
       <Row>
-        <Col md={2} className="px-0">
-          <Sidebar role={profile?.role?.toLowerCase() || "learner"} />
+        <Col xs={12} md={3}>
+          <Sidebar role={role} />
         </Col>
-        <Col md={10} className="py-4">
-          <h2 className="mb-4">My Profile</h2>
-
-          {profile && (
-            <>
-              <ProfileStats stats={profile.stats} />
-              <ProfileInfo user={profile} />
-            </>
-          )}
+        <Col xs={12} md={9} className="p-4">
+          <h2>{role === "ADMIN" ? "Admin Dashboard" : "User Profile"}</h2>
+          <ProfileInfo user={user} setUser={setUser} />
+          {role === "ADMIN" && <UserManagement />}
         </Col>
       </Row>
     </Container>

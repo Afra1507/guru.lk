@@ -1,5 +1,5 @@
-@import 'variables';
-@import '~bootstrap/scss/bootstrap';
+@import "variables";
+@import "~bootstrap/scss/bootstrap";
 
 // Global styles
 body {
@@ -9,11 +9,14 @@ body {
 
 // Sidebar styles
 .sidebar {
-  width: $sidebar-width;
-  background-color: white;
-  height: 100vh;
   position: fixed;
-  box-shadow: $box-shadow-sm;
+  top: 56px;      /* Height of your navbar */
+  left: 0;
+  width: 250px;   /* Or your desired width */
+  height: calc(100vh - 56px); /* Full viewport height minus navbar */
+  overflow-y: auto;  /* Scroll inside sidebar if content overflows */
+  background-color: #f8f9fa; /* Or your sidebar bg */
+  z-index: 1030;   /* Make sure it stays above content */
 
   .nav-link {
     color: $dark;
@@ -34,8 +37,7 @@ body {
   padding: 20px;
 }
 
-// Custom card styles
-.card {
+.card.profile-card {
   border: none;
   box-shadow: $box-shadow-sm;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -44,26 +46,30 @@ body {
     transform: translateY(-2px);
     box-shadow: $box-shadow;
   }
+
+  margin: 0 1rem;
+
+  @media (max-width: 768px) {
+    margin: 0.5rem;
+  }
 }
 
-// Custom button styles
 .btn {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
 }
 
-// Utility classes
 .min-vh-80 {
   min-height: 80vh;
 }
 
-// Responsive adjustments
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
     height: auto;
     position: relative;
+    top: 0;
   }
 
   .main-content {

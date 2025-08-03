@@ -15,7 +15,7 @@ const Footer = () => {
         <Row>
           <Col md={4} className="mb-4 mb-md-0">
             <h5>About GURU.Ik</h5>
-            <p className="text-muted">
+            <p className="text-white">
               A community knowledge sharing platform for inclusive education in
               Sri Lanka. Bridging the gap between learners and educators across
               the country.
@@ -43,28 +43,18 @@ const Footer = () => {
             <h5>Quick Links</h5>
             <ul className="list-unstyled">
               <li>
-                <a href="/" className="text-muted">
+                <a href="/" className="text-white">
                   Home
                 </a>
               </li>
               <li>
-                <a href="/lessons" className="text-muted">
+                <a href="/lessons" className="text-white">
                   Lessons
                 </a>
               </li>
               <li>
-                <a href="/qna" className="text-muted">
+                <a href="/qna" className="text-white">
                   Q&A Forum
-                </a>
-              </li>
-              <li>
-                <a href="/register" className="text-muted">
-                  Register
-                </a>
-              </li>
-              <li>
-                <a href="/login" className="text-muted">
-                  Login
                 </a>
               </li>
             </ul>
@@ -74,27 +64,27 @@ const Footer = () => {
             <h5>Content Categories</h5>
             <ul className="list-unstyled">
               <li>
-                <a href="#" className="text-muted">
+                <a href="#" className="text-white">
                   Mathematics
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted">
+                <a href="#" className="text-white">
                   Science
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted">
+                <a href="#" className="text-white">
                   Languages
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted">
+                <a href="#" className="text-white">
                   History
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted">
+                <a href="#" className="text-white">
                   Technology
                 </a>
               </li>
@@ -103,7 +93,7 @@ const Footer = () => {
 
           <Col md={3}>
             <h5>Contact Us</h5>
-            <address className="text-muted">
+            <address className="text-white">
               <strong>University of Sri Jayewardenepura</strong>
               <br />
               Faculty of Applied Sciences
@@ -118,7 +108,7 @@ const Footer = () => {
         </Row>
 
         <Row className="mt-3">
-          <Col className="text-center text-muted">
+          <Col className="text-center text-white">
             <p className="mb-0">
               &copy; {new Date().getFullYear()} GURU.Ik - All Rights Reserved
             </p>
