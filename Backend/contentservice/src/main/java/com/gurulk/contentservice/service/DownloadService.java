@@ -1,5 +1,6 @@
 package com.gurulk.contentservice.service;
 
+import com.gurulk.contentservice.dto.DownloadResponseDTO;
 import com.gurulk.contentservice.entity.Download;
 import com.gurulk.contentservice.entity.Lesson;
 import com.gurulk.contentservice.exception.ResourceNotFoundException;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class DownloadService {
   private final LessonRepository lessonRepository;
 
   @Transactional
-  public Download createDownload(Long userId, Long lessonId) {
+  public DownloadResponseDTO createDownload(Long userId, Long lessonId) {
     // Verify lesson exists
     Lesson lesson = lessonRepository.findById(lessonId)
         .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + lessonId));
@@ -32,14 +34,16 @@ public class DownloadService {
 
     Download download = Download.builder()
         .userId(userId)
-        .lesson(lesson) // Changed from lessonId to lesson object
+        .lesson(lesson)
         .expiresAt(LocalDateTime.now().plusDays(7))
         .build();
 
-    return downloadRepository.save(download);
+    return DownloadResponseDTO.fromEntity(downloadRepository.save(download));
   }
 
-  public List<Download> getDownloadsByUser(Long userId) {
-    return downloadRepository.findByUserId(userId);
+  public List<DownloadResponseDTO> getDownloadsByUser(Long userId) {
+    return downloadRepository.findByUserId(userId).stream()
+        .map(DownloadResponseDTO::fromEntity)
+        .collect(Collectors.toList());
   }
 }

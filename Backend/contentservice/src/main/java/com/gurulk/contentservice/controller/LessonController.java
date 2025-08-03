@@ -1,5 +1,6 @@
 package com.gurulk.contentservice.controller;
 
+import com.gurulk.contentservice.dto.LessonResponseDTO;
 import com.gurulk.contentservice.entity.Lesson;
 import com.gurulk.contentservice.service.LessonService;
 import lombok.RequiredArgsConstructor;
@@ -19,25 +20,31 @@ public class LessonController {
 
   @PostMapping("/create")
   @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
-  public ResponseEntity<Lesson> createLesson(@Valid @RequestBody Lesson lesson) {
-    return ResponseEntity.ok(lessonService.createLesson(lesson));
+  public ResponseEntity<LessonResponseDTO> createLesson(@Valid @RequestBody Lesson lesson) {
+    return ResponseEntity.ok(LessonResponseDTO.fromEntity(lessonService.createLesson(lesson)));
   }
 
   @GetMapping("/approved")
   @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
-  public ResponseEntity<List<Lesson>> getAllApprovedLessons() {
+  public ResponseEntity<List<LessonResponseDTO>> getAllApprovedLessons() {
     return ResponseEntity.ok(lessonService.getAllApprovedLessons());
+  }
+
+  @GetMapping("/{id}")
+  @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
+  public ResponseEntity<LessonResponseDTO> getLessonById(@PathVariable Long id) {
+    return ResponseEntity.ok(lessonService.getLessonById(id));
   }
 
   @PostMapping("/{id}/approve")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Lesson> approveLesson(@PathVariable Long id) {
+  public ResponseEntity<LessonResponseDTO> approveLesson(@PathVariable Long id) {
     return ResponseEntity.ok(lessonService.approveLesson(id));
   }
 
   @PostMapping("/{id}/view")
   @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
-  public ResponseEntity<Lesson> incrementView(@PathVariable Long id) {
+  public ResponseEntity<LessonResponseDTO> incrementViewCount(@PathVariable Long id) {
     return ResponseEntity.ok(lessonService.incrementViewCount(id));
   }
 }

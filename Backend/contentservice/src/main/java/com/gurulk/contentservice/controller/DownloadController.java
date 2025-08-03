@@ -1,5 +1,6 @@
 package com.gurulk.contentservice.controller;
 
+import com.gurulk.contentservice.dto.DownloadResponseDTO;
 import com.gurulk.contentservice.entity.Download;
 import com.gurulk.contentservice.service.DownloadService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class DownloadController {
 
     @PostMapping("/create")
     @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
-    public ResponseEntity<Download> createDownload(
+    public ResponseEntity<DownloadResponseDTO> createDownload(
             @RequestParam Long userId,
             @RequestParam Long lessonId) {
         return ResponseEntity.ok(downloadService.createDownload(userId, lessonId));
@@ -26,7 +27,7 @@ public class DownloadController {
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
-    public ResponseEntity<List<Download>> getUserDownloads(@PathVariable Long userId) {
+    public ResponseEntity<List<DownloadResponseDTO>> getUserDownloads(@PathVariable Long userId) {
         return ResponseEntity.ok(downloadService.getDownloadsByUser(userId));
     }
 }

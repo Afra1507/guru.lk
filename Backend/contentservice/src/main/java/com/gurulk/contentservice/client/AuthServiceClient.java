@@ -18,7 +18,7 @@ public class AuthServiceClient {
   public Optional<TokenValidationResponse> validateToken(String token) {
     try {
       ResponseEntity<TokenValidationResponse> response = restTemplate.postForEntity(
-          "http://authservice:8081/auth/validate-token",
+          "http://localhost:8081/auth/validate-token",
           new TokenValidationRequest(token),
           TokenValidationResponse.class);
       return Optional.ofNullable(response.getBody());
