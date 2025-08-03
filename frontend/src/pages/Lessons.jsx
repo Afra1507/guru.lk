@@ -3,17 +3,17 @@ import {
   Container,
   Row,
   Col,
-  Card,
   Spinner,
   Alert,
   Pagination,
 } from "react-bootstrap";
-import { getLessons } from "../services/contentService";
+import { fetchApprovedLessons } from "../services/contentService";
 import ContentCard from "../components/content/ContentCard";
 import SearchFilter from "../components/content/SearchFilter";
 
 const Lessons = () => {
   const [lessons, setLessons] = useState([]);
+  const [filteredLessons, setFilteredLessons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,8 +23,10 @@ const Lessons = () => {
     const fetchLessons = async () => {
       try {
         setLoading(true);
-        const data = await getLessons();
-        setLessons(data);
+        const response = await fetchApprovedLessons();
+        // Assuming API returns lessons array in response.data
+        setLessons(response.data);
+        setFilteredLessons(response.data);
         setLoading(false);
       } catch (err) {
         setError("Failed to load lessons. Please try again.");
@@ -35,13 +37,54 @@ const Lessons = () => {
     fetchLessons();
   }, []);
 
-  // Pagination logic
+  // Pagination calculation for filtered lessons
   const indexOfLastLesson = currentPage * lessonsPerPage;
   const indexOfFirstLesson = indexOfLastLesson - lessonsPerPage;
-  const currentLessons = lessons.slice(indexOfFirstLesson, indexOfLastLesson);
-  const totalPages = Math.ceil(lessons.length / lessonsPerPage);
+  const currentLessons = filteredLessons.slice(
+    indexOfFirstLesson,
+    indexOfLastLesson
+  );
+  const totalPages = Math.ceil(filteredLessons.length / lessonsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Filter handler passed to SearchFilter
+  const handleFilter = ({ searchTerm, language, subject, ageGroup }) => {
+    let tempLessons = [...lessons];
+
+    // Filter by search term in title or description (case-insensitive)
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      tempLessons = tempLessons.filter(
+        (lesson) =>
+          (lesson.title && lesson.title.toLowerCase().includes(term)) ||
+          (lesson.description &&
+            lesson.description.toLowerCase().includes(term))
+      );
+    }
+
+    if (language && language !== "all") {
+      tempLessons = tempLessons.filter(
+        (lesson) => lesson.language?.toLowerCase() === language.toLowerCase()
+      );
+    }
+
+    if (subject && subject !== "all" && subject.trim() !== "") {
+      const subj = subject.toLowerCase();
+      tempLessons = tempLessons.filter((lesson) =>
+        lesson.subject?.toLowerCase().includes(subj)
+      );
+    }
+
+    if (ageGroup && ageGroup !== "all") {
+      tempLessons = tempLessons.filter(
+        (lesson) => lesson.ageGroup?.toLowerCase() === ageGroup.toLowerCase()
+      );
+    }
+
+    setFilteredLessons(tempLessons);
+    setCurrentPage(1); // reset to first page when filter changes
+  };
 
   if (loading) {
     return (
@@ -69,7 +112,7 @@ const Lessons = () => {
 
       <Row className="mb-4">
         <Col>
-          <SearchFilter />
+          <SearchFilter onFilter={handleFilter} />
         </Col>
       </Row>
 
@@ -89,7 +132,7 @@ const Lessons = () => {
         )}
       </Row>
 
-      {lessons.length > lessonsPerPage && (
+      {filteredLessons.length > lessonsPerPage && (
         <Row className="mt-4">
           <Col className="d-flex justify-content-center">
             <Pagination>

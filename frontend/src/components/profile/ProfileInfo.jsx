@@ -8,7 +8,7 @@ import {
   FaTools,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { API } from "../../api/axiosInstances";
 
 const ProfileInfo = ({ user, setUser }) => {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ const ProfileInfo = ({ user, setUser }) => {
 
   const handleSaveChanges = async () => {
     try {
-      // PUT /user/profile expects UpdateProfileRequest
+      // PUT /user/profile expects UpdateProfileRequest payload
       const payload = {
         email: editedUser.email,
         preferredLanguage: editedUser.preferredLanguage,
@@ -53,7 +53,7 @@ const ProfileInfo = ({ user, setUser }) => {
         isLowIncome: editedUser.isLowIncome,
       };
 
-      const res = await axios.put("/user/profile", payload);
+      const res = await API.put("/user/profile", payload); // <-- use API here
       setUser(res.data);
       localStorage.setItem("user", JSON.stringify(res.data));
       setShowEdit(false);

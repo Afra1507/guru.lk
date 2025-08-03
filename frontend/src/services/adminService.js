@@ -1,10 +1,23 @@
-import axios from "axios";
+import { API } from "../api/axiosInstances";
 
-export const fetchAllUsers = () => axios.get("/user/admin/all");
+export const fetchAllUsers = async () => {
+  const response = await API.get("/user/admin/all");
+  return response.data;
+};
 
-export const fetchUserById = (userId) => axios.get(`/user/admin/${userId}`);
+export const fetchUserById = async (userId) => {
+  const response = await API.get(`/user/admin/${userId}`);
+  return response.data;
+};
 
-export const updateUserRole = (userId, role) =>
-  axios.put(`/user/admin/${userId}/role?role=${role}`);
+export const updateUserRole = async (userId, role) => {
+  const response = await API.put(`/user/admin/${userId}/role`, null, {
+    params: { role },
+  });
+  return response.data;
+};
 
-export const deleteUser = (userId) => axios.delete(`/user/admin/${userId}`);
+export const deleteUser = async (userId) => {
+  const response = await API.delete(`/user/admin/${userId}`);
+  return response.data;
+};

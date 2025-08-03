@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
+import { uploadLesson } from "../../services/contentService";
 
 const ContentUpload = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ const ContentUpload = () => {
     file: null,
   });
 
+  const [uploading, setUploading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -21,10 +24,37 @@ const ContentUpload = () => {
     setFormData((prev) => ({ ...prev, file: e.target.files[0] }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    // Will implement upload functionality later
+
+    if (!formData.file) {
+      alert("Please upload a file.");
+      return;
+    }
+
+    const data = new FormData();
+    for (const key in formData) {
+      data.append(key, formData[key]);
+    }
+
+    try {
+      setUploading(true);
+      await uploadLesson(data);
+      alert("Lesson uploaded successfully! Awaiting approval.");
+      setFormData({
+        title: "",
+        description: "",
+        contentType: "text",
+        subject: "",
+        language: "sinhala",
+        ageGroup: "all",
+        file: null,
+      });
+    } catch (err) {
+      alert("Upload failed: " + (err.response?.data?.message || err.message));
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -115,12 +145,17 @@ const ContentUpload = () => {
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formFile">
           <Form.Label>Upload File</Form.Label>
-          <Form.Control type="file" onChange={handleFileChange} required />
+          <Form.Control
+            type="file"
+            onChange={handleFileChange}
+            required
+            accept="video/*,audio/*,text/*"
+          />
         </Form.Group>
       </Row>
 
-      <Button variant="primary" type="submit">
-        Upload Lesson
+      <Button variant="primary" type="submit" disabled={uploading}>
+        {uploading ? "Uploading..." : "Upload Lesson"}
       </Button>
     </Form>
   );

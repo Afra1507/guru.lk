@@ -3,14 +3,15 @@ import React, { useState } from "react";
 import { Form, Button, Card, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { FaSignInAlt } from "react-icons/fa";
-import { loginUser, fetchUserProfile } from "../../services/authService";
-import { setAuthToken, setCurrentUser } from "../../utils/auth";
+import { loginUser } from "../../services/authService";
+import { useAuth } from "../../auth/AuthContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,12 +25,12 @@ const Login = () => {
 
     try {
       const { token } = await loginUser(formData);
-      setAuthToken(token);
+      await login(token);
 
-      const user = await fetchUserProfile(token);
-      setCurrentUser(user);
+      const role = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user")).role.toLowerCase()
+        : "learner";
 
-      const role = user.role?.toLowerCase() || "learner";
       navigate(
         role === "admin"
           ? "/admin"

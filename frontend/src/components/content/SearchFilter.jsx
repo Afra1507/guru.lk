@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Form, Row, Col, Button } from "react-bootstrap";
 
-const SearchFilter = () => {
+const SearchFilter = ({ onFilter }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [language, setLanguage] = useState("all");
   const [subject, setSubject] = useState("all");
@@ -9,12 +9,16 @@ const SearchFilter = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Will implement search functionality later
-    console.log({ searchTerm, language, subject, ageGroup });
+    onFilter({
+      searchTerm: searchTerm.trim(),
+      language,
+      subject,
+      ageGroup,
+    });
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit} className="mb-3">
       <Row className="g-2">
         <Col md={6}>
           <Form.Control
@@ -36,20 +40,31 @@ const SearchFilter = () => {
           </Form.Select>
         </Col>
         <Col md={2}>
-          <Form.Select
-            value={subject}
+          <Form.Control
+            type="text"
+            placeholder="Subject"
+            value={subject === "all" ? "" : subject}
             onChange={(e) => setSubject(e.target.value)}
-          >
-            <option value="all">All Subjects</option>
-            <option value="math">Mathematics</option>
-            <option value="science">Science</option>
-            <option value="language">Language</option>
-            <option value="history">History</option>
-          </Form.Select>
+          />
         </Col>
         <Col md={2}>
-          <Button variant="primary" type="submit" className="w-100">
-            Search
+          <Form.Select
+            value={ageGroup}
+            onChange={(e) => setAgeGroup(e.target.value)}
+          >
+            <option value="all">All Ages</option>
+            <option value="5-10">5-10</option>
+            <option value="11-14">11-14</option>
+            <option value="15-17">15-17</option>
+            <option value="18+">18+</option>
+          </Form.Select>
+        </Col>
+      </Row>
+
+      <Row className="mt-2">
+        <Col>
+          <Button type="submit" variant="primary" className="w-100">
+            Filter
           </Button>
         </Col>
       </Row>

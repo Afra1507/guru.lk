@@ -1,86 +1,31 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+// utils/auth.js
 import axios from "axios";
 
-// ======================
-// Backend base URL (port 8081)
-// ======================
-const AUTH_BASE_URL =
+export const AUTH_BASE_URL =
   process.env.REACT_APP_AUTH_BASE_URL || "http://localhost:8081";
 
-// ======================
-// LocalStorage Utilities
-// ======================
-export const isAuthenticated = () => !!localStorage.getItem("token");
-
+// ===================
+// LocalStorage helpers
+// ===================
 export const getToken = () => localStorage.getItem("token");
-
 export const setAuthToken = (token) => {
   localStorage.setItem("token", token);
   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
-
 export const clearAuth = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   delete axios.defaults.headers.common["Authorization"];
 };
-
+export const setCurrentUser = (user) =>
+  localStorage.setItem("user", JSON.stringify(user));
 export const getCurrentUser = () => {
   const user = localStorage.getItem("user");
   try {
-    return user ? JSON.parse(user) : null;
+    return JSON.parse(user);
   } catch {
     return null;
   }
 };
-
-export const setCurrentUser = (user) => {
-  localStorage.setItem("user", JSON.stringify(user));
-};
-
-export const getUserRole = () => {
-  const user = getCurrentUser();
-  return user?.role?.toUpperCase() || "LEARNER"; // fallback default
-};
-
-// ======================
-// Axios Global Config
-// ======================
-axios.defaults.baseURL = AUTH_BASE_URL;
-
-const token = getToken();
-if (token) {
-  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-}
-
-// ======================
-// Route Guards (Components)
-// ======================
-export const RequireAuth = ({ children }) => {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
-};
-
-export const RequireRole = ({ allowedRoles, children }) => {
-  const role = getUserRole();
-  if (!allowedRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-  return children;
-};
-
-// ======================
-// Optional Token Validation
-// ======================
-export const validateToken = async () => {
-  try {
-    const res = await axios.get("/auth/validate-token");
-    return res.status === 200;
-  } catch (err) {
-    clearAuth();
-    return false;
-  }
-};
+export const getUserRole = () =>
+  getCurrentUser()?.role?.toUpperCase() || "LEARNER";

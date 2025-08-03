@@ -12,6 +12,12 @@ import {
 } from "react-bootstrap";
 import { FaDownload, FaThumbsUp, FaComment, FaArrowLeft } from "react-icons/fa";
 import CommentSection from "./CommentSection";
+import {
+  fetchLessonById,
+  incrementLessonView,
+  createDownload,
+} from "../../services/contentService";
+import { useAuth } from "../../auth/useAuth"; // assumed auth hook
 
 const LessonViewer = () => {
   const { id } = useParams();
@@ -19,61 +25,49 @@ const LessonViewer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [comments, setComments] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const fetchLesson = async () => {
+    const loadLesson = async () => {
       try {
         setLoading(true);
-        // TODO: Replace with actual API call
-        await new Promise((resolve) => setTimeout(resolve, 800));
-
-        // Mock data - will be replaced with API response
-        const mockLesson = {
-          id: id,
-          title: "Sample Lesson Title",
-          description:
-            "This is a detailed description of the lesson content. It explains what the lesson covers and its importance.",
-          content:
-            "Full lesson content in text format. This could be replaced with a video or audio player based on content type.",
-          contentType: "text", // or 'video', 'audio'
-          fileUrl: "https://example.com/lesson-file",
-          subject: "Mathematics",
-          language: "Sinhala",
-          ageGroup: "15-17",
-          uploader: "John Doe",
-          uploadDate: "2023-05-15",
-          likes: 24,
-          downloads: 56,
-          isDownloadable: true,
-        };
-
-        setLesson(mockLesson);
+        const response = await fetchLessonById(id);
+        setLesson(response.data);
         setLoading(false);
+        await incrementLessonView(id);
       } catch (err) {
         setError("Failed to load lesson. Please try again.");
         setLoading(false);
       }
     };
 
-    fetchLesson();
+    loadLesson();
   }, [id]);
 
-  const handleDownload = () => {
-    // TODO: Implement download functionality
-    console.log("Downloading lesson:", lesson.id);
+  const handleDownload = async () => {
+    if (!user) {
+      alert("Please login to download.");
+      return;
+    }
+    try {
+      await createDownload(user.id, lesson.lessonId || lesson.id);
+      alert("Download registered. The file will start downloading.");
+      // Optionally trigger actual file download:
+      window.open(lesson.fileUrl, "_blank");
+    } catch (err) {
+      alert("Download failed. Please try again.");
+    }
   };
 
   const handleLike = () => {
-    // TODO: Implement like functionality
-    console.log("Liked lesson:", lesson.id);
+    // Optional: implement liking logic here
+    alert("Liked!");
   };
 
   if (loading) {
     return (
       <Container className="text-center my-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
+        <Spinner animation="border" role="status" />
       </Container>
     );
   }
@@ -125,7 +119,6 @@ const LessonViewer = () => {
 
           <Card.Text className="mb-4">{lesson.description}</Card.Text>
 
-          {/* Content display area - changes based on content type */}
           {lesson.contentType === "text" && (
             <div className="border p-3 mb-4 bg-light">{lesson.content}</div>
           )}
@@ -155,7 +148,7 @@ const LessonViewer = () => {
                 className="me-2"
                 onClick={handleLike}
               >
-                <FaThumbsUp className="me-1" /> {lesson.likes}
+                <FaThumbsUp className="me-1" /> {lesson.likes || 0}
               </Button>
               <Button variant="outline-secondary">
                 <FaComment className="me-1" /> Comment

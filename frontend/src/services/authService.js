@@ -1,22 +1,17 @@
-import axios from "axios";
+import { API } from "../api/axiosInstances";
 
-const API = axios.create({
-  baseURL: process.env.REACT_APP_AUTH_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
+// Register user (no token needed)
 export const registerUser = async (data) => {
   const payload = {
     ...data,
-    role: data.role.toUpperCase(), // convert to LEARNER / CONTRIBUTOR
-    preferredLanguage: data.preferredLanguage.toUpperCase(), // SINHALA / TAMIL
+    role: data.role.toUpperCase(),
+    preferredLanguage: data.preferredLanguage.toUpperCase(),
   };
   const response = await API.post("/auth/register", payload);
   return response.data;
 };
 
+// Login user (no token needed)
 export const loginUser = async (data) => {
   const payload = {
     username: data.username,
@@ -26,24 +21,20 @@ export const loginUser = async (data) => {
   return response.data;
 };
 
+// Validate token (no token needed)
 export const validateToken = async (token) => {
   const response = await API.post("/auth/validate-token", { token });
   return response.data;
 };
 
-export const fetchUserProfile = async (token) => {
-  const response = await API.get("/user/profile", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+// Fetch user profile (token auto-attached)
+export const fetchUserProfile = async () => {
+  const response = await API.get("/user/profile");
   return response.data;
 };
-// export const updateUserProfile = async (token, data) => {
-//   const response = await API.put('/user/profile', data, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-//   return response.data;
-// };
+
+// Update user profile
+export const updateUserProfile = async (data) => {
+  const response = await API.put("/user/profile", data);
+  return response.data;
+};

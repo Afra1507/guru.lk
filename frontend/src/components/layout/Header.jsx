@@ -1,33 +1,27 @@
-import React, { useEffect, useState } from "react";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { useNavigate } from "react-router-dom";
 import LanguageSelector from "./LanguageSelector";
+import { useAuth } from "../../auth/useAuth";
 
 const Header = () => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) setCurrentUser(user);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setCurrentUser(null);
-    navigate("/login");
-  };
-
   const handleDashboardRedirect = () => {
-    if (!currentUser) return;
-    if (currentUser.role === "ADMIN") {
+    if (!user) return;
+    if (user.role === "ADMIN") {
       navigate("/admin");
-    } else if (currentUser.role === "CONTRIBUTOR") {
-      navigate("/upload");
+    } else if (user.role === "CONTRIBUTOR") {
+      navigate("/contributor/uploads");
     } else {
       navigate("/learner");
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
   return (
@@ -52,19 +46,63 @@ const Header = () => {
 
           <Nav>
             <LanguageSelector />
-            {currentUser ? (
-              <NavDropdown title="Account" id="account-dropdown">
+            {user ? (
+              <NavDropdown
+                title={
+                  <span>
+                    <span className="me-2">
+                      {/* Avatar initial */}
+                      <span
+                        style={{
+                          background: "#fff",
+                          color: "#0d6efd",
+                          padding: "0.3rem 0.6rem",
+                          borderRadius: "50%",
+                          fontWeight: "bold",
+                          textTransform: "uppercase",
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        {user?.username?.charAt(0) || "U"}
+                      </span>
+                    </span>
+                    Account
+                  </span>
+                }
+                id="account-dropdown"
+              >
+                <NavDropdown.ItemText>
+                  <span
+                    className={`badge ${
+                      user.role === "ADMIN"
+                        ? "bg-danger"
+                        : user.role === "CONTRIBUTOR"
+                        ? "bg-warning text-dark"
+                        : "bg-success"
+                    }`}
+                  >
+                    {user.role}
+                  </span>
+                </NavDropdown.ItemText>
+
                 <NavDropdown.Item onClick={handleDashboardRedirect}>
-                  {currentUser.role === "ADMIN"
+                  {user.role === "ADMIN"
                     ? "Admin Dashboard"
-                    : currentUser.role === "CONTRIBUTOR"
+                    : user.role === "CONTRIBUTOR"
                     ? "Contributor Dashboard"
                     : "My Dashboard"}
                 </NavDropdown.Item>
+
                 <NavDropdown.Item onClick={() => navigate("/profile")}>
                   My Profile
                 </NavDropdown.Item>
+
+                <NavDropdown.Item onClick={() => alert("No new notifications")}>
+                  Notifications 🔔
+                </NavDropdown.Item>
+
                 <NavDropdown.Divider />
+
                 <NavDropdown.Item onClick={handleLogout}>
                   Logout
                 </NavDropdown.Item>

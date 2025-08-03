@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Card } from "react-bootstrap";
-import axios from "axios";
+import { API } from "../../api/axiosInstances";
 
 const roles = ["LEARNER", "CONTRIBUTOR", "ADMIN"];
 
@@ -31,7 +31,7 @@ const UserManagement = () => {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/user/admin/all");
+      const res = await API.get("/user/admin/all");
       setUsers(res.data);
       setError(null);
     } catch (err) {
@@ -52,9 +52,10 @@ const UserManagement = () => {
 
   const confirmDelete = async () => {
     try {
-      await axios.delete(`/user/admin/${userToDelete.userId}`);
+      await API.delete(`/user/admin/${userToDelete.userId}`);
       setUsers(users.filter((u) => u.userId !== userToDelete.userId));
       setShowDeleteModal(false);
+      setUserToDelete(null);
     } catch (err) {
       alert("Failed to delete user. Please try again.");
     }
@@ -72,7 +73,7 @@ const UserManagement = () => {
 
   const confirmRoleUpdate = async () => {
     try {
-      await axios.put(`/user/admin/${userToUpdate.userId}/role`, null, {
+      await API.put(`/user/admin/${userToUpdate.userId}/role`, null, {
         params: { role: newRole },
       });
       setUsers(
@@ -81,6 +82,7 @@ const UserManagement = () => {
         )
       );
       setShowRoleModal(false);
+      setUserToUpdate(null);
     } catch (err) {
       alert("Failed to update user role. Please try again.");
     }
