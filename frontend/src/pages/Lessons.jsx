@@ -1,156 +1,115 @@
-import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Spinner,
-  Alert,
-  Pagination,
-} from "react-bootstrap";
-import { fetchApprovedLessons } from "../services/contentService";
+// src/pages/Lessons.jsx
+
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
 import ContentCard from "../components/content/ContentCard";
 import SearchFilter from "../components/content/SearchFilter";
+import { useContent } from "../hooks/useContent";
 
 const Lessons = () => {
   const [lessons, setLessons] = useState([]);
   const [filteredLessons, setFilteredLessons] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const lessonsPerPage = 9;
+  const { getApprovedLessons, createDownload, loading, error } = useContent();
 
   useEffect(() => {
-    const fetchLessons = async () => {
+    const loadLessons = async () => {
       try {
-        setLoading(true);
-        const response = await fetchApprovedLessons();
-        // Assuming API returns lessons array in response.data
-        setLessons(response.data);
-        setFilteredLessons(response.data);
-        setLoading(false);
+        const data = await getApprovedLessons();
+        if (!Array.isArray(data)) {
+          console.error("Expected array but received:", typeof data, data);
+          throw new Error("Invalid data format received from server");
+        }
+
+        setLessons(data);
+        setFilteredLessons(data);
       } catch (err) {
-        setError("Failed to load lessons. Please try again.");
-        setLoading(false);
+        console.error("Failed to load lessons:", err);
+        setLessons([]);
+        setFilteredLessons([]);
       }
     };
 
-    fetchLessons();
-  }, []);
+    loadLessons();
+  }, [getApprovedLessons]);
 
-  // Pagination calculation for filtered lessons
-  const indexOfLastLesson = currentPage * lessonsPerPage;
-  const indexOfFirstLesson = indexOfLastLesson - lessonsPerPage;
-  const currentLessons = filteredLessons.slice(
-    indexOfFirstLesson,
-    indexOfLastLesson
-  );
-  const totalPages = Math.ceil(filteredLessons.length / lessonsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  // Filter handler passed to SearchFilter
   const handleFilter = ({ searchTerm, language, subject, ageGroup }) => {
-    let tempLessons = [...lessons];
+    let filtered = [...lessons];
 
-    // Filter by search term in title or description (case-insensitive)
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      tempLessons = tempLessons.filter(
+      const lower = searchTerm.toLowerCase();
+      filtered = filtered.filter(
         (lesson) =>
-          (lesson.title && lesson.title.toLowerCase().includes(term)) ||
-          (lesson.description &&
-            lesson.description.toLowerCase().includes(term))
+          lesson.title.toLowerCase().includes(lower) ||
+          lesson.description.toLowerCase().includes(lower) ||
+          lesson.subject.toLowerCase().includes(lower)
       );
     }
 
-    if (language && language !== "all") {
-      tempLessons = tempLessons.filter(
-        (lesson) => lesson.language?.toLowerCase() === language.toLowerCase()
+    if (language !== "all") {
+      filtered = filtered.filter(
+        (lesson) => lesson.language.toLowerCase() === language.toLowerCase()
       );
     }
 
-    if (subject && subject !== "all" && subject.trim() !== "") {
-      const subj = subject.toLowerCase();
-      tempLessons = tempLessons.filter((lesson) =>
-        lesson.subject?.toLowerCase().includes(subj)
+    if (subject !== "all") {
+      filtered = filtered.filter(
+        (lesson) => lesson.subject.toLowerCase() === subject.toLowerCase()
       );
     }
 
-    if (ageGroup && ageGroup !== "all") {
-      tempLessons = tempLessons.filter(
-        (lesson) => lesson.ageGroup?.toLowerCase() === ageGroup.toLowerCase()
+    if (ageGroup !== "all") {
+      filtered = filtered.filter(
+        (lesson) => lesson.ageGroup.toLowerCase() === ageGroup.toLowerCase()
       );
     }
 
-    setFilteredLessons(tempLessons);
-    setCurrentPage(1); // reset to first page when filter changes
+    setFilteredLessons(filtered);
   };
 
   if (loading) {
     return (
-      <Container className="text-center my-5">
-        <Spinner animation="border" />
-      </Container>
+      <div className="d-flex justify-content-center mt-5">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container className="my-5">
-        <Alert variant="danger">{error}</Alert>
+      <Container className="my-4">
+        <Alert variant="danger">
+          Error loading lessons: {error.toString()}
+        </Alert>
       </Container>
     );
   }
 
   return (
     <Container className="my-4">
-      <Row className="mb-4">
-        <Col>
-          <h1>Browse Lessons</h1>
-        </Col>
-      </Row>
+      <h2 className="mb-4">Available Lessons</h2>
 
-      <Row className="mb-4">
-        <Col>
-          <SearchFilter onFilter={handleFilter} />
-        </Col>
-      </Row>
+      {/* Updated to use the new filter handler */}
+      <SearchFilter onFilter={handleFilter} />
 
-      <Row>
-        {currentLessons.length > 0 ? (
-          currentLessons.map((lesson) => (
-            <Col key={lesson.id} md={6} lg={4} className="mb-4">
-              <ContentCard lesson={lesson} />
+      <Row className="mt-3 g-4">
+        {filteredLessons.length > 0 ? (
+          filteredLessons.map((lesson) => (
+            <Col key={lesson.lessonId} xs={12} md={6} lg={4}>
+              <ContentCard lesson={lesson} createDownload={createDownload} />
             </Col>
           ))
         ) : (
           <Col>
-            <Alert variant="info">
-              No lessons found. Try adjusting your search filters.
+            <Alert variant="info" className="text-center">
+              {lessons.length === 0
+                ? "No lessons available"
+                : "No lessons match your filter criteria"}
             </Alert>
           </Col>
         )}
       </Row>
-
-      {filteredLessons.length > lessonsPerPage && (
-        <Row className="mt-4">
-          <Col className="d-flex justify-content-center">
-            <Pagination>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (number) => (
-                  <Pagination.Item
-                    key={number}
-                    active={number === currentPage}
-                    onClick={() => paginate(number)}
-                  >
-                    {number}
-                  </Pagination.Item>
-                )
-              )}
-            </Pagination>
-          </Col>
-        </Row>
-      )}
     </Container>
   );
 };

@@ -1,25 +1,38 @@
 import { contentAPI } from "../api/axiosInstances";
 
-export const fetchApprovedLessons = () => contentAPI.get("/lessons/approved");
+const contentService = {
+  // Lesson endpoints
+  createLesson: (lessonData) =>
+    contentAPI.post("/lessons/create", lessonData).then((res) => res.data),
 
-export const fetchLessonById = (id) => contentAPI.get(`/lessons/${id}`);
+  getApprovedLessons: () =>
+    contentAPI.get("/lessons/approved").then((res) => res.data),
 
-export const incrementLessonView = (id) =>
-  contentAPI.post(`/lessons/${id}/view`);
+  getLessonById: (id) =>
+    contentAPI.get(`/lessons/${id}`).then((res) => res.data),
 
-export const approveLesson = (id) => contentAPI.post(`/lessons/${id}/approve`);
+  approveLesson: (id) =>
+    contentAPI.post(`/lessons/${id}/approve`).then((res) => res.data),
 
-export const createDownload = (userId, lessonId) =>
-  contentAPI.post("/downloads/create", null, {
-    params: { userId, lessonId },
-  });
+  incrementViewCount: (id) =>
+    contentAPI.post(`/lessons/${id}/view`).then((res) => res.data),
 
-export const getUserDownloads = (userId) =>
-  contentAPI.get(`/downloads/user/${userId}`);
+  getPendingLessons: () =>
+    contentAPI.get("/lessons/pending").then((res) => res.data),
 
-export const uploadLesson = (formData) =>
-  contentAPI.post("/lessons/create", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  // Download endpoints
+  createDownload: (userId, lessonId) =>
+    contentAPI
+      .post("/downloads/create", null, {
+        params: { userId, lessonId },
+      })
+      .then((res) => res.data),
 
-export const fetchAllDownloads = () => contentAPI.get("/downloads/all");
+  getUserDownloads: (userId) =>
+    contentAPI.get(`/downloads/user/${userId}`).then((res) => res.data),
+
+  getAllDownloads: () =>
+    contentAPI.get("/downloads/all").then((res) => res.data),
+};
+
+export default contentService;

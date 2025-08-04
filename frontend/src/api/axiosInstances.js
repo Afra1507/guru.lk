@@ -1,7 +1,9 @@
 import axios from "axios";
 
-const authBaseURL = process.env.REACT_APP_AUTH_BASE_URL || "http://localhost:8081";
-const contentBaseURL = process.env.REACT_APP_CONTENT_BASE_URL || "http://localhost:8082";
+const authBaseURL =
+  process.env.REACT_APP_AUTH_BASE_URL || "http://localhost:8081";
+const contentBaseURL =
+  process.env.REACT_APP_CONTENT_BASE_URL || "http://localhost:8082";
 
 // Create axios instance for auth API
 export const API = axios.create({
@@ -9,6 +11,7 @@ export const API = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Important for CORS with credentials
 });
 
 // Create axios instance for content API
@@ -17,32 +20,45 @@ export const contentAPI = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Important for CORS with credentials
 });
 
-// Attach token to every request if available (for API)
-API.interceptors.request.use((config) => {
+// Request interceptor for both API instances
+const requestInterceptor = (config) => {
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-});
+};
 
-// Attach token to every request if available (for contentAPI)
-contentAPI.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Response interceptor to handle errors
+const responseErrorInterceptor = (error) => {
+  if (error.response?.status === 401) {
+    // Handle unauthorized (token expired, invalid, etc.)
+    localStorage.removeItem("token");
+    window.location.href = "/login"; // Redirect to login
   }
-  return config;
+  return Promise.reject(error);
+};
+
+// Add interceptors to both API instances
+[API, contentAPI].forEach((instance) => {
+  instance.interceptors.request.use(requestInterceptor);
+  instance.interceptors.response.use(
+    (response) => response,
+    responseErrorInterceptor
+  );
 });
 
-// Optional: manual token setter (if you want to set token explicitly)
+// Manual token setter
 export const setAuthToken = (token) => {
   if (token) {
+    localStorage.setItem("token", token);
     API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     contentAPI.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
+    localStorage.removeItem("token");
     delete API.defaults.headers.common["Authorization"];
     delete contentAPI.defaults.headers.common["Authorization"];
   }

@@ -7,10 +7,9 @@ import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import NotFound from "./pages/NotFound";
 
-import { AuthProvider } from "./auth/AuthContext"; // ✅ Add this
+import { AuthProvider } from "./auth/AuthContext";
 import "./styles/main.scss";
 import { RequireAuth, RequireRole } from "./utils/ProtectedRoutes";
-
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home"));
@@ -36,6 +35,7 @@ const ContributorStats = lazy(() =>
 const ContributorNewUpload = lazy(() =>
   import("./components/contributor/ContributorNewUpload")
 );
+const LessonViewer = lazy(() => import("./pages/LessonViewer"));
 
 function App() {
   return (
@@ -70,6 +70,15 @@ function App() {
                   element={
                     <RequireAuth>
                       <LearnerDashboard />
+                    </RequireAuth>
+                  }
+                />
+
+                <Route
+                  path="/lessons/:id"
+                  element={
+                    <RequireAuth>
+                      <LessonViewer />
                     </RequireAuth>
                   }
                 />

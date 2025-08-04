@@ -1,6 +1,7 @@
+// D:\guru.lk\frontend\src\components\content\ContentUpload.jsx
 import React, { useState } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import { uploadLesson } from "../../services/contentService";
+import contentService from "../../services/contentService"; // ✅ Corrected import
 
 const ContentUpload = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +40,7 @@ const ContentUpload = () => {
 
     try {
       setUploading(true);
-      await uploadLesson(data);
+      await contentService.createLesson(data);
       alert("Lesson uploaded successfully! Awaiting approval.");
       setFormData({
         title: "",

@@ -1,66 +1,57 @@
-import React from "react";
+// src/components/content/ContentCard.jsx
+
+import React, { useState } from "react";
 import { Card, Button, Badge } from "react-bootstrap";
-import { FaDownload, FaPlay, FaBook } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
+import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
-import {
-  incrementLessonView,
-  createDownload,
-} from "../../services/contentService";
-import { useAuth } from "../../auth/useAuth"; // assumed
 
-const ContentCard = ({ lesson }) => {
+const ContentCard = ({ lesson, createDownload }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleView = async () => {
-    await incrementLessonView(lesson.lessonId);
+  const handleDownload = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      alert("Please login to download");
+      return;
+    }
+    try {
+      setIsDownloading(true);
+      await createDownload(lesson.lessonId);
+      alert("Download registered!");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleView = () => {
     navigate(`/lessons/${lesson.lessonId}`);
   };
 
-  const handleDownload = async () => {
-    try {
-      await createDownload(user.id, lesson.lessonId);
-      alert("Download registered!");
-    } catch (err) {
-      alert("Download failed.");
-    }
-  };
-
-  const getContentIcon = () => {
-    switch (lesson.contentType) {
-      case "video":
-      case "audio":
-        return <FaPlay className="me-1" />;
-      case "text":
-      default:
-        return <FaBook className="me-1" />;
-    }
-  };
-
   return (
-    <Card className="h-100">
-      <Card.Body onClick={handleView} style={{ cursor: "pointer" }}>
-        <div className="d-flex justify-content-between mb-2">
-          <Badge bg="info">{lesson.language}</Badge>
-          <Badge bg="secondary">{lesson.subject}</Badge>
-        </div>
+    <Card onClick={handleView} style={{ cursor: "pointer" }}>
+      <Card.Body>
         <Card.Title>{lesson.title}</Card.Title>
         <Card.Text>{lesson.description}</Card.Text>
         <div className="d-flex justify-content-between align-items-center">
-          <small className="text-muted">{lesson.ageGroup}</small>
           <div>
-            {getContentIcon()}
-            <Button
-              variant="link"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent navigating when downloading
-                handleDownload();
-              }}
-            >
-              <FaDownload />
-            </Button>
+            <Badge bg="info" className="me-2">
+              {lesson.subject}
+            </Badge>
+            <Badge bg="secondary">{lesson.language}</Badge>
           </div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleDownload}
+            disabled={isDownloading}
+          >
+            <FaDownload /> {isDownloading ? "Processing..." : "Download"}
+          </Button>
         </div>
       </Card.Body>
     </Card>

@@ -1,34 +1,47 @@
+// D:\guru.lk\frontend\src\components\layout\Sidebar.jsx
 import React, { useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import {
   FaHome,
   FaBook,
-  FaQuestionCircle,
   FaUser,
   FaUpload,
-  FaUsersCog,
   FaCheckCircle,
   FaDownload,
   FaChartLine,
-  FaCog,
-  FaGraduationCap,
-  FaFileAlt,
 } from "react-icons/fa";
+import { useContent } from "../../hooks/useContent";
+import { useAuth } from "../../auth/useAuth";
 
 const Sidebar = () => {
   const [role, setRole] = useState("learner");
   const [expandedSections, setExpandedSections] = useState({
-    admin: true,
     content: true,
   });
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
+  const { user } = useAuth();
+  const { fetchPendingLessons, loading } = useContent();
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    // Set user role
     if (user?.role) {
       setRole(user.role.toLowerCase());
     }
-  }, []);
+
+    // Load pending approvals count for admins
+    if (user?.role?.toLowerCase() === "admin") {
+      const loadPendingCount = async () => {
+        try {
+          const pendingLessons = await fetchPendingLessons();
+          setPendingApprovalsCount(pendingLessons.length);
+        } catch (err) {
+          console.error("Failed to fetch pending lessons:", err);
+        }
+      };
+      loadPendingCount();
+    }
+  }, [user, fetchPendingLessons]);
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -41,50 +54,47 @@ const Sidebar = () => {
   const commonLinks = [
     { path: "/profile", icon: <FaUser />, text: "My Profile" },
     { path: "/lessons", icon: <FaBook />, text: "Browse Lessons" },
-    { path: "/qna", icon: <FaQuestionCircle />, text: "Q&A Forum" },
   ];
 
   // Learner specific links
   const learnerLinks = [
-    { path: "/learner", icon: <FaHome />, text: "Dashboard" },
-    { path: "/learner/downloads", icon: <FaDownload />, text: "My Downloads" },
+    { path: "/", icon: <FaHome />, text: "Dashboard" },
+    {
+      path: "/downloads",
+      icon: <FaDownload />,
+      text: "My Downloads",
+      fetchCount: true, // This would need implementation similar to pending approvals
+    },
   ];
 
   // Contributor specific links
   const contributorLinks = [
     { path: "/contributor", icon: <FaHome />, text: "Dashboard" },
-    { path: "/contributor/uploads", icon: <FaFileAlt />, text: "My Uploads" },
-    { path: "/contributor/new", icon: <FaUpload />, text: "Upload Content" },
-    { path: "/contributor/stats", icon: <FaChartLine />, text: "Statistics" },
+    {
+      path: "/upload",
+      icon: <FaUpload />,
+      text: "Upload Content",
+    },
   ];
 
-  // Admin specific links grouped by functionality
+  // Admin content management links
   const adminContentLinks = [
     {
-      path: "/admin/content/pending",
+      path: "/admin/approvals",
       icon: <FaCheckCircle />,
       text: "Pending Approvals",
+      badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : null,
     },
-    { path: "/admin/content/all", icon: <FaBook />, text: "All Content" },
     {
-      path: "/admin/content/reports",
-      icon: <FaFileAlt />,
-      text: "Content Reports",
+      path: "/admin/lessons",
+      icon: <FaBook />,
+      text: "All Lessons",
     },
-  ];
-
-  const adminUserLinks = [
-    { path: "/admin/users", icon: <FaUsersCog />, text: "Manage Users" },
     {
-      path: "/admin/users/activity",
+      path: "/admin/analytics",
       icon: <FaChartLine />,
-      text: "User Activity",
+      text: "Content Analytics",
     },
-  ];
-
-  const adminSystemLinks = [
-    { path: "/admin/system", icon: <FaCog />, text: "System Settings" },
-    { path: "/admin/system/logs", icon: <FaFileAlt />, text: "Audit Logs" },
   ];
 
   // Combine links based on role
@@ -100,20 +110,6 @@ const Sidebar = () => {
         isSection: true,
         sectionKey: "content",
         children: adminContentLinks,
-      },
-      {
-        text: "User Management",
-        icon: <FaUsersCog />,
-        isSection: true,
-        sectionKey: "users",
-        children: adminUserLinks,
-      },
-      {
-        text: "System",
-        icon: <FaCog />,
-        isSection: true,
-        sectionKey: "system",
-        children: adminSystemLinks,
       },
       ...commonLinks,
     ];
@@ -145,6 +141,11 @@ const Sidebar = () => {
                       <Nav.Link className="d-flex align-items-center py-2 px-3">
                         <span className="me-3">{child.icon}</span>
                         {child.text}
+                        {child.badge && (
+                          <span className="ms-auto badge bg-danger rounded-pill">
+                            {child.badge}
+                          </span>
+                        )}
                       </Nav.Link>
                     </LinkContainer>
                   ))}
@@ -172,6 +173,11 @@ const Sidebar = () => {
             <Nav.Link className="d-flex align-items-center py-2 px-3">
               <span className="me-3">{link.icon}</span>
               {link.text}
+              {link.badge && (
+                <span className="ms-auto badge bg-danger rounded-pill">
+                  {link.badge}
+                </span>
+              )}
             </Nav.Link>
           </LinkContainer>
         );
