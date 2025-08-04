@@ -36,6 +36,9 @@ const ContributorNewUpload = lazy(() =>
   import("./components/contributor/ContributorNewUpload")
 );
 const LessonViewer = lazy(() => import("./pages/LessonViewer"));
+const PendingLessons = lazy(() => import("./pages/PendingLessons"));
+const AdminAllLessons = lazy(() => import("./pages/AdminAllLessons"));
+const LessonAnalytics = lazy(() => import("./pages/LessonAnalytics"));
 
 function App() {
   return (
@@ -103,6 +106,30 @@ function App() {
                   element={
                     <RequireRole allowedRoles={["ADMIN"]}>
                       <AdminDashboard />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/admin/approvals"
+                  element={
+                    <RequireRole allowedRoles={["ADMIN"]}>
+                      <PendingLessons />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/admin/lessons"
+                  element={
+                    <RequireRole allowedRoles={["ADMIN"]}>
+                      <AdminAllLessons />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/admin/analytics"
+                  element={
+                    <RequireRole allowedRoles={["ADMIN"]}>
+                      <LessonAnalytics />
                     </RequireRole>
                   }
                 />

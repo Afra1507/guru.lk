@@ -27,7 +27,6 @@ export const useContent = () => {
     }
   }, []);
 
-  // 🔁 Memoize all these methods so their reference is stable
   const createLesson = useCallback(
     (lessonData) => handleApiCall(contentService.createLesson, lessonData),
     [handleApiCall]
@@ -37,6 +36,13 @@ export const useContent = () => {
     () => handleApiCall(contentService.getApprovedLessons),
     [handleApiCall]
   );
+
+  const getAllLessons = useCallback(() => {
+    if (!user || user.role.toLowerCase() !== "admin") {
+      throw new Error("Admin privileges required");
+    }
+    return handleApiCall(contentService.getAllLessons);
+  }, [user, handleApiCall]);
 
   const getLessonById = useCallback(
     (id) => handleApiCall(contentService.getLessonById, id),
@@ -90,6 +96,7 @@ export const useContent = () => {
     error,
     createLesson,
     getApprovedLessons,
+    getAllLessons,
     getLessonById,
     approveLesson,
     incrementViewCount,

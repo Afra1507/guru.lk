@@ -1,12 +1,14 @@
 import { contentAPI } from "../api/axiosInstances";
 
 const contentService = {
-  // Lesson endpoints
+  // Lessons
   createLesson: (lessonData) =>
     contentAPI.post("/lessons/create", lessonData).then((res) => res.data),
 
   getApprovedLessons: () =>
     contentAPI.get("/lessons/approved").then((res) => res.data),
+
+  getAllLessons: () => contentAPI.get("/lessons").then((res) => res.data), // <== ✅ added
 
   getLessonById: (id) =>
     contentAPI.get(`/lessons/${id}`).then((res) => res.data),
@@ -20,7 +22,7 @@ const contentService = {
   getPendingLessons: () =>
     contentAPI.get("/lessons/pending").then((res) => res.data),
 
-  // Download endpoints
+  // Downloads
   createDownload: (userId, lessonId) =>
     contentAPI
       .post("/downloads/create", null, {
