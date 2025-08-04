@@ -30,6 +30,13 @@ public class LessonService {
                 .collect(Collectors.toList());
     }
 
+    public List<LessonResponseDTO> getPendingLessons() {
+        return lessonRepository.findByIsApprovedFalse()
+                .stream()
+                .map(LessonResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     public LessonResponseDTO getLessonById(Long id) {
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + id));
@@ -42,6 +49,57 @@ public class LessonService {
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + lessonId));
         lesson.setApproved(true);
         return LessonResponseDTO.fromEntity(lessonRepository.save(lesson));
+    }
+
+    public List<LessonResponseDTO> getUnapprovedLessons() {
+        return lessonRepository.findByIsApprovedFalse()
+                .stream()
+                .map(LessonResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<LessonResponseDTO> getLessonsByUploader(Long uploaderId) {
+        return lessonRepository.findByUploaderId(uploaderId)
+                .stream()
+                .map(LessonResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<LessonResponseDTO> getApprovedLessonsBySubject(String subject) {
+        return lessonRepository.findBySubjectAndIsApprovedTrue(subject)
+                .stream()
+                .map(LessonResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<LessonResponseDTO> searchByTitle(String keyword) {
+        return lessonRepository.findByTitleContainingIgnoreCase(keyword)
+                .stream()
+                .filter(Lesson::isApproved)
+                .map(LessonResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<LessonResponseDTO> searchByDescription(String keyword) {
+        return lessonRepository.findByDescriptionContainingIgnoreCase(keyword)
+                .stream()
+                .filter(Lesson::isApproved)
+                .map(LessonResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<LessonResponseDTO> getTop10PopularLessons() {
+        return lessonRepository.findTop10PopularLessons()
+                .stream()
+                .map(LessonResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<LessonResponseDTO> getLessonsByUploaderAndApproval(Long uploaderId, boolean approved) {
+        return lessonRepository.findByUploaderIdAndIsApproved(uploaderId, approved)
+                .stream()
+                .map(LessonResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional

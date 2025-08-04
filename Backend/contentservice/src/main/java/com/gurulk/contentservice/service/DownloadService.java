@@ -46,4 +46,24 @@ public class DownloadService {
         .map(DownloadResponseDTO::fromEntity)
         .collect(Collectors.toList());
   }
+
+  public List<DownloadResponseDTO> getDownloadsByLesson(Long lessonId) {
+    return downloadRepository.findByLessonId(lessonId).stream()
+        .map(DownloadResponseDTO::fromEntity)
+        .collect(Collectors.toList());
+  }
+
+  public long countDownloadsByLesson(Long lessonId) {
+    return downloadRepository.countByLessonId(lessonId);
+  }
+
+  public boolean hasUserDownloadedLesson(Long userId, Long lessonId) {
+    return !downloadRepository.findByUserIdAndLesson_LessonId(userId, lessonId).isEmpty();
+  }
+
+  public List<DownloadResponseDTO> getExpiredDownloads() {
+    return downloadRepository.findByExpiresAtBefore(LocalDateTime.now()).stream()
+        .map(DownloadResponseDTO::fromEntity)
+        .collect(Collectors.toList());
+  }
 }
