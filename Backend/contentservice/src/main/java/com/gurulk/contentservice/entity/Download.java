@@ -1,5 +1,6 @@
 package com.gurulk.contentservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ public class Download {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id", nullable = false)
+    @JsonBackReference
     private Lesson lesson;
 
     @Column(name = "downloaded_at", nullable = false, updatable = false)

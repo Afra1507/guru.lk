@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/lessons")
@@ -96,6 +97,18 @@ public class LessonController {
       @PathVariable Long uploaderId,
       @RequestParam boolean approved) {
     return ResponseEntity.ok(lessonService.getLessonsByUploaderAndApproval(uploaderId, approved));
+  }
+
+  @GetMapping("/all")
+  @PreAuthorize("hasRole('ADMIN')")
+  public List<Lesson> getAllLessons() {
+    return lessonService.getAllLessons();
+  }
+
+  @GetMapping("/analytics")
+  @PreAuthorize("hasRole('ADMIN')")
+  public Map<String, Object> getContentAnalytics() {
+    return lessonService.getContentAnalytics();
   }
 
 }

@@ -1,5 +1,6 @@
 package com.gurulk.contentservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -66,6 +67,7 @@ public class Lesson {
   private LocalDateTime updatedAt;
 
   @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
+  @JsonManagedReference
   private List<Download> downloads;
 
   @PrePersist
