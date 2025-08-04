@@ -41,7 +41,14 @@ export const useContent = () => {
     if (!user || user.role.toLowerCase() !== "admin") {
       throw new Error("Admin privileges required");
     }
-    return handleApiCall(contentService.getAllLessons);
+    return handleApiCall(contentService.getAllLessonsAdmin); // Updated to admin version
+  }, [user, handleApiCall]);
+
+  const getContentAnalytics = useCallback(() => {
+    if (!user || user.role.toLowerCase() !== "admin") {
+      throw new Error("Admin privileges required");
+    }
+    return handleApiCall(contentService.getContentAnalytics);
   }, [user, handleApiCall]);
 
   const getLessonById = useCallback(
@@ -97,6 +104,7 @@ export const useContent = () => {
     createLesson,
     getApprovedLessons,
     getAllLessons,
+    getContentAnalytics,
     getLessonById,
     approveLesson,
     incrementViewCount,

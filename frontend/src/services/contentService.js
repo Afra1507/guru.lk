@@ -22,6 +22,13 @@ const contentService = {
   getPendingLessons: () =>
     contentAPI.get("/lessons/pending").then((res) => res.data),
 
+  // Admin-specific
+  getAllLessonsAdmin: () =>
+    contentAPI.get("/lessons/all").then((res) => res.data),
+
+  getContentAnalytics: () =>
+    contentAPI.get("/lessons/analytics").then((res) => res.data),
+
   // Downloads
   createDownload: (userId, lessonId) =>
     contentAPI
