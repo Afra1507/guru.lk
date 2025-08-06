@@ -1,4 +1,3 @@
-// D:\guru.lk\frontend\src\components\layout\Sidebar.jsx
 import React, { useEffect, useState } from "react";
 import { Nav } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
@@ -10,26 +9,26 @@ import {
   FaCheckCircle,
   FaDownload,
   FaChartLine,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 import { useContent } from "../../hooks/useContent";
 import { useAuth } from "../../auth/useAuth";
+import "../../styles/main.scss";
 
 const Sidebar = () => {
   const [role, setRole] = useState("learner");
-  const [expandedSections, setExpandedSections] = useState({
-    content: true,
-  });
+  const [expandedSections, setExpandedSections] = useState({ content: true });
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { user } = useAuth();
-  const { fetchPendingLessons, loading } = useContent();
+  const { fetchPendingLessons } = useContent();
 
   useEffect(() => {
-    // Set user role
     if (user?.role) {
       setRole(user.role.toLowerCase());
     }
 
-    // Load pending approvals count for admins
     if (user?.role?.toLowerCase() === "admin") {
       const loadPendingCount = async () => {
         try {
@@ -41,6 +40,15 @@ const Sidebar = () => {
       };
       loadPendingCount();
     }
+
+    const handleResize = () => {
+      setIsSidebarOpen(window.innerWidth > 768); // auto-close on small screens
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => window.removeEventListener("resize", handleResize);
   }, [user, fetchPendingLessons]);
 
   const toggleSection = (section) => {
@@ -50,24 +58,25 @@ const Sidebar = () => {
     }));
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   // Common links for all roles
   const commonLinks = [
     { path: "/profile", icon: <FaUser />, text: "My Profile" },
     { path: "/lessons", icon: <FaBook />, text: "Browse Lessons" },
   ];
 
-  // Learner specific links
   const learnerLinks = [
     { path: "/", icon: <FaHome />, text: "Dashboard" },
     {
       path: "/downloads",
       icon: <FaDownload />,
       text: "My Downloads",
-      fetchCount: true, // This would need implementation similar to pending approvals
     },
   ];
 
-  // Contributor specific links
   const contributorLinks = [
     { path: "/contributor", icon: <FaHome />, text: "Dashboard" },
     {
@@ -77,7 +86,6 @@ const Sidebar = () => {
     },
   ];
 
-  // Admin content management links
   const adminContentLinks = [
     {
       path: "/admin/approvals",
@@ -97,7 +105,6 @@ const Sidebar = () => {
     },
   ];
 
-  // Combine links based on role
   let links = [...learnerLinks, ...commonLinks];
   if (role === "contributor") {
     links = [...contributorLinks, ...commonLinks];
@@ -116,73 +123,79 @@ const Sidebar = () => {
   }
 
   return (
-    <Nav
-      className="flex-column sidebar bg-light p-3"
-      style={{ minHeight: "100vh" }}
-    >
-      {links.map((link, index) => {
-        if (link.isSection) {
-          return (
-            <div key={index} className="mb-2">
-              <Nav.Link
-                className="d-flex align-items-center py-2 px-3 section-header"
-                onClick={() => toggleSection(link.sectionKey)}
-                style={{ cursor: "pointer" }}
-              >
-                <span className="me-3">{link.icon}</span>
-                <span className="flex-grow-1">{link.text}</span>
-                <span>{expandedSections[link.sectionKey] ? "▼" : "▶"}</span>
-              </Nav.Link>
+    <>
+      {/* Hamburger button */}
+      <div className="hamburger-btn" onClick={toggleSidebar}>
+        {isSidebarOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
+      </div>
 
-              {expandedSections[link.sectionKey] && (
-                <div className="ms-4">
-                  {link.children.map((child, childIndex) => (
-                    <LinkContainer to={child.path} key={childIndex}>
-                      <Nav.Link className="d-flex align-items-center py-2 px-3">
-                        <span className="me-3">{child.icon}</span>
-                        {child.text}
-                        {child.badge && (
-                          <span className="ms-auto badge bg-danger rounded-pill">
-                            {child.badge}
-                          </span>
-                        )}
-                      </Nav.Link>
-                    </LinkContainer>
-                  ))}
+      {/* Sidebar */}
+      <div className={`sidebar-container ${isSidebarOpen ? "open" : "closed"}`}>
+        <Nav className="flex-column sidebar p-3">
+          {links.map((link, index) => {
+            if (link.isSection) {
+              return (
+                <div key={index} className="mb-2">
+                  <Nav.Link
+                    className="sidebar-section-header"
+                    onClick={() => toggleSection(link.sectionKey)}
+                  >
+                    <span className="me-3">{link.icon}</span>
+                    <span className="flex-grow-1">{link.text}</span>
+                    <span>{expandedSections[link.sectionKey] ? "▼" : "▶"}</span>
+                  </Nav.Link>
+
+                  {expandedSections[link.sectionKey] && (
+                    <div className="ms-4">
+                      {link.children.map((child, childIndex) => (
+                        <LinkContainer to={child.path} key={childIndex}>
+                          <Nav.Link className="sidebar-link">
+                            <span className="me-3">{child.icon}</span>
+                            {child.text}
+                            {child.badge && (
+                              <span className="ms-auto badge bg-danger rounded-pill">
+                                {child.badge}
+                              </span>
+                            )}
+                          </Nav.Link>
+                        </LinkContainer>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        }
+              );
+            }
 
-        if (link.isHeader) {
-          return (
-            <div key={index} className="border-bottom mb-3 pb-2">
-              <LinkContainer to={link.path}>
-                <Nav.Link className="d-flex align-items-center py-2 px-3 fw-bold">
+            if (link.isHeader) {
+              return (
+                <div key={index} className="sidebar-header">
+                  <LinkContainer to={link.path}>
+                    <Nav.Link className="fw-bold sidebar-link">
+                      <span className="me-3">{link.icon}</span>
+                      {link.text}
+                    </Nav.Link>
+                  </LinkContainer>
+                </div>
+              );
+            }
+
+            return (
+              <LinkContainer to={link.path} key={index}>
+                <Nav.Link className="sidebar-link">
                   <span className="me-3">{link.icon}</span>
                   {link.text}
+                  {link.badge && (
+                    <span className="ms-auto badge bg-danger rounded-pill">
+                      {link.badge}
+                    </span>
+                  )}
                 </Nav.Link>
               </LinkContainer>
-            </div>
-          );
-        }
-
-        return (
-          <LinkContainer to={link.path} key={index}>
-            <Nav.Link className="d-flex align-items-center py-2 px-3">
-              <span className="me-3">{link.icon}</span>
-              {link.text}
-              {link.badge && (
-                <span className="ms-auto badge bg-danger rounded-pill">
-                  {link.badge}
-                </span>
-              )}
-            </Nav.Link>
-          </LinkContainer>
-        );
-      })}
-    </Nav>
+            );
+          })}
+        </Nav>
+      </div>
+    </>
   );
 };
 

@@ -8,7 +8,7 @@ const contentService = {
   getApprovedLessons: () =>
     contentAPI.get("/lessons/approved").then((res) => res.data),
 
-  getAllLessons: () => contentAPI.get("/lessons").then((res) => res.data), // <== ✅ added
+  getAllLessons: () => contentAPI.get("/lessons").then((res) => res.data),
 
   getLessonById: (id) =>
     contentAPI.get(`/lessons/${id}`).then((res) => res.data),
@@ -21,6 +21,9 @@ const contentService = {
 
   getPendingLessons: () =>
     contentAPI.get("/lessons/pending").then((res) => res.data),
+  
+  getPopularLessons: () =>
+    contentAPI.get("/lessons/popular").then((res) => res.data),
 
   // Admin-specific
   getAllLessonsAdmin: () =>

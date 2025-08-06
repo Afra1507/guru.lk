@@ -11,7 +11,7 @@ import {
 const Footer = () => {
   return (
     <footer className="bg-dark text-white mt-5 py-4">
-      <Container>
+      <Container fluid>
         <Row>
           <Col md={4} className="mb-4 mb-md-0">
             <h5>About GURU.Ik</h5>
@@ -112,7 +112,7 @@ const Footer = () => {
             <p className="mb-0">
               &copy; {new Date().getFullYear()} GURU.Ik - All Rights Reserved
             </p>
-            <small>Developed by AS2022466, AS2022468, AS2022471</small>
+            <small>Developed by AS2022468</small>
           </Col>
         </Row>
       </Container>

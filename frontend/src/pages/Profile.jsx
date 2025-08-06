@@ -30,7 +30,6 @@ const Profile = () => {
         <Col xs={12} md={9} className="p-4">
           <h2>{role === "ADMIN" ? "Admin Dashboard" : "User Profile"}</h2>
           <ProfileInfo user={user} setUser={setUser} />
-          {role === "ADMIN" && <UserManagement />}
         </Col>
       </Row>
     </Container>

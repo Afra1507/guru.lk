@@ -1,34 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Card, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import SearchFilter from "../components/content/SearchFilter";
 import ContentCard from "../components/content/ContentCard";
+import contentService from "../services/contentService";
 
 const Home = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
-  const navigate = useNavigate();
+  const [popularLessons, setPopularLessons] = useState([]);
+  const [loadingPopular, setLoadingPopular] = useState(true);
+  const [errorPopular, setErrorPopular] = useState(null);
 
-  const featuredLessons = [
-    {
-      id: 1,
-      title: "Basic Sinhala Grammar",
-      description: "Introduction to Sinhala sentence structure",
-      language: "Sinhala",
-      subject: "Language",
-      ageGroup: "All Ages",
-      contentType: "video",
-    },
-    {
-      id: 2,
-      title: "Mathematics for Grade 10",
-      description: "Algebra basics in Tamil",
-      language: "Tamil",
-      subject: "Mathematics",
-      ageGroup: "15-17",
-      contentType: "text",
-    },
-  ];
+  const navigate = useNavigate();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -44,6 +28,23 @@ const Home = () => {
       return () => clearTimeout(timer);
     }
   }, [showWelcome]);
+
+  // Fetch popular lessons on mount
+  useEffect(() => {
+    setLoadingPopular(true);
+    setErrorPopular(null);
+    contentService
+      .getPopularLessons()
+      .then((data) => {
+        setPopularLessons(data);
+        setLoadingPopular(false);
+      })
+      .catch((err) => {
+        setErrorPopular("Failed to load popular lessons.");
+        setLoadingPopular(false);
+        console.error(err);
+      });
+  }, []);
 
   const handleLogin = () => navigate("/login");
   const handleRegister = () => navigate("/register");
@@ -141,18 +142,32 @@ const Home = () => {
         </Col>
       </Row>
 
-      {/* Featured Lessons */}
+      {/* Popular Lessons Section */}
       <Row className="mb-4">
         <Col>
-          <h2>Featured Lessons</h2>
+          <h2>Top Viewed Lessons</h2>
         </Col>
       </Row>
       <Row>
-        {featuredLessons.map((lesson) => (
-          <Col key={lesson.id} md={6} lg={4} className="mb-4">
-            <ContentCard lesson={lesson} />
+        {loadingPopular ? (
+          <Col>
+            <p>Loading popular lessons...</p>
           </Col>
-        ))}
+        ) : errorPopular ? (
+          <Col>
+            <Alert variant="danger">{errorPopular}</Alert>
+          </Col>
+        ) : popularLessons.length === 0 ? (
+          <Col>
+            <p>No popular lessons available yet.</p>
+          </Col>
+        ) : (
+          popularLessons.map((lesson) => (
+            <Col key={lesson.id} md={6} lg={4} className="mb-4">
+              <ContentCard lesson={lesson} />
+            </Col>
+          ))
+        )}
       </Row>
 
       {/* Browse Button */}

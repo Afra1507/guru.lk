@@ -39,11 +39,11 @@ const LessonViewer = lazy(() => import("./pages/LessonViewer"));
 const PendingLessons = lazy(() => import("./pages/PendingLessons"));
 const AdminAllLessons = lazy(() => import("./pages/AdminAllLessons"));
 const LessonAnalytics = lazy(() => import("./pages/LessonAnalytics"));
+const UserManagement = lazy(() => import("./components/admin/UserManagement"));
 
 function App() {
   return (
     <AuthProvider>
-      {" "}
       {/* ✅ Wrap everything inside AuthProvider */}
       <Router>
         <ScrollToTop />
@@ -100,12 +100,20 @@ function App() {
                   <Route path="new" element={<ContributorNewUpload />} />
                 </Route>
 
-                {/* Admin */}
+                {/* Admin Routes */}
                 <Route
                   path="/admin"
                   element={
                     <RequireRole allowedRoles={["ADMIN"]}>
                       <AdminDashboard />
+                    </RequireRole>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <RequireRole allowedRoles={["ADMIN"]}>
+                      <UserManagement />
                     </RequireRole>
                   }
                 />
