@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +87,9 @@ public class LessonService {
     }
 
     public List<LessonResponseDTO> getTop10PopularLessons() {
-        return lessonRepository.findTopPopularLessons(PageRequest.of(0, 10))
+        int minViews = 3;
+        Pageable topTen = PageRequest.of(0, 10);
+        return lessonRepository.findPopularLessonsWithMinViews(minViews, topTen)
                 .stream()
                 .map(LessonResponseDTO::fromEntity)
                 .collect(Collectors.toList());

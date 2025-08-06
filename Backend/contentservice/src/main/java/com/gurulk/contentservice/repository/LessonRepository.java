@@ -39,6 +39,6 @@ public interface LessonRepository extends JpaRepository<Lesson, Long> {
 
   long countByIsApprovedFalse();
 
-  @Query("SELECT l FROM Lesson l ORDER BY l.viewCount DESC")
-  List<Lesson> findTopPopularLessons(Pageable pageable);
+  @Query("SELECT l FROM Lesson l WHERE l.viewCount >= :minViews ORDER BY l.viewCount DESC")
+  List<Lesson> findPopularLessonsWithMinViews(int minViews, Pageable pageable);
 }
