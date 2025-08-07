@@ -71,15 +71,15 @@ export const useContent = () => {
   /** -----------------------------------------
    * ✅ Contributor Features
    * ------------------------------------------ */
-  const fetchUserUploads = useCallback(() => {
-    if (!user || user.role.toLowerCase() !== "contributor") {
-      throw new Error("Contributor privileges required");
-    }
-    if (!user.id) {
-      throw new Error("User ID is undefined");
-    }
-    return handleApiCall(contentService.getLessonsByUploader, user.id);
-  }, [user, handleApiCall]);
+const fetchUserUploads = useCallback((userId) => {
+  if (!user || user.role.toLowerCase() !== "contributor") {
+    throw new Error("Contributor privileges required");
+  }
+  if (!userId) {
+    throw new Error("User ID is undefined");
+  }
+  return handleApiCall(contentService.getLessonsByUploader, userId);
+}, [user, handleApiCall]);
 
   const fetchUploadStats = useCallback(async () => {
     if (!user || user.role.toLowerCase() !== "contributor") {

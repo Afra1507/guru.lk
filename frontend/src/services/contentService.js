@@ -41,10 +41,9 @@ const contentService = {
     contentAPI.get("/lessons/analytics").then((res) => res.data),
 
   // Downloads
-  // Changed createDownload to send payload in body, safer than query params
   createDownload: (userId, lessonId) =>
     contentAPI
-      .post("/downloads/create", { userId, lessonId }) // payload in body
+      .post(`/downloads/create?userId=${userId}&lessonId=${lessonId}`)
       .then((res) => res.data),
 
   getUserDownloads: (userId) =>
@@ -52,6 +51,15 @@ const contentService = {
 
   getAllDownloads: () =>
     contentAPI.get("/downloads/all").then((res) => res.data),
+
+  // ✅ File Download
+  downloadLessonFile: (userId, lessonId) =>
+    contentAPI
+      .get("/files/download", {
+        params: { userId, lessonId },
+        responseType: "blob",
+      })
+      .then((res) => res.data),
 };
 
 export default contentService;

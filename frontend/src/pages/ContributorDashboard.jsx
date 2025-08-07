@@ -1,36 +1,48 @@
 // src/pages/contributor/ContributorDashboard.jsx
 import React from "react";
-import { Outlet, NavLink } from "react-router-dom";
-import { Container, Nav } from "react-bootstrap";
+import { Container } from "react-bootstrap";
+
+// Import your section components here
+import UploadForm from "../../components/contributor/UploadForm";
+import MyUploads from "../../components/contributor/MyUploads";
+import StatsOverview from "../../components/contributor/StatsOverview"; // Optional
 
 const ContributorDashboard = () => {
   return (
-    <Container fluid className="p-3">
-      <h3 className="mb-4">Contributor Dashboard</h3>
-      <Nav variant="tabs" className="mb-3">
-        <Nav.Item>
-          <NavLink to="/contributor" end className="nav-link">
-            Overview
-          </NavLink>
-        </Nav.Item>
-        <Nav.Item>
-          <NavLink to="/contributor/new" className="nav-link">
-            Upload Content
-          </NavLink>
-        </Nav.Item>
-        <Nav.Item>
-          <NavLink to="/contributor/my-uploads" className="nav-link">
-            My Uploads
-          </NavLink>
-        </Nav.Item>
-        <Nav.Item>
-          <NavLink to="/contributor/stats" className="nav-link">
-            Statistics
-          </NavLink>
-        </Nav.Item>
-      </Nav>
+    <Container fluid className="p-4">
+      <h2 className="mb-4">Contributor Dashboard</h2>
 
-      <Outlet />
+      {/* Upload Section */}
+      <section className="mb-5">
+        <h4>Start Uploading</h4>
+        <div className="bg-light p-3 rounded shadow-sm">
+          <UploadForm />
+        </div>
+      </section>
+
+      {/* My Uploads Section */}
+      <section className="mb-5">
+        <h4>My Uploads</h4>
+        <div className="bg-light p-3 rounded shadow-sm">
+          <MyUploads />
+        </div>
+      </section>
+
+      {/* Statistics Section */}
+      <section className="mb-5">
+        <h4>Statistics</h4>
+        <div className="bg-light p-3 rounded shadow-sm">
+          <StatsOverview />
+        </div>
+      </section>
+
+      {/* Optional: Profile Section */}
+      {/* <section className="mb-5">
+        <h4>Edit My Profile</h4>
+        <div className="bg-light p-3 rounded shadow-sm">
+          <EditProfileForm />
+        </div>
+      </section> */}
     </Container>
   );
 };

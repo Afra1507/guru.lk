@@ -8,25 +8,34 @@ import { useNavigate } from "react-router-dom";
 
 const ContentCard = ({ lesson, createDownload }) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownload = async (e) => {
-    e.stopPropagation();
-    if (!isAuthenticated) {
-      alert("Please login to download");
-      return;
-    }
-    try {
-      setIsDownloading(true);
-      await createDownload(lesson.lessonId);
-      alert("Download registered!");
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
+  const { isAuthenticated, user } = useAuth();
+
+const handleDownload = async (e) => {
+  e.stopPropagation();
+  if (!isAuthenticated) {
+    alert("Please login to download");
+    return;
+  }
+  try {
+    setIsDownloading(true);
+    await createDownload(lesson.lessonId);
+    alert("Download registered!");
+
+    // Trigger the actual file download
+    const userId = user?.id;
+    const url = `${process.env.REACT_APP_CONTENT_BASE_URL || "http://localhost:8082"}/files/download?userId=${userId}&lessonId=${lesson.lessonId}`;
+    window.open(url, "_blank");
+
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    setIsDownloading(false);
+  }
+};
+
+
 
   const handleView = () => {
     navigate(`/lessons/${lesson.lessonId}`);

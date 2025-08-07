@@ -29,7 +29,8 @@ const MyUploads = () => {
         return;
       }
       try {
-        const data = await fetchUserUploads(uploaderId);
+        const data = await fetchUserUploads(3);
+        console.log("Fetched uploads:", data);
         setUploads(data);
       } catch (err) {
         console.error(err);
@@ -48,7 +49,7 @@ const MyUploads = () => {
         <Button
           variant="primary"
           size="sm"
-          onClick={() => navigate("/contributor/new-upload")}
+          onClick={() => navigate("/contributor/new")}
         >
           Upload New Lesson
         </Button>
