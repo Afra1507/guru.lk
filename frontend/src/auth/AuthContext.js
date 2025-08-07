@@ -9,17 +9,17 @@ import {
 } from "../utils/auth";
 import { fetchUserProfile } from "../services/authService";
 
-export const AuthContext = createContext(); // ✅ named export
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(getCurrentUser());
   const [token, setToken] = useState(getToken());
 
-  const login = async (token) => {
-    setAuthToken(token);
-    setToken(token);
+  const login = async (authToken) => {
+    setAuthToken(authToken);
+    setToken(authToken);
     try {
-      const profile = await fetchUserProfile(token);
+      const profile = await fetchUserProfile(authToken);
       setUser(profile);
       setCurrentUser(profile);
     } catch {

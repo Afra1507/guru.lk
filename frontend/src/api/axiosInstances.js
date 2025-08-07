@@ -17,9 +17,6 @@ export const API = axios.create({
 // Create axios instance for content API
 export const contentAPI = axios.create({
   baseURL: contentBaseURL,
-  headers: {
-    "Content-Type": "application/json",
-  },
   withCredentials: true, // Important for CORS with credentials
 });
 

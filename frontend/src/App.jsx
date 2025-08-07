@@ -11,6 +11,7 @@ import { AuthProvider } from "./auth/AuthContext";
 import "./styles/main.scss";
 import { RequireAuth, RequireRole } from "./utils/ProtectedRoutes";
 
+
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home"));
 const Lessons = lazy(() => import("./pages/Lessons"));
@@ -35,6 +36,9 @@ const ContributorStats = lazy(() =>
 const ContributorNewUpload = lazy(() =>
   import("./components/contributor/ContributorNewUpload")
 );
+const ContributorHome = lazy(() => import("./pages/ContributorHome"));
+const MyUploads = lazy(() => import("./components/contributor/MyUploads"));
+
 const LessonViewer = lazy(() => import("./pages/LessonViewer"));
 const PendingLessons = lazy(() => import("./pages/PendingLessons"));
 const AdminAllLessons = lazy(() => import("./pages/AdminAllLessons"));
@@ -95,8 +99,10 @@ function App() {
                     </RequireRole>
                   }
                 >
+                  <Route index element={<ContributorHome />} />
                   <Route path="uploads" element={<ContributorUploads />} />
                   <Route path="stats" element={<ContributorStats />} />
+                  <Route path="my-uploads" element={<MyUploads />} />
                   <Route path="new" element={<ContributorNewUpload />} />
                 </Route>
 

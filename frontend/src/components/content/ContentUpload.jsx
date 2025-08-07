@@ -1,7 +1,8 @@
-// D:\guru.lk\frontend\src\components\content\ContentUpload.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
-import contentService from "../../services/contentService"; // ✅ Corrected import
+import contentService from "../../services/contentService";
+import { jwtDecode } from "jwt-decode";
+
 
 const ContentUpload = () => {
   const [formData, setFormData] = useState({
@@ -12,9 +13,30 @@ const ContentUpload = () => {
     language: "sinhala",
     ageGroup: "all",
     file: null,
+    uploaderId: null,
   });
 
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    // Get token from wherever you store it, e.g. localStorage
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        // Assuming your token has userId stored as "userId" or "sub"
+        const userId = decoded.userId || decoded.sub;
+
+        setFormData((prev) => ({
+          ...prev,
+          uploaderId: userId,
+        }));
+      } catch (error) {
+        console.error("Failed to decode token", error);
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,11 +54,21 @@ const ContentUpload = () => {
       alert("Please upload a file.");
       return;
     }
+    if (!formData.uploaderId) {
+      alert("User not authenticated.");
+      return;
+    }
 
     const data = new FormData();
-    for (const key in formData) {
-      data.append(key, formData[key]);
-    }
+
+    // Extract file and metadata separately
+    const { file, ...lessonData } = formData;
+
+    // Append JSON stringified lesson data as "lesson"
+    data.append("lesson", JSON.stringify(lessonData));
+
+    // Append file as "file"
+    data.append("file", file);
 
     try {
       setUploading(true);
@@ -50,6 +82,7 @@ const ContentUpload = () => {
         language: "sinhala",
         ageGroup: "all",
         file: null,
+        uploaderId: formData.uploaderId, // keep uploaderId intact
       });
     } catch (err) {
       alert("Upload failed: " + (err.response?.data?.message || err.message));
@@ -60,6 +93,21 @@ const ContentUpload = () => {
 
   return (
     <Form onSubmit={handleSubmit}>
+      {/* User ID (read-only) */}
+      <Row className="mb-3">
+        <Form.Group as={Col} controlId="formUserId">
+          <Form.Label>User ID</Form.Label>
+          <Form.Control
+            type="text"
+            name="uploaderId"
+            value={formData.uploaderId || ""}
+            readOnly
+            plaintext
+          />
+        </Form.Group>
+      </Row>
+
+      {/* Title */}
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formTitle">
           <Form.Label>Title</Form.Label>
@@ -73,6 +121,7 @@ const ContentUpload = () => {
         </Form.Group>
       </Row>
 
+      {/* Description */}
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formDescription">
           <Form.Label>Description</Form.Label>
@@ -87,6 +136,7 @@ const ContentUpload = () => {
         </Form.Group>
       </Row>
 
+      {/* Content Type, Language, Age Group */}
       <Row className="mb-3">
         <Form.Group as={Col} md={4} controlId="formContentType">
           <Form.Label>Content Type</Form.Label>
@@ -130,6 +180,7 @@ const ContentUpload = () => {
         </Form.Group>
       </Row>
 
+      {/* Subject */}
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formSubject">
           <Form.Label>Subject</Form.Label>
@@ -143,6 +194,7 @@ const ContentUpload = () => {
         </Form.Group>
       </Row>
 
+      {/* File Upload */}
       <Row className="mb-3">
         <Form.Group as={Col} controlId="formFile">
           <Form.Label>Upload File</Form.Label>
@@ -156,7 +208,7 @@ const ContentUpload = () => {
       </Row>
 
       <Button variant="primary" type="submit" disabled={uploading}>
-        {uploading ? "Uploading..." : "Upload Lesson"}
+        {uploading ? "Uploading..." : "Upload"}
       </Button>
     </Form>
   );

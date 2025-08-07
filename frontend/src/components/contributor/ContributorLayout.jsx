@@ -8,7 +8,7 @@ const ContributorLayout = () => {
     <Container fluid>
       <Row>
         <Col md={2} className="px-0">
-          <Sidebar role="contributor" />
+          <Sidebar />
         </Col>
         <Col md={10} className="py-4">
           <Outlet />

@@ -1,25 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { Table, Spinner, Alert, Button } from "react-bootstrap";
 import { useContent } from "../../hooks/useContent";
-import { useAuth } from "../../auth/useAuth";
+import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
+
+const getUploaderIdFromToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode(token);
+    return Number(decoded.userId || decoded.sub);
+  } catch {
+    return null;
+  }
+};
 
 const MyUploads = () => {
   const [uploads, setUploads] = useState([]);
   const { fetchUserUploads, loading, error } = useContent();
-  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadUploads = async () => {
-      if (!user) return;
+      const uploaderId = getUploaderIdFromToken();
+      if (!uploaderId) {
+        alert("You must be logged in.");
+        navigate("/login");
+        return;
+      }
       try {
-        const data = await fetchUserUploads(user.id);
+        const data = await fetchUserUploads(uploaderId);
         setUploads(data);
       } catch (err) {
         console.error(err);
       }
     };
     loadUploads();
-  }, [user, fetchUserUploads]);
+  }, [fetchUserUploads, navigate]);
 
   if (loading) return <Spinner animation="border" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
@@ -28,7 +45,11 @@ const MyUploads = () => {
     <div className="p-3 border rounded">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4>My Uploads</h4>
-        <Button variant="primary" size="sm">
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => navigate("/contributor/new-upload")}
+        >
           Upload New Lesson
         </Button>
       </div>
@@ -67,7 +88,12 @@ const MyUploads = () => {
       ) : (
         <div className="text-center py-4">
           <p>You haven't uploaded any lessons yet.</p>
-          <Button variant="outline-primary">Start Uploading</Button>
+          <Button
+            variant="outline-primary"
+            onClick={() => navigate("/contributor/new-upload")}
+          >
+            Start Uploading
+          </Button>
         </div>
       )}
     </div>

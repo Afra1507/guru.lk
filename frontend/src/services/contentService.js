@@ -5,6 +5,14 @@ const contentService = {
   createLesson: (lessonData) =>
     contentAPI.post("/lessons/create", lessonData).then((res) => res.data),
 
+  getLessonsByUploader: (uploaderId) =>
+    contentAPI.get(`/lessons/uploader/${uploaderId}`).then((res) => res.data),
+
+  getLessonsByUploaderAndApproval: (uploaderId, approved) =>
+    contentAPI
+      .get(`/lessons/uploader/${uploaderId}/status`, { params: { approved } })
+      .then((res) => res.data),
+
   getApprovedLessons: () =>
     contentAPI.get("/lessons/approved").then((res) => res.data),
 
@@ -21,7 +29,7 @@ const contentService = {
 
   getPendingLessons: () =>
     contentAPI.get("/lessons/pending").then((res) => res.data),
-  
+
   getPopularLessons: () =>
     contentAPI.get("/lessons/popular").then((res) => res.data),
 
@@ -33,11 +41,10 @@ const contentService = {
     contentAPI.get("/lessons/analytics").then((res) => res.data),
 
   // Downloads
+  // Changed createDownload to send payload in body, safer than query params
   createDownload: (userId, lessonId) =>
     contentAPI
-      .post("/downloads/create", null, {
-        params: { userId, lessonId },
-      })
+      .post("/downloads/create", { userId, lessonId }) // payload in body
       .then((res) => res.data),
 
   getUserDownloads: (userId) =>

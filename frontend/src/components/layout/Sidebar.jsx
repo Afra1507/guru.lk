@@ -80,9 +80,14 @@ const Sidebar = () => {
   const contributorLinks = [
     { path: "/contributor", icon: <FaHome />, text: "Dashboard" },
     {
-      path: "/upload",
+      path: "/contributor/new",
       icon: <FaUpload />,
-      text: "Upload Content",
+      text: "Start Uploading",
+    },
+    {
+      path: "/contributor/my-uploads",
+      icon: <FaBook />,
+      text: "My Uploads",
     },
   ];
 

@@ -27,34 +27,22 @@ export const useContent = () => {
     }
   }, []);
 
-  const createLesson = useCallback(
-    (lessonData) => handleApiCall(contentService.createLesson, lessonData),
-    [handleApiCall]
-  );
-
-  const getApprovedLessons = useCallback(
-    () => handleApiCall(contentService.getApprovedLessons),
-    [handleApiCall]
-  );
-
+  /** -----------------------------------------
+   * ✅ Admin-only Actions
+   * ------------------------------------------ */
   const getAllLessons = useCallback(() => {
     if (!user || user.role.toLowerCase() !== "admin") {
       throw new Error("Admin privileges required");
     }
-    return handleApiCall(contentService.getAllLessonsAdmin); // Updated to admin version
+    return handleApiCall(contentService.getAllLessonsAdmin);
   }, [user, handleApiCall]);
 
-  const getContentAnalytics = useCallback(() => {
+  const getPendingLessons = useCallback(() => {
     if (!user || user.role.toLowerCase() !== "admin") {
       throw new Error("Admin privileges required");
     }
-    return handleApiCall(contentService.getContentAnalytics);
+    return handleApiCall(contentService.getPendingLessons);
   }, [user, handleApiCall]);
-
-  const getLessonById = useCallback(
-    (id) => handleApiCall(contentService.getLessonById, id),
-    [handleApiCall]
-  );
 
   const approveLesson = useCallback(
     (id) => {
@@ -66,8 +54,84 @@ export const useContent = () => {
     [user, handleApiCall]
   );
 
+  const getContentAnalytics = useCallback(() => {
+    if (!user || user.role.toLowerCase() !== "admin") {
+      throw new Error("Admin privileges required");
+    }
+    return handleApiCall(contentService.getContentAnalytics);
+  }, [user, handleApiCall]);
+
+  const getAllDownloads = useCallback(() => {
+    if (!user || user.role.toLowerCase() !== "admin") {
+      throw new Error("Admin privileges required");
+    }
+    return handleApiCall(contentService.getAllDownloads);
+  }, [user, handleApiCall]);
+
+  /** -----------------------------------------
+   * ✅ Contributor Features
+   * ------------------------------------------ */
+  const fetchUserUploads = useCallback(() => {
+    if (!user || user.role.toLowerCase() !== "contributor") {
+      throw new Error("Contributor privileges required");
+    }
+    if (!user.id) {
+      throw new Error("User ID is undefined");
+    }
+    return handleApiCall(contentService.getLessonsByUploader, user.id);
+  }, [user, handleApiCall]);
+
+  const fetchUploadStats = useCallback(async () => {
+    if (!user || user.role.toLowerCase() !== "contributor") {
+      throw new Error("Contributor privileges required");
+    }
+    if (!user.id) {
+      throw new Error("User ID is undefined");
+    }
+    const lessons = await handleApiCall(
+      contentService.getLessonsByUploader,
+      user.id
+    );
+    const approved = lessons.filter((l) => l.isApproved).length;
+    const pending = lessons.length - approved;
+    const downloads = lessons.reduce(
+      (sum, l) => sum + (l.downloadCount || 0),
+      0
+    );
+
+    return {
+      totalUploads: lessons.length,
+      approved,
+      pending,
+      downloads,
+    };
+  }, [user, handleApiCall]);
+
+  /** -----------------------------------------
+   * ✅ Shared (All Roles)
+   * ------------------------------------------ */
+  const createLesson = useCallback(
+    (lessonData) => {
+      return handleApiCall(contentService.createLesson, lessonData);
+    },
+    [handleApiCall]
+  );
+
+  const getApprovedLessons = useCallback(() => {
+    return handleApiCall(contentService.getApprovedLessons);
+  }, [handleApiCall]);
+
+  const getLessonById = useCallback(
+    (id) => {
+      return handleApiCall(contentService.getLessonById, id);
+    },
+    [handleApiCall]
+  );
+
   const incrementViewCount = useCallback(
-    (id) => handleApiCall(contentService.incrementViewCount, id),
+    (id) => {
+      return handleApiCall(contentService.incrementViewCount, id);
+    },
     [handleApiCall]
   );
 
@@ -84,33 +148,27 @@ export const useContent = () => {
     return handleApiCall(contentService.getUserDownloads, user.id);
   }, [user, handleApiCall]);
 
-  const getPendingLessons = useCallback(() => {
-    if (!user || user.role.toLowerCase() !== "admin") {
-      throw new Error("Admin privileges required");
-    }
-    return handleApiCall(contentService.getPendingLessons);
-  }, [user, handleApiCall]);
-
-  const getAllDownloads = useCallback(() => {
-    if (!user || user.role.toLowerCase() !== "admin") {
-      throw new Error("Admin privileges required");
-    }
-    return handleApiCall(contentService.getAllDownloads);
-  }, [user, handleApiCall]);
-
   return {
     loading,
     error,
+
+    // Shared
     createLesson,
     getApprovedLessons,
-    getAllLessons,
-    getContentAnalytics,
     getLessonById,
-    approveLesson,
     incrementViewCount,
     createDownload,
     getUserDownloads,
+
+    // Contributor
+    fetchUserUploads,
+    fetchUploadStats,
+
+    // Admin
+    getAllLessons,
     getPendingLessons,
+    approveLesson,
+    getContentAnalytics,
     getAllDownloads,
   };
 };
