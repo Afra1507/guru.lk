@@ -5,15 +5,22 @@ import com.gurulk.contentservice.entity.Lesson;
 import com.gurulk.contentservice.exception.ResourceNotFoundException;
 import com.gurulk.contentservice.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.StandardCopyOption;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,11 +29,59 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
 
+    // Path to store uploaded files, set in application.properties or hardcoded here
+    @Value("${lesson.upload.dir:uploads}")
+    private String uploadDir;
+
     @Transactional
     public Lesson createLesson(Lesson lesson) {
         lesson.setApproved(false); // New lessons need approval
         lesson.setViewCount(0); // Initialize view count
         return lessonRepository.save(lesson);
+    }
+
+    // New method to handle multipart file upload and lesson creation
+    @Transactional
+    public Lesson createLessonWithFile(Lesson lesson, MultipartFile file) {
+        String newFilename = null;
+        try {
+            if (file != null && !file.isEmpty()) {
+                Path uploadPath = Paths.get(uploadDir);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                String originalFilename = file.getOriginalFilename();
+                String fileExtension = "";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                }
+
+                newFilename = UUID.randomUUID().toString() + fileExtension;
+                Path filePath = uploadPath.resolve(newFilename);
+
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                lesson.setFilePath(newFilename); // saved file name
+                lesson.setFileName(originalFilename); // original file name
+            }
+
+            lesson.setApproved(false);
+            lesson.setViewCount(0);
+            return lessonRepository.save(lesson);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file", e);
+        } catch (RuntimeException e) {
+            if (newFilename != null) {
+                try {
+                    Files.deleteIfExists(Paths.get(uploadDir).resolve(newFilename));
+                } catch (IOException ex) {
+                    System.err.println("Failed to delete uploaded file after error: " + ex.getMessage());
+                }
+            }
+            throw e;
+        }
     }
 
     public List<LessonResponseDTO> getAllApprovedLessons() {

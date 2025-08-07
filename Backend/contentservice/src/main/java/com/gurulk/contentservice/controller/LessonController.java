@@ -1,5 +1,7 @@
 package com.gurulk.contentservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gurulk.contentservice.dto.LessonResponseDTO;
 import com.gurulk.contentservice.entity.Lesson;
 import com.gurulk.contentservice.service.LessonService;
@@ -7,8 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +22,40 @@ public class LessonController {
 
   private final LessonService lessonService;
 
-  @PostMapping("/create")
+  // @PostMapping(value = "/create", consumes =
+  // MediaType.MULTIPART_FORM_DATA_VALUE)
+  // @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
+  // public ResponseEntity<LessonResponseDTO> createLesson(
+  // @RequestPart("lesson") String lessonJson,
+  // @RequestPart(value = "file", required = false) MultipartFile file) throws
+  // JsonProcessingException {
+
+  // ObjectMapper mapper = new ObjectMapper();
+  // Lesson lesson = mapper.readValue(lessonJson, Lesson.class);
+
+  // Lesson savedLesson = lessonService.createLessonWithFile(lesson, file);
+  // return ResponseEntity.ok(LessonResponseDTO.fromEntity(savedLesson));
+  // }
+  // @PostMapping("/create")
+  // @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
+  // public ResponseEntity<Lesson> createLesson(@Valid @RequestBody Lesson lesson)
+  // {
+  // return ResponseEntity.ok(lessonService.createLesson(lesson));
+  // }
+  @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
-  public ResponseEntity<LessonResponseDTO> createLesson(@Valid @RequestBody Lesson lesson) {
-    return ResponseEntity.ok(LessonResponseDTO.fromEntity(lessonService.createLesson(lesson)));
+  public ResponseEntity<LessonResponseDTO> createLessonWithFile(
+      @RequestPart("lesson") String lessonJson,
+      @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
+
+    System.out.println("Received JSON: " + lessonJson); // debug log
+
+    ObjectMapper mapper = new ObjectMapper();
+    Lesson lesson = mapper.readValue(lessonJson, Lesson.class);
+
+    Lesson savedLesson = lessonService.createLessonWithFile(lesson, file);
+
+    return ResponseEntity.ok(LessonResponseDTO.fromEntity(savedLesson));
   }
 
   @GetMapping("/approved")

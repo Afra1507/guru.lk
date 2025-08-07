@@ -1,9 +1,9 @@
 package com.gurulk.contentservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,9 +33,13 @@ public class Lesson {
   @Column(name = "content_type", nullable = false)
   private String contentType;
 
-  @NotBlank
-  @Column(name = "file_url", nullable = false)
-  private String fileUrl;
+  // Store the saved file name on disk
+  @Column(name = "file_path")
+  private String filePath;
+
+  // Store the original file name
+  @Column(name = "file_name")
+  private String fileName;
 
   @NotBlank
   @Column(nullable = false)
@@ -49,6 +53,7 @@ public class Lesson {
   @Column(name = "age_group", nullable = false)
   private String ageGroup;
 
+  @NotNull
   @Column(name = "uploader_id", nullable = false)
   private Long uploaderId;
 
@@ -67,7 +72,6 @@ public class Lesson {
   private LocalDateTime updatedAt;
 
   @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
-  @JsonManagedReference
   private List<Download> downloads;
 
   @PrePersist
