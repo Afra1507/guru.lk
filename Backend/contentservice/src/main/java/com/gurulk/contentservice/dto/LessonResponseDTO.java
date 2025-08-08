@@ -1,7 +1,6 @@
 package com.gurulk.contentservice.dto;
 
 import com.gurulk.contentservice.entity.Lesson;
-
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -11,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class LessonResponseDTO {
+
   private Long lessonId;
   private String title;
   private String description;
@@ -23,6 +23,7 @@ public class LessonResponseDTO {
   private boolean isApproved;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private String fileUrl;
 
   public static LessonResponseDTO fromEntity(Lesson lesson) {
     return LessonResponseDTO.builder()
@@ -38,6 +39,7 @@ public class LessonResponseDTO {
         .isApproved(lesson.isApproved())
         .createdAt(lesson.getCreatedAt())
         .updatedAt(lesson.getUpdatedAt())
+        .fileUrl(lesson.getFileUrl())
         .build();
   }
 }

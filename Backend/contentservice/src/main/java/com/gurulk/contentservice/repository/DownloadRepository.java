@@ -24,7 +24,9 @@ public interface DownloadRepository extends JpaRepository<Download, Long> {
   long countByUserId(Long userId);
 
   // Additional useful queries
-  List<Download> findByUserIdAndLesson_LessonId(Long userId, Long lessonId);
+  @Query("SELECT d FROM Download d WHERE d.userId = :userId AND d.lesson.lessonId = :lessonId")
+  List<Download> findByUserIdAndLessonId(@Param("userId") Long userId,
+      @Param("lessonId") Long lessonId);
 
   @Query("SELECT COUNT(d) FROM Download d WHERE d.lesson.lessonId = :lessonId")
   long countByLessonId(@Param("lessonId") Long lessonId);

@@ -33,13 +33,8 @@ public class Lesson {
   @Column(name = "content_type", nullable = false)
   private String contentType;
 
-  // Store the saved file name on disk
-  @Column(name = "file_path")
-  private String filePath;
-
-  // Store the original file name
-  @Column(name = "file_name")
-  private String fileName;
+  @Column(name = "file_url")
+  private String fileUrl;
 
   @NotBlank
   @Column(nullable = false)

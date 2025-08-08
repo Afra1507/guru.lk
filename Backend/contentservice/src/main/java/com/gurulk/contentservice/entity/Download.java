@@ -2,6 +2,7 @@ package com.gurulk.contentservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -19,9 +20,11 @@ public class Download {
     @Column(name = "download_id")
     private Long downloadId;
 
+    @NotNull
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lesson_id", nullable = false)
     @JsonBackReference
@@ -30,6 +33,7 @@ public class Download {
     @Column(name = "downloaded_at", nullable = false, updatable = false)
     private LocalDateTime downloadedAt;
 
+    @NotNull
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 

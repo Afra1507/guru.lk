@@ -40,48 +40,17 @@ public class LessonService {
         return lessonRepository.save(lesson);
     }
 
-    // New method to handle multipart file upload and lesson creation
     @Transactional
-    public Lesson createLessonWithFile(Lesson lesson, MultipartFile file) {
-        String newFilename = null;
-        try {
-            if (file != null && !file.isEmpty()) {
-                Path uploadPath = Paths.get(uploadDir);
-                if (!Files.exists(uploadPath)) {
-                    Files.createDirectories(uploadPath);
-                }
+    public Lesson createLessonWithUrl(Lesson lesson) {
+        lesson.setApproved(false); // needs approval
+        lesson.setViewCount(0);
 
-                String originalFilename = file.getOriginalFilename();
-                String fileExtension = "";
-                if (originalFilename != null && originalFilename.contains(".")) {
-                    fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-                }
-
-                newFilename = UUID.randomUUID().toString() + fileExtension;
-                Path filePath = uploadPath.resolve(newFilename);
-
-                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-                lesson.setFilePath(newFilename); // saved file name
-                lesson.setFileName(originalFilename); // original file name
-            }
-
-            lesson.setApproved(false);
-            lesson.setViewCount(0);
-            return lessonRepository.save(lesson);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file", e);
-        } catch (RuntimeException e) {
-            if (newFilename != null) {
-                try {
-                    Files.deleteIfExists(Paths.get(uploadDir).resolve(newFilename));
-                } catch (IOException ex) {
-                    System.err.println("Failed to delete uploaded file after error: " + ex.getMessage());
-                }
-            }
-            throw e;
+        // Ensure fileUrl is set, no file saving
+        if (lesson.getFileUrl() == null || lesson.getFileUrl().isBlank()) {
+            throw new IllegalArgumentException("File URL must be provided");
         }
+
+        return lessonRepository.save(lesson);
     }
 
     public List<LessonResponseDTO> getAllApprovedLessons() {

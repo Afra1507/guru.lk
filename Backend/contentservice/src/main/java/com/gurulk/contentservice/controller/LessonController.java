@@ -22,39 +22,10 @@ public class LessonController {
 
   private final LessonService lessonService;
 
-  // @PostMapping(value = "/create", consumes =
-  // MediaType.MULTIPART_FORM_DATA_VALUE)
-  // @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
-  // public ResponseEntity<LessonResponseDTO> createLesson(
-  // @RequestPart("lesson") String lessonJson,
-  // @RequestPart(value = "file", required = false) MultipartFile file) throws
-  // JsonProcessingException {
-
-  // ObjectMapper mapper = new ObjectMapper();
-  // Lesson lesson = mapper.readValue(lessonJson, Lesson.class);
-
-  // Lesson savedLesson = lessonService.createLessonWithFile(lesson, file);
-  // return ResponseEntity.ok(LessonResponseDTO.fromEntity(savedLesson));
-  // }
-  // @PostMapping("/create")
-  // @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
-  // public ResponseEntity<Lesson> createLesson(@Valid @RequestBody Lesson lesson)
-  // {
-  // return ResponseEntity.ok(lessonService.createLesson(lesson));
-  // }
-  @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
-  public ResponseEntity<LessonResponseDTO> createLessonWithFile(
-      @RequestPart("lesson") String lessonJson,
-      @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
-
-    System.out.println("Received JSON: " + lessonJson); // debug log
-
-    ObjectMapper mapper = new ObjectMapper();
-    Lesson lesson = mapper.readValue(lessonJson, Lesson.class);
-
-    Lesson savedLesson = lessonService.createLessonWithFile(lesson, file);
-
+  public ResponseEntity<LessonResponseDTO> createLesson(@RequestBody Lesson lesson) {
+    Lesson savedLesson = lessonService.createLessonWithUrl(lesson);
     return ResponseEntity.ok(LessonResponseDTO.fromEntity(savedLesson));
   }
 

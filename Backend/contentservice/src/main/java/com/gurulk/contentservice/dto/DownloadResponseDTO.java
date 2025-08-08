@@ -10,20 +10,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class DownloadResponseDTO {
-  private Long downloadId;
-  private Long userId;
-  private LessonResponseDTO lesson;
-  private LocalDateTime downloadedAt;
-  private LocalDateTime expiresAt;
+    private Long downloadId;
+    private Long userId;
+    private LessonResponseDTO lesson;
+    private LocalDateTime downloadedAt;
+    private LocalDateTime expiresAt;
+    private String fileUrl;
 
-  // Add static mapper method
-  public static DownloadResponseDTO fromEntity(Download download) {
-    return DownloadResponseDTO.builder()
-        .downloadId(download.getDownloadId())
-        .userId(download.getUserId())
-        .lesson(LessonResponseDTO.fromEntity(download.getLesson()))
-        .downloadedAt(download.getDownloadedAt())
-        .expiresAt(download.getExpiresAt())
-        .build();
-  }
+    public static DownloadResponseDTO fromEntity(Download download) {
+        return DownloadResponseDTO.builder()
+                .downloadId(download.getDownloadId())
+                .userId(download.getUserId())
+                .lesson(LessonResponseDTO.fromEntity(download.getLesson()))
+                .downloadedAt(download.getDownloadedAt())
+                .expiresAt(download.getExpiresAt())
+                .fileUrl(download.getLesson().getFileUrl())
+                .build();
+    }
 }

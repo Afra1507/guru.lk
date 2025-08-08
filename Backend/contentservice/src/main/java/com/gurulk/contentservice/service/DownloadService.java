@@ -23,14 +23,12 @@ public class DownloadService {
 
   @Transactional
   public DownloadResponseDTO createDownload(Long userId, Long lessonId) {
-    // Verify lesson exists
+    if (userId == null || lessonId == null) {
+      throw new IllegalArgumentException("User ID and Lesson ID cannot be null");
+    }
+
     Lesson lesson = lessonRepository.findById(lessonId)
         .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + lessonId));
-
-    // Only allow download if lesson is approved
-    if (!lesson.isApproved()) {
-      throw new IllegalStateException("Cannot download unapproved lesson");
-    }
 
     Download download = Download.builder()
         .userId(userId)
@@ -38,7 +36,8 @@ public class DownloadService {
         .expiresAt(LocalDateTime.now().plusDays(7))
         .build();
 
-    return DownloadResponseDTO.fromEntity(downloadRepository.save(download));
+    Download savedDownload = downloadRepository.save(download);
+    return DownloadResponseDTO.fromEntity(savedDownload);
   }
 
   public List<DownloadResponseDTO> getDownloadsByUser(Long userId) {
@@ -58,7 +57,7 @@ public class DownloadService {
   }
 
   public boolean hasUserDownloadedLesson(Long userId, Long lessonId) {
-    return !downloadRepository.findByUserIdAndLesson_LessonId(userId, lessonId).isEmpty();
+    return !downloadRepository.findByUserIdAndLessonId(userId, lessonId).isEmpty();
   }
 
   public List<DownloadResponseDTO> getExpiredDownloads() {

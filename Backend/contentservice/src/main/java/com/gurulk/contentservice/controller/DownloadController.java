@@ -21,7 +21,8 @@ public class DownloadController {
     public ResponseEntity<DownloadResponseDTO> createDownload(
             @RequestParam Long userId,
             @RequestParam Long lessonId) {
-        return ResponseEntity.ok(downloadService.createDownload(userId, lessonId));
+        DownloadResponseDTO dto = downloadService.createDownload(userId, lessonId);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/user/{userId}")
