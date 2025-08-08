@@ -2,15 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Table, Spinner, Alert, Button } from "react-bootstrap";
 import { useContent } from "../../hooks/useContent";
 import { useNavigate } from "react-router-dom";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // note: import without braces, if your package exports default
 
 const getUploaderIdFromToken = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
+
   try {
     const decoded = jwtDecode(token);
+    // Assuming userId or sub stores the user identifier as a number or string
     return Number(decoded.userId || decoded.sub);
-  } catch {
+  } catch (error) {
+    console.error("Failed to decode token", error);
     return null;
   }
 };
@@ -23,19 +26,22 @@ const MyUploads = () => {
   useEffect(() => {
     const loadUploads = async () => {
       const uploaderId = getUploaderIdFromToken();
+
       if (!uploaderId) {
         alert("You must be logged in.");
         navigate("/login");
         return;
       }
+
       try {
-        const data = await fetchUserUploads(3);
+        const data = await fetchUserUploads(uploaderId);
         console.log("Fetched uploads:", data);
         setUploads(data);
       } catch (err) {
         console.error(err);
       }
     };
+
     loadUploads();
   }, [fetchUserUploads, navigate]);
 
@@ -73,10 +79,10 @@ const MyUploads = () => {
                 <td>
                   <span
                     className={`badge bg-${
-                      upload.isApproved ? "success" : "warning"
+                      upload.approved ? "success" : "warning"
                     }`}
                   >
-                    {upload.isApproved ? "Approved" : "Pending"}
+                    {upload.approved ? "Approved" : "Pending"}
                   </span>
                 </td>
                 <td>{upload.viewCount}</td>
@@ -91,7 +97,7 @@ const MyUploads = () => {
           <p>You haven't uploaded any lessons yet.</p>
           <Button
             variant="outline-primary"
-            onClick={() => navigate("/contributor/new-upload")}
+            onClick={() => navigate("/contributor/new")}
           >
             Start Uploading
           </Button>

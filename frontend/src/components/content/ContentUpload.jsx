@@ -3,7 +3,6 @@ import { Form, Button, Row, Col } from "react-bootstrap";
 import contentService from "../../services/contentService";
 import { jwtDecode } from "jwt-decode";
 
-
 const ContentUpload = () => {
   const [formData, setFormData] = useState({
     title: "",
@@ -12,11 +11,11 @@ const ContentUpload = () => {
     subject: "",
     language: "sinhala",
     ageGroup: "all",
-    file: null,
+    fileUrl: "",
     uploaderId: null,
   });
 
-  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     // Get token from wherever you store it, e.g. localStorage
@@ -25,7 +24,6 @@ const ContentUpload = () => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        // Assuming your token has userId stored as "userId" or "sub"
         const userId = decoded.userId || decoded.sub;
 
         setFormData((prev) => ({
@@ -43,15 +41,11 @@ const ContentUpload = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    setFormData((prev) => ({ ...prev, file: e.target.files[0] }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.file) {
-      alert("Please upload a file.");
+    if (!formData.fileUrl) {
+      alert("Please provide a file URL.");
       return;
     }
     if (!formData.uploaderId) {
@@ -59,21 +53,10 @@ const ContentUpload = () => {
       return;
     }
 
-    const data = new FormData();
-
-    // Extract file and metadata separately
-    const { file, ...lessonData } = formData;
-
-    // Append JSON stringified lesson data as "lesson"
-    data.append("lesson", JSON.stringify(lessonData));
-
-    // Append file as "file"
-    data.append("file", file);
-
     try {
-      setUploading(true);
-      await contentService.createLesson(data);
-      alert("Lesson uploaded successfully! Awaiting approval.");
+      setSubmitting(true);
+      await contentService.createLesson(formData); // Send the formData directly
+      alert("Lesson created successfully!");
       setFormData({
         title: "",
         description: "",
@@ -81,13 +64,15 @@ const ContentUpload = () => {
         subject: "",
         language: "sinhala",
         ageGroup: "all",
-        file: null,
-        uploaderId: formData.uploaderId, // keep uploaderId intact
+        fileUrl: "",
+        uploaderId: formData.uploaderId,
       });
     } catch (err) {
-      alert("Upload failed: " + (err.response?.data?.message || err.message));
+      alert(
+        "Submission failed: " + (err.response?.data?.message || err.message)
+      );
     } finally {
-      setUploading(false);
+      setSubmitting(false);
     }
   };
 
@@ -194,21 +179,23 @@ const ContentUpload = () => {
         </Form.Group>
       </Row>
 
-      {/* File Upload */}
+      {/*File Upload with URL Input */}
       <Row className="mb-3">
-        <Form.Group as={Col} controlId="formFile">
-          <Form.Label>Upload File</Form.Label>
+        <Form.Group as={Col} controlId="formFileUrl">
+          <Form.Label>File URL</Form.Label>
           <Form.Control
-            type="file"
-            onChange={handleFileChange}
+            type="url"
+            name="fileUrl"
+            value={formData.fileUrl}
+            onChange={handleChange}
             required
-            accept="video/*,audio/*,text/*"
+            placeholder="https://example.com/file.pdf"
           />
         </Form.Group>
       </Row>
 
-      <Button variant="primary" type="submit" disabled={uploading}>
-        {uploading ? "Uploading..." : "Upload"}
+      <Button variant="primary" type="submit" disabled={submitting}>
+        {submitting ? "Submitting..." : "Submit"}
       </Button>
     </Form>
   );
