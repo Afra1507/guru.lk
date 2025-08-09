@@ -1,12 +1,47 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Alert } from "react-bootstrap";
+import Slider from "react-slick";
+import {
+  Container,
+  Grid,
+  Typography,
+  Button,
+  Alert,
+  Box,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
+
+import PersonIcon from "@mui/icons-material/Person";
+import LogoutIcon from "@mui/icons-material/Logout";
+import LoginIcon from "@mui/icons-material/Login";
+import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+
 import SearchFilter from "../components/content/SearchFilter";
 import ContentCard from "../components/content/ContentCard";
 import contentService from "../services/contentService";
 
+import { useAuth } from "../auth/useAuth"; // Your auth hook
+
+const sliderImages = [
+  {
+    src: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1350&q=80",
+    alt: "Group study and collaboration",
+    caption: "Collaborate and Learn Together",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1350&q=80",
+    alt: "Open book and laptop for knowledge sharing",
+    caption: "Share Your Knowledge with the Community",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1350&q=80",
+    alt: "Person writing notes and learning",
+    caption: "Grow Your Skills and Help Others",
+  },
+];
+
 const Home = () => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const { user, logout } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
   const [popularLessons, setPopularLessons] = useState([]);
   const [loadingPopular, setLoadingPopular] = useState(true);
@@ -14,14 +49,16 @@ const Home = () => {
 
   const navigate = useNavigate();
 
+  // Show welcome alert on login
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
-      setCurrentUser(user);
       setShowWelcome(true);
+    } else {
+      setShowWelcome(false);
     }
-  }, []);
+  }, [user]);
 
+  // Hide welcome after 5 seconds
   useEffect(() => {
     if (showWelcome) {
       const timer = setTimeout(() => setShowWelcome(false), 5000);
@@ -29,7 +66,7 @@ const Home = () => {
     }
   }, [showWelcome]);
 
-  // Fetch popular lessons on mount
+  // Fetch popular lessons on mount (same for all roles)
   useEffect(() => {
     setLoadingPopular(true);
     setErrorPopular(null);
@@ -49,12 +86,12 @@ const Home = () => {
   const handleLogin = () => navigate("/login");
   const handleRegister = () => navigate("/register");
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    setCurrentUser(null);
+    logout();
+    window.location.href = "/login"; // reload + redirect
   };
 
   const handleProfileRedirect = () => {
-    if (currentUser?.role === "ADMIN") {
+    if (user?.role === "ADMIN") {
       navigate("/admin");
     } else {
       navigate("/profile");
@@ -62,8 +99,8 @@ const Home = () => {
   };
 
   const getWelcomeMessage = () => {
-    if (!currentUser) return null;
-    switch (currentUser.role) {
+    if (!user) return null;
+    switch (user.role) {
       case "ADMIN":
         return "Welcome, Admin!";
       case "CONTRIBUTOR":
@@ -74,136 +111,231 @@ const Home = () => {
     }
   };
 
-  const role = currentUser?.role;
+  const role = user?.role;
+
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    speed: 600,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    arrows: true,
+  };
 
   return (
-    <Container>
-      {/* Welcome Message */}
-      {currentUser && showWelcome && (
-        <Row className="mt-3">
-          <Col>
-            <Alert variant="success" className="text-center">
-              {getWelcomeMessage()}
-            </Alert>
-          </Col>
-        </Row>
-      )}
-
+    <Container maxWidth="lg" sx={{ mt: 3, mb: 6 }}>
       {/* Header Section */}
-      <Row className="my-4 align-items-center">
-        <Col>
-          <h1>Welcome to GURU.Ik</h1>
-          <p className="lead">
+      <Grid
+        container
+        alignItems="center"
+        spacing={2}
+        sx={{ mb: 4 }}
+        justifyContent="space-between"
+      >
+        <Grid item xs={12} md={8}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            Welcome to GURU.Ik
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
             Community Knowledge Sharing Platform for All Sri Lankans
-          </p>
-        </Col>
-        <Col md="auto">
-          {currentUser ? (
-            <div className="d-flex gap-2">
+          </Typography>
+        </Grid>
+
+        <Grid
+          item
+          xs="auto"
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 2,
+            flexWrap: "wrap",
+          }}
+        >
+          {user ? (
+            <>
               <Button
-                variant={role === "ADMIN" ? "danger" : "outline-primary"}
+                startIcon={<PersonIcon />}
+                variant={role === "ADMIN" ? "contained" : "outlined"}
+                color={role === "ADMIN" ? "error" : "primary"}
                 onClick={handleProfileRedirect}
+                size="large"
+                sx={{ textTransform: "capitalize", fontWeight: "600" }}
               >
                 {role === "ADMIN" ? "Admin Dashboard" : "My Profile"}
               </Button>
-              <Button variant="outline-danger" onClick={handleLogout}>
+              <Button
+                startIcon={<LogoutIcon />}
+                variant="outlined"
+                color="error"
+                onClick={handleLogout}
+                size="large"
+                sx={{ textTransform: "capitalize", fontWeight: "600" }}
+              >
                 Logout
               </Button>
-            </div>
+            </>
           ) : (
-            <div className="d-flex gap-2">
-              <Button variant="primary" onClick={handleLogin}>
+            <>
+              <Button
+                startIcon={<LoginIcon />}
+                variant="contained"
+                color="primary"
+                onClick={handleLogin}
+                size="large"
+                sx={{ textTransform: "capitalize", fontWeight: "600" }}
+              >
                 Login
               </Button>
-              <Button variant="outline-primary" onClick={handleRegister}>
+              <Button
+                startIcon={<AppRegistrationIcon />}
+                variant="outlined"
+                color="primary"
+                onClick={handleRegister}
+                size="large"
+                sx={{ textTransform: "capitalize", fontWeight: "600" }}
+              >
                 Register
               </Button>
-            </div>
+            </>
           )}
-        </Col>
-      </Row>
+        </Grid>
+      </Grid>
 
-      {/* Optional notice based on role */}
+      {/* Contributor Notice */}
       {role === "CONTRIBUTOR" && (
-        <Row className="mb-3">
-          <Col>
-            <Alert variant="info">
-              Welcome, contributor! Head to your profile to upload or edit your
-              lessons.
-            </Alert>
-          </Col>
-        </Row>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          Welcome, contributor! Head to your profile to upload or edit your
+          lessons.
+        </Alert>
       )}
 
-      {/* Filters - visible to everyone */}
-      <Row className="mb-4">
-        <Col>
-          <SearchFilter />
-        </Col>
-      </Row>
+      {/* Admin Notice */}
+      {role === "ADMIN" && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          You have admin privileges. Use the admin tools below to manage users
+          and review content.
+        </Alert>
+      )}
 
-      {/* Popular Lessons Section */}
-      <Row className="mb-4">
-        <Col>
-          <h2>Top Viewed Lessons</h2>
-        </Col>
-      </Row>
-      <Row>
-        {loadingPopular ? (
-          <Col>
-            <p>Loading popular lessons...</p>
-          </Col>
-        ) : errorPopular ? (
-          <Col>
-            <Alert variant="danger">{errorPopular}</Alert>
-          </Col>
-        ) : popularLessons.length === 0 ? (
-          <Col>
-            <p>No popular lessons available yet.</p>
-          </Col>
-        ) : (
-          popularLessons.map((lesson) => (
-            <Col key={lesson.id} md={6} lg={4} className="mb-4">
+      {/* Image Slider */}
+      <Box sx={{ mb: 5 }}>
+        <Slider {...sliderSettings}>
+          {sliderImages.map(({ src, alt, caption }, idx) => (
+            <Box
+              key={idx}
+              sx={{
+                position: "relative",
+                borderRadius: 3,
+                overflow: "hidden",
+                height: { xs: 180, sm: 300, md: 400 },
+                boxShadow: 3,
+              }}
+            >
+              <img
+                src={src}
+                alt={alt}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                loading="lazy"
+              />
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: 20,
+                  left: 20,
+                  color: "white",
+                  bgcolor: "rgba(0,0,0,0.6)",
+                  px: 2,
+                  py: 1,
+                  borderRadius: 1,
+                  fontWeight: "bold",
+                  fontSize: { xs: "1rem", sm: "1.25rem" },
+                  maxWidth: "70%",
+                  userSelect: "none",
+                }}
+              >
+                {caption}
+              </Box>
+            </Box>
+          ))}
+        </Slider>
+      </Box>
+
+      {/* Welcome Message */}
+      {user && showWelcome && (
+        <Alert severity="success" sx={{ mb: 3, textAlign: "center" }}>
+          {getWelcomeMessage()}
+        </Alert>
+      )}
+
+      {/* Filters */}
+      <Box sx={{ mb: 5 }}>
+        <SearchFilter />
+      </Box>
+
+      {/* Popular Lessons */}
+      <Typography variant="h4" gutterBottom>
+        Top Viewed Lessons
+      </Typography>
+
+      {loadingPopular ? (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
+          <CircularProgress />
+        </Box>
+      ) : errorPopular ? (
+        <Alert severity="error" sx={{ my: 3 }}>
+          {errorPopular}
+        </Alert>
+      ) : popularLessons.length === 0 ? (
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 3 }}>
+          No popular lessons available yet.
+        </Typography>
+      ) : (
+        <Grid container spacing={4} sx={{ mt: 1 }}>
+          {popularLessons.map((lesson) => (
+            <Grid item key={lesson.id || lesson.lessonId} xs={12} sm={6} md={4}>
               <ContentCard lesson={lesson} />
-            </Col>
-          ))
-        )}
-      </Row>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       {/* Browse Button */}
-      <Row className="mt-4">
-        <Col className="text-center">
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => navigate("/lessons")}
-          >
-            Browse All Lessons
-          </Button>
-        </Col>
-      </Row>
+      <Box sx={{ textAlign: "center", mt: 6 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={() => navigate("/lessons")}
+        >
+          Browse All Lessons
+        </Button>
+      </Box>
 
-      {/* Admin-only section */}
+      {/* Admin-only Section */}
       {role === "ADMIN" && (
-        <Row className="mt-5">
-          <Col>
-            <h4>Admin Tools</h4>
-            <div className="d-flex gap-3">
-              <Button
-                variant="outline-dark"
-                onClick={() => navigate("/admin/users")}
-              >
-                Manage Users
-              </Button>
-              <Button
-                variant="outline-secondary"
-                onClick={() => navigate("/admin/content")}
-              >
-                Review Content
-              </Button>
-            </div>
-          </Col>
-        </Row>
+        <Box sx={{ mt: 8 }}>
+          <Typography variant="h5" gutterBottom>
+            Admin Tools
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => navigate("/admin/users")}
+            >
+              Manage Users
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => navigate("/admin/analytics")}
+            >
+              Review Content
+            </Button>
+          </Box>
+        </Box>
       )}
     </Container>
   );

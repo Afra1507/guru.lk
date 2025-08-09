@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Alert } from "react-bootstrap";
-import { useContent } from "../hooks/useContent";
+import {
+  Container,
+  Grid,
+  Typography,
+  Alert,
+  AlertTitle,
+  Box,
+} from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ContentCard from "../components/content/ContentCard";
+import { useContent } from "../hooks/useContent";
 
 const AdminAllLessons = () => {
   const { getAllLessons } = useContent();
@@ -12,21 +20,38 @@ const AdminAllLessons = () => {
   }, []);
 
   return (
-    <Container className="my-4">
-      <h2>All Lessons (Admin View)</h2>
-      <Row className="mt-3 g-4">
-        {lessons.length === 0 ? (
-          <Col>
-            <Alert variant="info">No lessons available.</Alert>
-          </Col>
-        ) : (
-          lessons.map((lesson) => (
-            <Col key={lesson.lessonId} xs={12} md={6} lg={4}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          fontWeight: 700,
+          fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+          letterSpacing: "0.05em",
+          color: "#001f54", // navy blue
+        }}
+      >
+        All Lessons (Admin View)
+      </Typography>
+
+      {lessons.length === 0 ? (
+        <Alert
+          severity="info"
+          icon={<InfoOutlinedIcon fontSize="inherit" />}
+          sx={{ mt: 2 }}
+        >
+          <AlertTitle>No lessons available.</AlertTitle>
+          Please check back later.
+        </Alert>
+      ) : (
+        <Grid container spacing={3}>
+          {lessons.map((lesson) => (
+            <Grid item xs={12} md={6} lg={4} key={lesson.lessonId}>
               <ContentCard lesson={lesson} />
-            </Col>
-          ))
-        )}
-      </Row>
+            </Grid>
+          ))}
+        </Grid>
+      )}
     </Container>
   );
 };

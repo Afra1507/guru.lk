@@ -1,89 +1,166 @@
 import React, { useEffect, useState } from "react";
-import { Table, Spinner, Alert, Button } from "react-bootstrap";
-import { useContent } from "../../hooks/useContent";
-import { useAuth } from "../../auth/useAuth";
-import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  CircularProgress,
+  Alert,
+  Stack,
+} from "@mui/material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DownloadIcon from "@mui/icons-material/Download";
+import contentService from "../../services/contentService";
+import { jwtDecode } from "jwt-decode";
 
-const MyUploads = () => {
-  const [uploads, setUploads] = useState([]);
-  const { fetchUserUploads, loading, error } = useContent();
-  const { user } = useAuth();
-  const navigate = useNavigate();
+const UploadStats = () => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadUploads = async () => {
-      if (!user || typeof user.id !== "number") return;
-
+    const fetchStats = async () => {
       try {
-        const data = await fetchUserUploads(user.id);
-        setUploads(data);
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        if (!token) throw new Error("No token found, please login.");
+
+        const decoded = jwtDecode(token);
+        const userId = decoded.id || decoded.userId;
+        if (!userId) throw new Error("User ID not found in token.");
+
+        const lessons = await contentService.getLessonsByUploader(userId);
+
+        const totalUploads = lessons.length;
+        const approvedUploads = lessons.filter((l) => l.isApproved).length;
+        const pendingUploads = totalUploads - approvedUploads;
+        const totalViews = lessons.reduce(
+          (sum, l) => sum + (l.viewCount || 0),
+          0
+        );
+        const totalDownloads = lessons.reduce(
+          (sum, l) => sum + (l.downloadCount || 0),
+          0
+        );
+
+        setStats({
+          totalUploads,
+          approvedUploads,
+          pendingUploads,
+          totalViews,
+          totalDownloads,
+        });
       } catch (err) {
-        console.error(err);
+        setError(err.message || "Failed to fetch stats");
+      } finally {
+        setLoading(false);
       }
     };
-    loadUploads();
-  }, [user, fetchUserUploads]);
 
-  if (loading) return <Spinner animation="border" />;
-  if (error) return <Alert variant="danger">{error}</Alert>;
+    fetchStats();
+  }, []);
+
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  if (error)
+    return (
+      <Alert severity="error" sx={{ mt: 4 }}>
+        {error}
+      </Alert>
+    );
+
+  const statItems = [
+    {
+      label: "Total Uploads",
+      value: stats.totalUploads,
+      color: "grey.200",
+      icon: <CloudUploadIcon sx={{ fontSize: 30, color: "text.secondary" }} />,
+    },
+    {
+      label: "Approved Uploads",
+      value: stats.approvedUploads,
+      color: "success.light",
+      icon: <CheckCircleIcon sx={{ fontSize: 30, color: "success.dark" }} />,
+    },
+    {
+      label: "Pending Uploads",
+      value: stats.pendingUploads,
+      color: "warning.light",
+      icon: <HourglassEmptyIcon sx={{ fontSize: 30, color: "warning.dark" }} />,
+    },
+    {
+      label: "Total Views",
+      value: stats.totalViews,
+      color: "info.light",
+      icon: <VisibilityIcon sx={{ fontSize: 30, color: "info.dark" }} />,
+    },
+    {
+      label: "Total Downloads",
+      value: stats.totalDownloads,
+      color: "primary.light",
+      icon: <DownloadIcon sx={{ fontSize: 30, color: "primary.dark" }} />,
+    },
+  ];
 
   return (
-    <div className="p-3 border rounded">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>My Uploads</h4>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => navigate("/contributor/new")}
-        >
-          Upload New Lesson
-        </Button>
-      </div>
-
-      {uploads.length > 0 ? (
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Views</th>
-              <th>Downloads</th>
-              <th>Uploaded</th>
-            </tr>
-          </thead>
-          <tbody>
-            {uploads.map((upload) => (
-              <tr key={upload.lessonId}>
-                <td>{upload.title}</td>
-                <td>
-                  <span
-                    className={`badge bg-${
-                      upload.isApproved ? "success" : "warning"
-                    }`}
-                  >
-                    {upload.isApproved ? "Approved" : "Pending"}
-                  </span>
-                </td>
-                <td>{upload.viewCount}</td>
-                <td>{upload.downloadCount || 0}</td>
-                <td>{new Date(upload.createdAt).toLocaleDateString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      ) : (
-        <div className="text-center py-4">
-          <p>You haven't uploaded any lessons yet.</p>
-          <Button
-            variant="outline-primary"
-            onClick={() => navigate("/contributor/new")}
+    <Box sx={{ flexGrow: 1, p: 2 }}>
+      <Grid container spacing={3} justifyContent="space-evenly" flexWrap="wrap">
+        {statItems.map(({ label, value, color, icon }, idx) => (
+          <Grid
+            key={idx}
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            sx={{ display: "flex" }}
           >
-            Start Uploading
-          </Button>
-        </div>
-      )}
-    </div>
+            <Paper
+              elevation={3}
+              sx={{
+                p: 3,
+                bgcolor: color,
+                borderRadius: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                width: "100%",
+              }}
+            >
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}
+                mb={1}
+                sx={{ justifyContent: "center", width: "100%" }}
+              >
+                {icon}
+                <Typography
+                  variant="subtitle1"
+                  fontWeight="medium"
+                  sx={{ flexGrow: 1 }}
+                >
+                  {label}
+                </Typography>
+              </Stack>
+              <Typography variant="h4" fontWeight="bold" color="text.primary">
+                {value ?? 0}
+              </Typography>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 };
 
-export default MyUploads;
+export default UploadStats;

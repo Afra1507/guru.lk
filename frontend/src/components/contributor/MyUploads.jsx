@@ -1,8 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Table, Spinner, Alert, Button } from "react-bootstrap";
+import {
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  CircularProgress,
+  Alert,
+  Box,
+} from "@mui/material";
 import { useContent } from "../../hooks/useContent";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; // note: import without braces, if your package exports default
+import { jwtDecode } from "jwt-decode";
+
+// Import MUI Icons
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 
 const getUploaderIdFromToken = () => {
   const token = localStorage.getItem("token");
@@ -10,7 +32,6 @@ const getUploaderIdFromToken = () => {
 
   try {
     const decoded = jwtDecode(token);
-    // Assuming userId or sub stores the user identifier as a number or string
     return Number(decoded.userId || decoded.sub);
   } catch (error) {
     console.error("Failed to decode token", error);
@@ -35,7 +56,6 @@ const MyUploads = () => {
 
       try {
         const data = await fetchUserUploads(uploaderId);
-        console.log("Fetched uploads:", data);
         setUploads(data);
       } catch (err) {
         console.error(err);
@@ -45,65 +65,176 @@ const MyUploads = () => {
     loadUploads();
   }, [fetchUserUploads, navigate]);
 
-  if (loading) return <Spinner animation="border" />;
-  if (error) return <Alert variant="danger">{error}</Alert>;
+  if (loading)
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <CircularProgress size={60} />
+      </Box>
+    );
+
+  if (error)
+    return (
+      <Box display="flex" justifyContent="center" my={4}>
+        <Alert severity="error" sx={{ width: "100%", maxWidth: 600 }}>
+          {error}
+        </Alert>
+      </Box>
+    );
 
   return (
-    <div className="p-3 border rounded">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>My Uploads</h4>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => navigate("/contributor/new")}
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="70vh"
+      px={2}
+      py={4}
+    >
+      <Paper
+        elevation={4}
+        sx={{
+          p: 4,
+          width: "100%",
+          maxWidth: 900,
+          borderRadius: 3,
+        }}
+      >
+        {/* Header */}
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={3}
+          flexWrap="wrap"
+          gap={2}
         >
-          Upload New Lesson
-        </Button>
-      </div>
-
-      {uploads.length > 0 ? (
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Status</th>
-              <th>Views</th>
-              <th>Downloads</th>
-              <th>Uploaded</th>
-            </tr>
-          </thead>
-          <tbody>
-            {uploads.map((upload) => (
-              <tr key={upload.lessonId}>
-                <td>{upload.title}</td>
-                <td>
-                  <span
-                    className={`badge bg-${
-                      upload.approved ? "success" : "warning"
-                    }`}
-                  >
-                    {upload.approved ? "Approved" : "Pending"}
-                  </span>
-                </td>
-                <td>{upload.viewCount}</td>
-                <td>{upload.downloadCount || 0}</td>
-                <td>{new Date(upload.createdAt).toLocaleDateString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      ) : (
-        <div className="text-center py-4">
-          <p>You haven't uploaded any lessons yet.</p>
+          <Typography
+            variant="h4"
+            component="h1"
+            fontWeight="bold"
+            flexGrow={1}
+          >
+            My Uploads
+          </Typography>
           <Button
-            variant="outline-primary"
+            variant="contained"
+            size="medium"
+            startIcon={<CloudUploadIcon />}
             onClick={() => navigate("/contributor/new")}
           >
-            Start Uploading
+            Upload New Lesson
           </Button>
-        </div>
-      )}
-    </div>
+        </Box>
+
+        {/* Content */}
+        {uploads.length > 0 ? (
+          <TableContainer component={Paper} elevation={0}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: "bold" }}>Title</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      <VisibilityIcon fontSize="small" />
+                      Views
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      <GetAppIcon fontSize="small" />
+                      Downloads
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      <EventNoteIcon fontSize="small" />
+                      Uploaded
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {uploads.map((upload) => (
+                  <TableRow key={upload.lessonId} hover>
+                    <TableCell>{upload.title}</TableCell>
+                    <TableCell>
+                      <Chip
+                        icon={
+                          upload.approved ? (
+                            <CheckCircleIcon />
+                          ) : (
+                            <HourglassEmptyIcon />
+                          )
+                        }
+                        label={upload.approved ? "Approved" : "Pending"}
+                        color={upload.approved ? "success" : "warning"}
+                        size="small"
+                        sx={{ fontWeight: "bold" }}
+                      />
+                    </TableCell>
+                    <TableCell>{upload.viewCount}</TableCell>
+                    <TableCell>{upload.downloadCount || 0}</TableCell>
+                    <TableCell>
+                      {new Date(upload.createdAt).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Box
+            textAlign="center"
+            py={8}
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            gap={3}
+          >
+            <CloudUploadIcon sx={{ fontSize: 60, color: "primary.main" }} />
+            <Typography variant="h6" color="text.secondary" fontWeight="medium">
+              You haven't uploaded any lessons yet.
+            </Typography>
+            <Button
+              variant="outlined"
+              size="medium"
+              onClick={() => navigate("/contributor/new")}
+              startIcon={<CloudUploadIcon />}
+            >
+              Start Uploading
+            </Button>
+          </Box>
+        )}
+      </Paper>
+    </Box>
   );
 };
 

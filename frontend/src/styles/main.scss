@@ -1,6 +1,14 @@
 @import "variables";
 @import "~bootstrap/scss/bootstrap";
 
+$font-family-base: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+body {
+  font-family: $font-family-base;
+  background-color: #f8f9fa;
+}
+
+
 // Global styles
 body {
   font-family: $font-family-base;

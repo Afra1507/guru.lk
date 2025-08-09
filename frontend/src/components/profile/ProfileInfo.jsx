@@ -1,5 +1,31 @@
 import React, { useState } from "react";
-import { Card, ListGroup, Button, Badge, Form, Modal } from "react-bootstrap";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Checkbox,
+  FormControlLabel,
+  useTheme,
+  useMediaQuery,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 import {
   FaUserEdit,
   FaLanguage,
@@ -12,22 +38,59 @@ import { API } from "../../api/axiosInstances";
 
 const ProfileInfo = ({ user, setUser }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
   const [showEdit, setShowEdit] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [editedUser, setEditedUser] = useState({ ...user });
+
+  // New state for snackbars
+  const [successSnackbar, setSuccessSnackbar] = useState(false);
+  const [errorSnackbar, setErrorSnackbar] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (!user) return null;
 
   const role = user.role?.toUpperCase();
 
   const getRoleBadge = () => {
+    let color = "primary";
+    let label = "Learner";
+
     switch (role) {
       case "ADMIN":
-        return <Badge bg="danger">Admin</Badge>;
+        color = "error";
+        label = "Admin";
+        break;
       case "CONTRIBUTOR":
-        return <Badge bg="success">Contributor</Badge>;
+        color = "success";
+        label = "Contributor";
+        break;
       default:
-        return <Badge bg="primary">Learner</Badge>;
+        color = "primary";
+        label = "Learner";
     }
+
+    return (
+      <Box
+        component="span"
+        sx={{
+          bgcolor: (theme) => theme.palette[color].main,
+          color: "white",
+          borderRadius: 2,
+          px: 2,
+          py: 0.5,
+          fontWeight: "bold",
+          fontSize: "0.875rem",
+          display: "inline-block",
+          minWidth: 85,
+          textAlign: "center",
+        }}
+      >
+        {label}
+      </Box>
+    );
   };
 
   const getLanguageDisplayName = (code) => {
@@ -45,7 +108,6 @@ const ProfileInfo = ({ user, setUser }) => {
 
   const handleSaveChanges = async () => {
     try {
-      // PUT /user/profile expects UpdateProfileRequest payload
       const payload = {
         email: editedUser.email,
         preferredLanguage: editedUser.preferredLanguage,
@@ -53,169 +115,333 @@ const ProfileInfo = ({ user, setUser }) => {
         isLowIncome: editedUser.isLowIncome,
       };
 
-      const res = await API.put("/user/profile", payload); // <-- use API here
+      const res = await API.put("/user/profile", payload);
       setUser(res.data);
       localStorage.setItem("user", JSON.stringify(res.data));
+      setShowConfirm(false);
       setShowEdit(false);
+      setSuccessSnackbar(true); // show success message
     } catch (error) {
-      alert(error.response?.data?.message || "Failed to update profile.");
+      setShowConfirm(false);
+      setErrorMessage(
+        error.response?.data?.message || "Failed to update profile."
+      );
+      setErrorSnackbar(true); // show error message
     }
   };
 
   return (
-    <>
-      <Card className="mb-4 profile-card">
-        <Card.Body>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <Card.Title className="mb-0">Profile Information</Card.Title>
+    <Box
+      sx={{
+        width: "100%",
+        p: 2,
+        fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+      }}
+    >
+      <Card
+        sx={{
+          p: 2,
+          boxShadow: 4,
+          borderRadius: 3,
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
+        <CardHeader
+          title={
+            <Typography variant={isSmUp ? "h5" : "h6"} fontWeight="bold">
+              Profile Information
+            </Typography>
+          }
+          action={
             <Button
-              variant="outline-primary"
-              size="sm"
+              variant="outlined"
+              startIcon={<FaUserEdit />}
+              size="small"
               onClick={() => setShowEdit(true)}
             >
-              <FaUserEdit className="me-1" /> Edit Profile
+              Edit Profile
             </Button>
-          </div>
+          }
+        />
+        <CardContent>
+          <List sx={{ width: "100%" }}>
+            {[
+              { label: "Username", value: user.username },
+              { label: "Email", value: user.email || "Not specified" },
+            ].map(({ label, value }) => (
+              <ListItem key={label} sx={{ py: 1 }}>
+                <ListItemText
+                  primary={
+                    <Typography
+                      variant="body1"
+                      color="text.secondary"
+                      sx={{ fontWeight: 500 }}
+                    >
+                      {label}
+                    </Typography>
+                  }
+                />
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: "bold", minWidth: 150, textAlign: "right" }}
+                >
+                  {value}
+                </Typography>
+              </ListItem>
+            ))}
 
-          <ListGroup variant="flush">
-            <ListGroup.Item className="d-flex justify-content-between">
-              <span>Username</span>
-              <strong>{user.username}</strong>
-            </ListGroup.Item>
-
-            <ListGroup.Item className="d-flex justify-content-between">
-              <span>Email</span>
-              <strong>{user.email || "Not specified"}</strong>
-            </ListGroup.Item>
-
-            <ListGroup.Item className="d-flex justify-content-between">
-              <span>Account Type</span>
+            <ListItem sx={{ py: 1 }}>
+              <ListItemText
+                primary={
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    sx={{ fontWeight: 500 }}
+                  >
+                    Account Type
+                  </Typography>
+                }
+              />
               {getRoleBadge()}
-            </ListGroup.Item>
+            </ListItem>
 
             {role !== "ADMIN" && (
               <>
-                <ListGroup.Item className="d-flex justify-content-between align-items-center">
-                  <span>
-                    <FaLanguage className="me-2" />
-                    Preferred Language
-                  </span>
-                  <strong>
+                <ListItem sx={{ py: 1 }}>
+                  <ListItemIcon sx={{ minWidth: 30 }}>
+                    <FaLanguage />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        sx={{ fontWeight: 500 }}
+                      >
+                        Preferred Language
+                      </Typography>
+                    }
+                  />
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: "bold",
+                      minWidth: 150,
+                      textAlign: "right",
+                    }}
+                  >
                     {getLanguageDisplayName(user.preferredLanguage)}
-                  </strong>
-                </ListGroup.Item>
+                  </Typography>
+                </ListItem>
 
-                <ListGroup.Item className="d-flex justify-content-between align-items-center">
-                  <span>
-                    <FaMapMarkerAlt className="me-2" />
-                    Region
-                  </span>
-                  <strong>{user.region || "Not specified"}</strong>
-                </ListGroup.Item>
+                <ListItem sx={{ py: 1 }}>
+                  <ListItemIcon sx={{ minWidth: 30 }}>
+                    <FaMapMarkerAlt />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        sx={{ fontWeight: 500 }}
+                      >
+                        Region
+                      </Typography>
+                    }
+                  />
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: "bold",
+                      minWidth: 150,
+                      textAlign: "right",
+                    }}
+                  >
+                    {user.region || "Not specified"}
+                  </Typography>
+                </ListItem>
 
-                <ListGroup.Item className="d-flex justify-content-between align-items-center">
-                  <span>
-                    <FaUserShield className="me-2" />
-                    Low Income
-                  </span>
-                  <strong>{user.isLowIncome ? "Yes" : "No"}</strong>
-                </ListGroup.Item>
+                <ListItem sx={{ py: 1 }}>
+                  <ListItemIcon sx={{ minWidth: 30 }}>
+                    <FaUserShield />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        sx={{ fontWeight: 500 }}
+                      >
+                        Low Income
+                      </Typography>
+                    }
+                  />
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: "bold",
+                      minWidth: 150,
+                      textAlign: "right",
+                    }}
+                  >
+                    {user.isLowIncome ? "Yes" : "No"}
+                  </Typography>
+                </ListItem>
               </>
             )}
 
             {role === "ADMIN" && (
-              <ListGroup.Item>
+              <ListItem sx={{ py: 2 }}>
                 <Button
-                  variant="warning"
-                  className="w-100"
+                  variant="contained"
+                  color="warning"
+                  fullWidth
+                  startIcon={<FaTools />}
                   onClick={() => navigate("/admin/users")}
                 >
-                  <FaTools className="me-2" /> Go to User Management
+                  Go to User Management
                 </Button>
-              </ListGroup.Item>
+              </ListItem>
             )}
-          </ListGroup>
-        </Card.Body>
+          </List>
+        </CardContent>
       </Card>
 
-      {/* Edit Modal */}
-      <Modal show={showEdit} onHide={() => setShowEdit(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Profile</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3" controlId="emailInput">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                value={editedUser.email || ""}
-                onChange={(e) =>
-                  setEditedUser({ ...editedUser, email: e.target.value })
-                }
-              />
-            </Form.Group>
+      {/* Edit Dialog */}
+      <Dialog
+        open={showEdit}
+        onClose={() => setShowEdit(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Edit Profile</DialogTitle>
+        <DialogContent dividers>
+          <Box component="form" noValidate autoComplete="off" sx={{ mt: 1 }}>
+            <TextField
+              label="Email"
+              type="email"
+              fullWidth
+              margin="normal"
+              value={editedUser.email || ""}
+              onChange={(e) =>
+                setEditedUser((prev) => ({ ...prev, email: e.target.value }))
+              }
+            />
 
             {role !== "ADMIN" && (
               <>
-                <Form.Group className="mb-3" controlId="languageSelect">
-                  <Form.Label>Preferred Language</Form.Label>
-                  <Form.Select
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="language-select-label">
+                    Preferred Language
+                  </InputLabel>
+                  <Select
+                    labelId="language-select-label"
+                    label="Preferred Language"
                     value={editedUser.preferredLanguage || "ENGLISH"}
                     onChange={(e) =>
-                      setEditedUser({
-                        ...editedUser,
+                      setEditedUser((prev) => ({
+                        ...prev,
                         preferredLanguage: e.target.value.toUpperCase(),
-                      })
+                      }))
                     }
                   >
-                    <option value="ENGLISH">English</option>
-                    <option value="SINHALA">සිංහල</option>
-                    <option value="TAMIL">தமிழ்</option>
-                  </Form.Select>
-                </Form.Group>
+                    <MenuItem value="ENGLISH">English</MenuItem>
+                    <MenuItem value="SINHALA">සිංහල</MenuItem>
+                    <MenuItem value="TAMIL">தமிழ்</MenuItem>
+                  </Select>
+                </FormControl>
 
-                <Form.Group className="mb-3" controlId="regionInput">
-                  <Form.Label>Region</Form.Label>
-                  <Form.Control
-                    type="text"
-                    maxLength={100}
-                    value={editedUser.region || ""}
-                    onChange={(e) =>
-                      setEditedUser({ ...editedUser, region: e.target.value })
-                    }
-                  />
-                </Form.Group>
+                <TextField
+                  label="Region"
+                  fullWidth
+                  margin="normal"
+                  inputProps={{ maxLength: 100 }}
+                  value={editedUser.region || ""}
+                  onChange={(e) =>
+                    setEditedUser((prev) => ({
+                      ...prev,
+                      region: e.target.value,
+                    }))
+                  }
+                />
 
-                <Form.Group className="mb-3" controlId="lowIncomeCheckbox">
-                  <Form.Check
-                    type="checkbox"
-                    label="Low Income"
-                    checked={!!editedUser.isLowIncome}
-                    onChange={(e) =>
-                      setEditedUser({
-                        ...editedUser,
-                        isLowIncome: e.target.checked,
-                      })
-                    }
-                  />
-                </Form.Group>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={!!editedUser.isLowIncome}
+                      onChange={(e) =>
+                        setEditedUser((prev) => ({
+                          ...prev,
+                          isLowIncome: e.target.checked,
+                        }))
+                      }
+                    />
+                  }
+                  label="Low Income"
+                />
               </>
             )}
-          </Form>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEdit(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSaveChanges}>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowEdit(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => setShowConfirm(true)}>
             Save Changes
           </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Save</DialogTitle>
+        <DialogContent dividers>
+          <Typography>Are you sure you want to save the changes?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowConfirm(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSaveChanges}>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={successSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setSuccessSnackbar(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSuccessSnackbar(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          Profile updated successfully!
+        </Alert>
+      </Snackbar>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={errorSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setErrorSnackbar(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setErrorSnackbar(false)}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {errorMessage}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 

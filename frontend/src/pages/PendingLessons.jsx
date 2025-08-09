@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Spinner, Row, Col } from "react-bootstrap";
+import {
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  Grid,
+  CircularProgress,
+  Alert,
+  Stack,
+} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import PersonIcon from "@mui/icons-material/Person";
+
 import { useContent } from "../hooks/useContent";
 
 const PendingLessons = () => {
   const { getPendingLessons, approveLesson, loading, error } = useContent();
-
   const [pending, setPending] = useState([]);
 
   useEffect(() => {
@@ -29,38 +41,79 @@ const PendingLessons = () => {
     }
   };
 
-  if (loading) return <Spinner animation="border" />;
+  if (loading)
+    return (
+      <Stack alignItems="center" mt={4}>
+        <CircularProgress />
+      </Stack>
+    );
 
-  if (error) return <p className="text-danger">{error}</p>;
+  if (error)
+    return (
+      <Alert severity="error" sx={{ mt: 4 }}>
+        {error}
+      </Alert>
+    );
 
-  if (pending.length === 0) return <p>No pending lessons found.</p>;
+  if (pending.length === 0)
+    return (
+      <Typography variant="h6" align="center" mt={4}>
+        No pending lessons found.
+      </Typography>
+    );
 
   return (
-    <Row>
+    <Grid container spacing={3} mt={2}>
       {pending.map((lesson) => (
-        <Col md={6} lg={4} key={lesson.lessonId} className="mb-4">
-          <Card>
-            <Card.Body>
-              <Card.Title>{lesson.title}</Card.Title>
-              <Card.Subtitle className="mb-2 text-muted">
-                Uploaded by User ID: {lesson.uploaderId}
-              </Card.Subtitle>
-              <Card.Text>{lesson.description?.slice(0, 100)}...</Card.Text>
-
+        <Grid item xs={12} sm={6} md={4} key={lesson.lessonId}>
+          <Card
+            sx={{
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              boxShadow: 3,
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "scale(1.03)",
+                boxShadow: 6,
+              },
+            }}
+          >
+            <CardContent>
+              <Typography variant="h6" gutterBottom noWrap>
+                {lesson.title}
+              </Typography>
+              <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+                <PersonIcon color="action" fontSize="small" />
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  noWrap
+                >{`Uploaded by User ID: ${lesson.uploaderId}`}</Typography>
+              </Stack>
+              <Typography variant="body2" color="text.secondary" noWrap>
+                {lesson.description?.length > 100
+                  ? lesson.description.slice(0, 100) + "..."
+                  : lesson.description}
+              </Typography>
+            </CardContent>
+            <CardActions sx={{ justifyContent: "flex-end", pb: 2, pr: 2 }}>
               <Button
-                variant="success"
-                size="sm"
+                variant="contained"
+                color="success"
+                size="small"
+                startIcon={<CheckCircleOutlineIcon />}
                 onClick={() => handleApprove(lesson.lessonId)}
               >
                 Approve
               </Button>
-              {/* Optional Reject or View buttons */}
-              {/* <Button variant="outline-danger" size="sm" className="ms-2">Reject</Button> */}
-            </Card.Body>
+              {/* Optional: Add Reject Button here */}
+            </CardActions>
           </Card>
-        </Col>
+        </Grid>
       ))}
-    </Row>
+    </Grid>
   );
 };
 

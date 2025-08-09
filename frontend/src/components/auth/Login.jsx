@@ -31,13 +31,8 @@ const Login = () => {
         ? JSON.parse(localStorage.getItem("user")).role.toLowerCase()
         : "learner";
 
-      navigate(
-        role === "admin"
-          ? "/admin"
-          : role === "contributor"
-          ? "/contributor"
-          : "/learner"
-      );
+      navigate("/");
+
     } catch (err) {
       setError(err.response?.data?.message || "Login failed.");
     }
@@ -92,9 +87,6 @@ const Login = () => {
 
           <div className="text-center mt-3">
             <Link to="/register">Don't have an account? Register</Link>
-          </div>
-          <div className="text-center mt-2">
-            <Link to="/forgot-password">Forgot Password?</Link>
           </div>
         </Card.Body>
       </Card>

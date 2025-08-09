@@ -1,55 +1,231 @@
 import React, { useEffect, useState } from "react";
-import { Nav } from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
 import {
-  FaHome,
-  FaBook,
-  FaUser,
-  FaUpload,
-  FaCheckCircle,
-  FaDownload,
-  FaChartLine,
-  FaBars,
-  FaTimes,
-} from "react-icons/fa";
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
+  Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  IconButton,
+  CircularProgress,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import {
+  ExpandLess,
+  ExpandMore,
+  Home,
+  Book,
+  Person,
+  CloudUpload,
+  CheckCircle,
+  BarChart,
+  Close as CloseIcon,
+} from "@mui/icons-material";
 import { useContent } from "../../hooks/useContent";
 import { useAuth } from "../../auth/useAuth";
-import "../../styles/main.scss";
+import { useNavigate } from "react-router-dom";
 
-const Sidebar = () => {
+const PendingApprovalsDialog = ({
+  open,
+  onClose,
+  pendingLessons,
+  onApproveClick,
+  loadingApprove,
+}) => {
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>
+        Pending Lesson Approvals
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent dividers>
+        {pendingLessons.length === 0 ? (
+          <Typography>No pending lessons to approve.</Typography>
+        ) : (
+          pendingLessons.map((lesson) => (
+            <ListItem
+              key={lesson.lessonId || lesson.id}
+              secondaryAction={
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() =>
+                    onApproveClick(lesson.lessonId || lesson.id, lesson.title)
+                  }
+                  disabled={loadingApprove}
+                >
+                  {loadingApprove ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    "Approve"
+                  )}
+                </Button>
+              }
+              disableGutters
+              sx={{ mb: 1 }}
+            >
+              <ListItemText
+                primary={
+                  lesson.title || `Lesson ID: ${lesson.lessonId || lesson.id}`
+                }
+                secondary={`Uploaded by: ${
+                  lesson.uploaderName || lesson.uploaderId || "Unknown"
+                }`}
+              />
+            </ListItem>
+          ))
+        )}
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={onClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const ConfirmDialog = ({ open, onClose, onConfirm, message }) => {
+  return (
+    <Dialog open={open} onClose={() => onClose(false)} maxWidth="xs" fullWidth>
+      <DialogTitle>Confirm Approval</DialogTitle>
+      <DialogContent>
+        <Typography>{message}</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => onClose(false)}>Cancel</Button>
+        <Button variant="contained" onClick={() => onConfirm()} color="primary">
+          Yes
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+const Sidebar = ({ open, onClose }) => {
   const [role, setRole] = useState("learner");
   const [expandedSections, setExpandedSections] = useState({ content: true });
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [pendingLessons, setPendingLessons] = useState([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [loadingApprove, setLoadingApprove] = useState(false);
+  const [loadingPending, setLoadingPending] = useState(false);
+
+  // New state for confirmation dialog
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [lessonToApprove, setLessonToApprove] = useState(null);
+
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+
   const { user } = useAuth();
-  const { fetchPendingLessons } = useContent();
+  const { getPendingLessons, approveLesson } = useContent();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.role) {
-      setRole(user.role.toLowerCase());
-    }
-
     if (user?.role?.toLowerCase() === "admin") {
-      const loadPendingCount = async () => {
-        try {
-          const pendingLessons = await fetchPendingLessons();
-          setPendingApprovalsCount(pendingLessons.length);
-        } catch (err) {
-          console.error("Failed to fetch pending lessons:", err);
-        }
-      };
-      loadPendingCount();
+      setRole("admin");
+      fetchPendingLessonsCount();
+    } else if (user?.role?.toLowerCase() === "contributor") {
+      setRole("contributor");
+    } else {
+      setRole("learner");
     }
+  }, [user]);
 
-    const handleResize = () => {
-      setIsSidebarOpen(window.innerWidth > 768); // auto-close on small screens
-    };
+  const fetchPendingLessonsCount = async () => {
+    setLoadingPending(true);
+    try {
+      const pending = await getPendingLessons();
+      setPendingApprovalsCount(Array.isArray(pending) ? pending.length : 0);
+    } catch (err) {
+      setPendingApprovalsCount(0);
+    } finally {
+      setLoadingPending(false);
+    }
+  };
 
-    window.addEventListener("resize", handleResize);
-    handleResize();
+  const fetchPendingLessons = async () => {
+    setLoadingPending(true);
+    try {
+      const lessons = await getPendingLessons();
+      setPendingLessons(Array.isArray(lessons) ? lessons : []);
+      setDialogOpen(true);
+    } catch (err) {
+      setPendingLessons([]);
+      setDialogOpen(true);
+    } finally {
+      setLoadingPending(false);
+    }
+  };
 
-    return () => window.removeEventListener("resize", handleResize);
-  }, [user, fetchPendingLessons]);
+  // When approve button clicked: open confirmation dialog
+  const handleApproveClick = (lessonId, lessonTitle) => {
+    setLessonToApprove({ id: lessonId, title: lessonTitle });
+    setConfirmDialogOpen(true);
+  };
+
+  // On confirm approval dialog Yes clicked
+  const handleConfirmApprove = async () => {
+    if (!lessonToApprove) return;
+    setLoadingApprove(true);
+    setConfirmDialogOpen(false);
+    try {
+      await approveLesson(lessonToApprove.id);
+      setPendingLessons((prev) =>
+        prev.filter(
+          (lesson) => (lesson.lessonId || lesson.id) !== lessonToApprove.id
+        )
+      );
+      setPendingApprovalsCount((count) => Math.max(count - 1, 0));
+      setSnackbar({
+        open: true,
+        message: "Lesson approved successfully!",
+        severity: "success",
+      });
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: "Failed to approve lesson.",
+        severity: "error",
+      });
+    } finally {
+      setLoadingApprove(false);
+      setLessonToApprove(null);
+    }
+  };
+
+  // On cancel approval dialog Cancel clicked
+  const handleConfirmClose = (confirmed) => {
+    setConfirmDialogOpen(false);
+    if (!confirmed) {
+      setSnackbar({
+        open: true,
+        message: "Approval cancelled.",
+        severity: "info",
+      });
+    }
+    setLessonToApprove(null);
+  };
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -58,56 +234,47 @@ const Sidebar = () => {
     }));
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
+  const handleNavigate = (path) => {
+    navigate(path);
+    onClose();
   };
 
-  // Common links for all roles
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const commonLinks = [
-    { path: "/profile", icon: <FaUser />, text: "My Profile" },
-    { path: "/lessons", icon: <FaBook />, text: "Browse Lessons" },
+    { path: "/profile", icon: <Person />, text: "My Profile" },
+    { path: "/lessons", icon: <Book />, text: "Browse Lessons" },
   ];
 
   const learnerLinks = [
-    { path: "/", icon: <FaHome />, text: "Dashboard" },
-    {
-      path: "/downloads",
-      icon: <FaDownload />,
-      text: "My Downloads",
-    },
+    { path: "/learner", icon: <Home />, text: "Dashboard" },
   ];
 
   const contributorLinks = [
-    { path: "/contributor", icon: <FaHome />, text: "Dashboard" },
     {
       path: "/contributor/new",
-      icon: <FaUpload />,
+      icon: <CloudUpload />,
       text: "Start Uploading",
     },
+    { path: "/contributor/my-uploads", icon: <Book />, text: "My Uploads" },
     {
-      path: "/contributor/my-uploads",
-      icon: <FaBook />,
-      text: "My Uploads",
+      path: "/contributor/stats",
+      icon: <BarChart />,
+      text: "Upload Statistics",
     },
   ];
 
   const adminContentLinks = [
     {
-      path: "/admin/approvals",
-      icon: <FaCheckCircle />,
+      icon: <CheckCircle />,
       text: "Pending Approvals",
-      badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : null,
+      badge: pendingApprovalsCount,
+      onClick: fetchPendingLessons,
     },
-    {
-      path: "/admin/lessons",
-      icon: <FaBook />,
-      text: "All Lessons",
-    },
-    {
-      path: "/admin/analytics",
-      icon: <FaChartLine />,
-      text: "Content Analytics",
-    },
+    { path: "/admin/lessons", icon: <Book />, text: "All Lessons" },
+    { path: "/admin/analytics", icon: <BarChart />, text: "Content Analytics" },
   ];
 
   let links = [...learnerLinks, ...commonLinks];
@@ -115,10 +282,10 @@ const Sidebar = () => {
     links = [...contributorLinks, ...commonLinks];
   } else if (role === "admin") {
     links = [
-      { path: "/admin", icon: <FaHome />, text: "Dashboard", isHeader: true },
+      { path: "/admin", icon: <Home />, text: "Dashboard" },
       {
         text: "Content Management",
-        icon: <FaBook />,
+        icon: <Book />,
         isSection: true,
         sectionKey: "content",
         children: adminContentLinks,
@@ -129,77 +296,105 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Hamburger button */}
-      <div className="hamburger-btn" onClick={toggleSidebar}>
-        {isSidebarOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
-      </div>
-
-      {/* Sidebar */}
-      <div className={`sidebar-container ${isSidebarOpen ? "open" : "closed"}`}>
-        <Nav className="flex-column sidebar p-3">
-          {links.map((link, index) => {
-            if (link.isSection) {
-              return (
-                <div key={index} className="mb-2">
-                  <Nav.Link
-                    className="sidebar-section-header"
-                    onClick={() => toggleSection(link.sectionKey)}
-                  >
-                    <span className="me-3">{link.icon}</span>
-                    <span className="flex-grow-1">{link.text}</span>
-                    <span>{expandedSections[link.sectionKey] ? "▼" : "▶"}</span>
-                  </Nav.Link>
-
-                  {expandedSections[link.sectionKey] && (
-                    <div className="ms-4">
-                      {link.children.map((child, childIndex) => (
-                        <LinkContainer to={child.path} key={childIndex}>
-                          <Nav.Link className="sidebar-link">
-                            <span className="me-3">{child.icon}</span>
-                            {child.text}
-                            {child.badge && (
-                              <span className="ms-auto badge bg-danger rounded-pill">
-                                {child.badge}
-                              </span>
-                            )}
-                          </Nav.Link>
-                        </LinkContainer>
-                      ))}
-                    </div>
+      <Drawer anchor="left" open={open} onClose={onClose}>
+        <List sx={{ width: 250 }}>
+          {links.map((link, index) =>
+            link.isSection ? (
+              <React.Fragment key={index}>
+                <ListItemButton onClick={() => toggleSection(link.sectionKey)}>
+                  <ListItemIcon>{link.icon}</ListItemIcon>
+                  <ListItemText primary={link.text} />
+                  {expandedSections[link.sectionKey] ? (
+                    <ExpandLess />
+                  ) : (
+                    <ExpandMore />
                   )}
-                </div>
-              );
-            }
+                </ListItemButton>
+                <Collapse
+                  in={expandedSections[link.sectionKey]}
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  <List component="div" disablePadding>
+                    {link.children.map((child, idx) => (
+                      <ListItemButton
+                        sx={{ pl: 4 }}
+                        key={idx}
+                        onClick={
+                          child.onClick
+                            ? child.onClick
+                            : () => handleNavigate(child.path)
+                        }
+                      >
+                        <ListItemIcon>{child.icon}</ListItemIcon>
+                        <ListItemText primary={child.text} />
+                        {child.badge ? (
+                          <Badge
+                            badgeContent={child.badge}
+                            color="error"
+                            sx={{ ml: "auto" }}
+                          />
+                        ) : null}
+                      </ListItemButton>
+                    ))}
+                  </List>
+                </Collapse>
+              </React.Fragment>
+            ) : (
+              <ListItem disablePadding key={index}>
+                <ListItemButton onClick={() => handleNavigate(link.path)}>
+                  <ListItemIcon>{link.icon}</ListItemIcon>
+                  <ListItemText primary={link.text} />
+                  {link.badge ? (
+                    <Badge
+                      badgeContent={link.badge}
+                      color="error"
+                      sx={{ ml: "auto" }}
+                    />
+                  ) : null}
+                </ListItemButton>
+              </ListItem>
+            )
+          )}
+        </List>
+      </Drawer>
 
-            if (link.isHeader) {
-              return (
-                <div key={index} className="sidebar-header">
-                  <LinkContainer to={link.path}>
-                    <Nav.Link className="fw-bold sidebar-link">
-                      <span className="me-3">{link.icon}</span>
-                      {link.text}
-                    </Nav.Link>
-                  </LinkContainer>
-                </div>
-              );
-            }
+      {/* Pending Approvals Dialog */}
+      <PendingApprovalsDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        pendingLessons={pendingLessons}
+        onApproveClick={handleApproveClick}
+        loadingApprove={loadingApprove}
+      />
 
-            return (
-              <LinkContainer to={link.path} key={index}>
-                <Nav.Link className="sidebar-link">
-                  <span className="me-3">{link.icon}</span>
-                  {link.text}
-                  {link.badge && (
-                    <span className="ms-auto badge bg-danger rounded-pill">
-                      {link.badge}
-                    </span>
-                  )}
-                </Nav.Link>
-              </LinkContainer>
-            );
-          })}
-        </Nav>
-      </div>
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        open={confirmDialogOpen}
+        onClose={handleConfirmClose}
+        onConfirm={handleConfirmApprove}
+        message={
+          lessonToApprove
+            ? `Are you sure you want to approve "${lessonToApprove.title}"?`
+            : ""
+        }
+      />
+
+      {/* Snackbar for success/error/info */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

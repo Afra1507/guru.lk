@@ -1,5 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Button, Card } from "react-bootstrap";
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Snackbar,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { API } from "../../api/axiosInstances";
 
 const roles = ["LEARNER", "CONTRIBUTOR", "ADMIN"];
@@ -16,6 +35,13 @@ const UserManagement = () => {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [userToUpdate, setUserToUpdate] = useState(null);
   const [newRole, setNewRole] = useState("");
+
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -43,7 +69,11 @@ const UserManagement = () => {
 
   const handleDeleteClick = (user) => {
     if (user.username === currentUsername) {
-      alert("You cannot delete your own account.");
+      setSnackbar({
+        open: true,
+        message: "You cannot delete your own account.",
+        severity: "warning",
+      });
       return;
     }
     setUserToDelete(user);
@@ -56,14 +86,27 @@ const UserManagement = () => {
       setUsers(users.filter((u) => u.userId !== userToDelete.userId));
       setShowDeleteModal(false);
       setUserToDelete(null);
+      setSnackbar({
+        open: true,
+        message: "User deleted successfully.",
+        severity: "success",
+      });
     } catch (err) {
-      alert("Failed to delete user. Please try again.");
+      setSnackbar({
+        open: true,
+        message: "Failed to delete user. Please try again.",
+        severity: "error",
+      });
     }
   };
 
   const handleRoleChangeClick = (user) => {
     if (user.username === currentUsername) {
-      alert("You cannot modify your own role.");
+      setSnackbar({
+        open: true,
+        message: "You cannot modify your own role.",
+        severity: "warning",
+      });
       return;
     }
     setUserToUpdate(user);
@@ -83,9 +126,39 @@ const UserManagement = () => {
       );
       setShowRoleModal(false);
       setUserToUpdate(null);
+      setSnackbar({
+        open: true,
+        message: "User role updated successfully.",
+        severity: "success",
+      });
     } catch (err) {
-      alert("Failed to update user role. Please try again.");
+      setSnackbar({
+        open: true,
+        message: "Failed to update user role. Please try again.",
+        severity: "error",
+      });
     }
+  };
+
+  // New: handlers to close dialogs and show cancellation snackbar
+  const handleDeleteDialogClose = () => {
+    setShowDeleteModal(false);
+    setUserToDelete(null);
+    setSnackbar({
+      open: true,
+      message: "Delete action cancelled.",
+      severity: "info",
+    });
+  };
+
+  const handleRoleDialogClose = () => {
+    setShowRoleModal(false);
+    setUserToUpdate(null);
+    setSnackbar({
+      open: true,
+      message: "Role update cancelled.",
+      severity: "info",
+    });
   };
 
   const formatRole = (role) => {
@@ -93,116 +166,165 @@ const UserManagement = () => {
     return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
   };
 
-  if (loading)
-    return (
-      <div className="d-flex justify-content-center p-5">
-        <div className="spinner-border text-primary" role="status" />
-      </div>
-    );
-
-  if (error) return <div className="alert alert-danger">{error}</div>;
-
   return (
-    <>
-      <h3>User Management</h3>
-      <div className="d-flex flex-wrap gap-3">
-        {users.map((user) => (
-          <Card key={user.userId} style={{ minWidth: "18rem" }}>
-            <Card.Body>
-              <Card.Title>{user.username}</Card.Title>
-              <Card.Subtitle className="mb-2 text-muted">
-                {user.email}
-              </Card.Subtitle>
-              <Card.Text>
-                <strong>Role:</strong> {formatRole(user.role)}
-                <br />
-                <strong>Language:</strong> {user.preferredLanguage || "N/A"}
-                <br />
-                <strong>Region:</strong> {user.region || "N/A"}
-                <br />
-                <strong>Low Income:</strong> {user.isLowIncome ? "Yes" : "No"}
-                <br />
-                <strong>Joined:</strong>{" "}
-                {new Date(user.createdAt).toLocaleDateString()}
-              </Card.Text>
-
-              <Button
-                variant="outline-danger"
-                size="sm"
-                className="me-2"
-                onClick={() => handleDeleteClick(user)}
-                disabled={user.username === currentUsername}
-              >
-                Delete
-              </Button>
-              <Button
-                variant="outline-secondary"
-                size="sm"
-                onClick={() => handleRoleChangeClick(user)}
-                disabled={user.username === currentUsername}
-              >
-                Change Role
-              </Button>
-            </Card.Body>
-          </Card>
-        ))}
-      </div>
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        show={showDeleteModal}
-        onHide={() => setShowDeleteModal(false)}
-        centered
+    <Box p={3}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          fontWeight: 700,
+          fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+          letterSpacing: "0.05em",
+          color: "#001f54", // navy blue
+        }}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete User</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to delete user{" "}
-          <strong>{userToDelete?.username}</strong>?
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={confirmDelete}>
+        User Management
+      </Typography>
+
+      {loading ? (
+        <Box display="flex" justifyContent="center" p={5}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error">{error}</Alert>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 3, // theme spacing(3) = 24px
+          }}
+        >
+          {users.map((user) => (
+            <Box
+              key={user.userId}
+              sx={{
+                flex: "0 1 calc(33.33% - 16px)", // 3 cards per row approx minus gap
+                maxWidth: "350px",
+                minWidth: "280px",
+                marginBottom: 3,
+              }}
+            >
+              <Paper elevation={3} sx={{ p: 2 }}>
+                <Typography variant="h6">{user.username}</Typography>
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  gutterBottom
+                >
+                  {user.email}
+                </Typography>
+
+                <Typography variant="body2" gutterBottom>
+                  <strong>Role:</strong> {formatRole(user.role)} <br />
+                  <strong>Language:</strong> {user.preferredLanguage || "N/A"}{" "}
+                  <br />
+                  <strong>Region:</strong> {user.region || "N/A"} <br />
+                  <strong>Low Income:</strong> {user.isLowIncome ? "Yes" : "No"}{" "}
+                  <br />
+                  <strong>Joined:</strong>{" "}
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </Typography>
+
+                <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => handleDeleteClick(user)}
+                    disabled={user.username === currentUsername}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<EditIcon />}
+                    onClick={() => handleRoleChangeClick(user)}
+                    disabled={user.username === currentUsername}
+                  >
+                    Change Role
+                  </Button>
+                </Box>
+              </Paper>
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={showDeleteModal}
+        onClose={handleDeleteDialogClose}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Confirm Delete User</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete user{" "}
+            <strong>{userToDelete?.username}</strong>?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteDialogClose}>Cancel</Button>
+          <Button color="error" onClick={confirmDelete}>
             Delete
           </Button>
-        </Modal.Footer>
-      </Modal>
+        </DialogActions>
+      </Dialog>
 
-      {/* Change Role Modal */}
-      <Modal
-        show={showRoleModal}
-        onHide={() => setShowRoleModal(false)}
-        centered
+      {/* Change Role Dialog */}
+      <Dialog
+        open={showRoleModal}
+        onClose={handleRoleDialogClose}
+        maxWidth="xs"
+        fullWidth
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Change Role for {userToUpdate?.username}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <select
-            className="form-select"
-            value={newRole}
-            onChange={(e) => setNewRole(e.target.value)}
-          >
-            {roles.map((r) => (
-              <option key={r} value={r}>
-                {r.charAt(0) + r.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </select>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowRoleModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={confirmRoleUpdate}>
+        <DialogTitle>Change Role for {userToUpdate?.username}</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="role-select-label">Role</InputLabel>
+            <Select
+              labelId="role-select-label"
+              value={newRole}
+              label="Role"
+              onChange={(e) => setNewRole(e.target.value)}
+            >
+              {roles.map((r) => (
+                <MenuItem key={r} value={r}>
+                  {r.charAt(0) + r.slice(1).toLowerCase()}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleRoleDialogClose}>Cancel</Button>
+          <Button variant="contained" onClick={confirmRoleUpdate}>
             Save
           </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 
