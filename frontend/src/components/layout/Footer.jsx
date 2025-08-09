@@ -34,7 +34,6 @@ const Footer = () => {
     { icon: FaGithub, label: "Github", href: "#" },
   ];
 
-  // Quick Links with icons for all
   const quickLinks = [
     {
       label: "Home",
@@ -79,7 +78,7 @@ const Footer = () => {
       <Container maxWidth="lg">
         <Grid container spacing={6}>
           {/* About */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={5}>
             <Typography
               variant="h6"
               gutterBottom
@@ -121,7 +120,7 @@ const Footer = () => {
           </Grid>
 
           {/* Quick Links */}
-          <Grid item xs={6} md={2}>
+          <Grid item xs={6} md={4}>
             <Typography
               variant="h6"
               gutterBottom
@@ -152,47 +151,6 @@ const Footer = () => {
                   >
                     {icon}
                     {label}
-                  </Link>
-                </li>
-              ))}
-            </Stack>
-          </Grid>
-
-          {/* Content Categories */}
-          <Grid item xs={6} md={3}>
-            <Typography
-              variant="h6"
-              gutterBottom
-              fontWeight="700"
-              sx={{ letterSpacing: 1, color: "#fff" }}
-            >
-              Content Categories
-            </Typography>
-            <Stack
-              component="ul"
-              spacing={1}
-              sx={{ listStyle: "none", p: 0, m: 0 }}
-            >
-              {[
-                "Mathematics",
-                "Science",
-                "Languages",
-                "History",
-                "Technology",
-              ].map((category) => (
-                <li key={category}>
-                  <Link
-                    href="#"
-                    underline="hover"
-                    sx={{
-                      color: "#9bb0f7",
-                      fontWeight: 500,
-                      transition: "color 0.25s ease",
-                      "&:hover": { color: "#fff" },
-                      cursor: "pointer",
-                    }}
-                  >
-                    {category}
                   </Link>
                 </li>
               ))}

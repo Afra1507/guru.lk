@@ -14,7 +14,7 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import contentService from "../../services/contentService";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode"; // fixed import, jwtDecode is default export
 
 const UploadStats = () => {
   const [stats, setStats] = useState(null);
@@ -80,7 +80,7 @@ const UploadStats = () => {
     {
       label: "Total Uploads",
       value: stats.totalUploads,
-      color: "grey.200",
+      color: "grey.100",
       icon: <CloudUploadIcon sx={{ fontSize: 30, color: "text.secondary" }} />,
     },
     {
@@ -111,7 +111,7 @@ const UploadStats = () => {
 
   return (
     <Box sx={{ flexGrow: 1, p: 2 }}>
-      <Grid container spacing={3} justifyContent="space-evenly" flexWrap="wrap">
+      <Grid container spacing={3} justifyContent="center" flexWrap="wrap">
         {statItems.map(({ label, value, color, icon }, idx) => (
           <Grid
             key={idx}
@@ -123,17 +123,27 @@ const UploadStats = () => {
             sx={{ display: "flex" }}
           >
             <Paper
-              elevation={3}
+              elevation={6}
               sx={{
                 p: 3,
                 bgcolor: color,
-                borderRadius: 2,
+                borderRadius: 3,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 textAlign: "center",
                 width: "100%",
+                boxShadow:
+                  "rgba(0, 0, 0, 0.1) 0px 4px 12px",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
+                cursor: "default",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                  boxShadow:
+                    "rgba(0, 0, 0, 0.25) 0px 8px 20px",
+                  bgcolor: (theme) => theme.palette.grey[200],
+                },
               }}
             >
               <Stack

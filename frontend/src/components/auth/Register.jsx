@@ -1,9 +1,30 @@
 // auth/Register.jsx
-import React, { useState } from "react";
-import { Form, Button, Card, Alert, Col, Row } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  TextField,
+  Typography,
+  Alert,
+  CircularProgress,
+  InputAdornment,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  Snackbar,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUserPlus } from "react-icons/fa";
 import { registerUser } from "../../services/authService";
+import { FaUserPlus } from "react-icons/fa";
+import PersonIcon from "@mui/icons-material/Person";
+import EmailIcon from "@mui/icons-material/Email";
+import LockIcon from "@mui/icons-material/Lock";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import PublicIcon from "@mui/icons-material/Public";
+import Confetti from "react-confetti";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +39,11 @@ const Register = () => {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -32,7 +58,9 @@ const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      return setError("Passwords do not match");
+      setError("Passwords do not match");
+      setSnackbarOpen(true);
+      return;
     }
 
     setError("");
@@ -40,139 +68,251 @@ const Register = () => {
 
     try {
       await registerUser(formData);
-      navigate("/login");
+      setSuccess(true); // Show confetti
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed.");
+      setSnackbarOpen(true);
     }
 
     setLoading(false);
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{ minHeight: "80vh" }}
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="90vh"
+      sx={{
+        fontFamily: "Roboto, sans-serif",
+        background: "linear-gradient(to right, #ece9e6, #ffffff)",
+        p: 2,
+        position: "relative",
+      }}
     >
-      <Card style={{ width: "500px" }} className="shadow">
-        <Card.Body>
-          <h2 className="text-center mb-4">
-            <FaUserPlus className="me-2" />
-            Register
-          </h2>
-          {error && <Alert variant="danger">{error}</Alert>}
-          <Form onSubmit={handleSubmit}>
-            <Row className="mb-3">
-              <Form.Group as={Col} controlId="formUsername">
-                <Form.Label>Username</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="username"
-                  value={formData.username}
+      {/* Fireworks / Confetti */}
+      {success && <Confetti width={window.innerWidth} height={window.innerHeight} />}
+
+      <Card sx={{ width: 500, boxShadow: 5, borderRadius: 3 }}>
+        <CardContent>
+          {/* Logo and title */}
+          <Box textAlign="center" mb={3}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                mx: "auto",
+                borderRadius: "50%",
+                backgroundColor: "#1976d2",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mb: 1,
+              }}
+            >
+              <FaUserPlus size={32} color="white" />
+            </Box>
+            <Typography variant="h5" fontWeight="bold">
+              Create an Account
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Fill in your details to register
+            </Typography>
+          </Box>
+
+          {/* Registration form */}
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              label="Username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              fullWidth
+              required
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              fullWidth
+              required
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              label="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              fullWidth
+              required
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment
+                    position="end"
+                    onClick={() => setShowPassword(!showPassword)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              label="Confirm Password"
+              name="confirmPassword"
+              type={showConfirm ? "text" : "password"}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              fullWidth
+              required
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment
+                    position="end"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    {showConfirm ? <Visibility /> : <VisibilityOff />}
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <TextField
+              select
+              label="Account Type"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            >
+              <MenuItem value="learner">Learner</MenuItem>
+              <MenuItem value="contributor">Contributor</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </TextField>
+
+            <TextField
+              select
+              label="Preferred Language"
+              name="preferredLanguage"
+              value={formData.preferredLanguage}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            >
+              <MenuItem value="sinhala">Sinhala</MenuItem>
+              <MenuItem value="tamil">Tamil</MenuItem>
+              <MenuItem value="english">English</MenuItem>
+            </TextField>
+
+            <TextField
+              label="Region"
+              name="region"
+              value={formData.region}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PublicIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.isLowIncome}
                   onChange={handleChange}
-                  required
+                  name="isLowIncome"
+                  color="primary"
                 />
-              </Form.Group>
-
-              <Form.Group as={Col} controlId="formEmail">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-            </Row>
-
-            <Row className="mb-3">
-              <Form.Group as={Col} controlId="formPassword">
-                <Form.Label>Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group as={Col} controlId="formConfirmPassword">
-                <Form.Label>Confirm Password</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-            </Row>
-
-            <Row className="mb-3">
-              <Form.Group as={Col} md={6} controlId="formRole">
-                <Form.Label>Account Type</Form.Label>
-                <Form.Select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                >
-                  <option value="learner">Learner</option>
-                  <option value="contributor">Contributor</option>
-                  <option value="admin">Admin</option>
-                </Form.Select>
-              </Form.Group>
-
-              <Form.Group as={Col} md={6} controlId="formLanguage">
-                <Form.Label>Preferred Language</Form.Label>
-                <Form.Select
-                  name="preferredLanguage"
-                  value={formData.preferredLanguage}
-                  onChange={handleChange}
-                >
-                  <option value="sinhala">Sinhala</option>
-                  <option value="tamil">Tamil</option>
-                  <option value="english">English</option>
-                </Form.Select>
-              </Form.Group>
-            </Row>
-
-            <Form.Group className="mb-3" controlId="formRegion">
-              <Form.Label>Region</Form.Label>
-              <Form.Control
-                type="text"
-                name="region"
-                value={formData.region}
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="formLowIncome">
-              <Form.Check
-                type="checkbox"
-                label="Limited internet connectivity"
-                name="isLowIncome"
-                checked={formData.isLowIncome}
-                onChange={handleChange}
-              />
-            </Form.Group>
+              }
+              label="Limited internet connectivity"
+              sx={{ mt: 1 }}
+            />
 
             <Button
-              variant="primary"
+              variant="contained"
+              color="primary"
               type="submit"
-              className="w-100 mt-3"
+              fullWidth
+              sx={{ mt: 3, py: 1.3, borderRadius: 2 }}
               disabled={loading}
+              startIcon={!loading && <FaUserPlus />}
             >
-              {loading ? "Registering..." : "Register"}
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Register"
+              )}
             </Button>
-          </Form>
+          </Box>
 
-          <div className="text-center mt-3">
-            Already have an account? <Link to="/login">Login</Link>
-          </div>
-        </Card.Body>
+          {/* Login link */}
+          <Typography variant="body2" textAlign="center" sx={{ mt: 3 }}>
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              style={{ color: "#1976d2", textDecoration: "none" }}
+            >
+              Login
+            </Link>
+          </Typography>
+        </CardContent>
       </Card>
-    </div>
+
+      {/* Snackbar Alert */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setSnackbarOpen(false)}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 

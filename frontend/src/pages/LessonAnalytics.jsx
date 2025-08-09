@@ -9,18 +9,17 @@ import {
   CircularProgress,
   useTheme,
 } from "@mui/material";
-import {
-  BarChart as BarChartIcon,
-  Visibility as VisibilityIcon,
-  Book as BookIcon,
-  Subject as SubjectIcon,
-  Language as LanguageIcon,
-  Category as CategoryIcon,
-  People as PeopleIcon,
-  ThumbUp as ThumbUpIcon,
-  CheckCircle as CheckCircleIcon,
-  HourglassEmpty as HourglassEmptyIcon,
-} from "@mui/icons-material";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import BookIcon from "@mui/icons-material/Book";
+import SubjectIcon from "@mui/icons-material/Subject";
+import LanguageIcon from "@mui/icons-material/Language";
+import CategoryIcon from "@mui/icons-material/Category";
+import PeopleIcon from "@mui/icons-material/People";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import BarChartIcon from "@mui/icons-material/BarChart";
 import { useContent } from "../hooks/useContent";
 
 // Loading spinner component
@@ -37,21 +36,20 @@ const LoadingSpinner = () => (
   </Box>
 );
 
-// Map keys to icons and colors for summary cards
+// Updated icon map with colored icons for summary cards
 const iconMap = {
-  totalViews: <VisibilityIcon fontSize="large" sx={{ color: "#4caf50" }} />,
+  totalViews: (
+    <VisibilityIcon fontSize="large" sx={{ color: "#4caf50" }} />
+  ),
   totalLessons: <BookIcon fontSize="large" sx={{ color: "#2196f3" }} />,
   totalSubjects: <SubjectIcon fontSize="large" sx={{ color: "#ff9800" }} />,
   totalLanguages: <LanguageIcon fontSize="large" sx={{ color: "#9c27b0" }} />,
   totalContentTypes: <CategoryIcon fontSize="large" sx={{ color: "#f44336" }} />,
   totalUsers: <PeopleIcon fontSize="large" sx={{ color: "#00bcd4" }} />,
   totalLikes: <ThumbUpIcon fontSize="large" sx={{ color: "#e91e63" }} />,
-  totalApproved: (
-    <CheckCircleIcon fontSize="large" sx={{ color: "#4caf50" }} />
-  ),
-  totalPending: (
-    <HourglassEmptyIcon fontSize="large" sx={{ color: "#ffb300" }} />
-  ),
+  totalApproved: <CheckCircleIcon fontSize="large" sx={{ color: "#4caf50" }} />,
+  totalPending: <HourglassEmptyIcon fontSize="large" sx={{ color: "#ffb300" }} />,
+  totalUploads: <CloudUploadIcon fontSize="large" sx={{ color: "#607d8b" }} />,
 };
 
 const LessonAnalytics = () => {
@@ -210,7 +208,7 @@ const LessonAnalytics = () => {
         </Typography>
       </Box>
 
-      {/* Summary Analytics Cards - equal square size, color-coded, icons */}
+      {/* Summary Analytics Cards - color-coded with nice icons */}
       <Grid container spacing={4} justifyContent="center" sx={{ mb: 6 }}>
         {analyticsSummary.map(([key, value]) => {
           // Normalize key to camelCase style for icon mapping
@@ -226,15 +224,31 @@ const LessonAnalytics = () => {
             />
           );
 
+          // Assign card bg color on key or fallback
+          const bgColorMap = {
+            totalViews: "success.light",
+            totalLessons: "info.light",
+            totalSubjects: "warning.light",
+            totalLanguages: "purple.light",
+            totalContentTypes: "error.light",
+            totalUsers: "cyan.light",
+            totalLikes: "pink.light",
+            totalApproved: "success.light",
+            totalPending: "warning.light",
+            totalUploads: "grey.200",
+          };
+
+          // Use MUI theme colors or fallback
+          const bgColor = theme.palette[bgColorMap[normalizedKey]?.split(".")[0]]?.[bgColorMap[normalizedKey]?.split(".")[1]] || theme.palette.grey[100];
+
           return (
             <Grid item xs={6} sm={4} md={3} lg={2.4} key={key}>
               <Card
-                elevation={0}
+                elevation={6}
                 sx={{
                   height: 140,
                   borderRadius: 3,
-                  backgroundColor:
-                    theme.palette.mode === "light" ? "#f5f7fa" : "#2c2f36",
+                  backgroundColor: bgColor,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -243,9 +257,15 @@ const LessonAnalytics = () => {
                   color: theme.palette.text.primary,
                   textTransform: "capitalize",
                   cursor: "default",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
                   "&:hover": {
                     backgroundColor:
-                      theme.palette.mode === "light" ? "#e0e5ec" : "#3a3f4b",
+                      theme.palette.mode === "light"
+                        ? theme.palette.grey[300]
+                        : theme.palette.grey[700],
+                    transform: "scale(1.05)",
+                    boxShadow:
+                      "rgba(0, 0, 0, 0.25) 0px 8px 20px",
                   },
                 }}
               >

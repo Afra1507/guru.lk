@@ -43,7 +43,7 @@ const PendingApprovalsDialog = ({
 }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>
+      <DialogTitle sx={{ position: "relative" }}>
         Pending Lesson Approvals
         <IconButton
           aria-label="close"
@@ -69,6 +69,12 @@ const PendingApprovalsDialog = ({
                     onApproveClick(lesson.lessonId || lesson.id, lesson.title)
                   }
                   disabled={loadingApprove}
+                  sx={{
+                    transition: "transform 0.3s ease",
+                    "&:hover": {
+                      transform: loadingApprove ? "none" : "scale(1.05)",
+                    },
+                  }}
                 >
                   {loadingApprove ? (
                     <CircularProgress size={20} color="inherit" />
@@ -78,7 +84,17 @@ const PendingApprovalsDialog = ({
                 </Button>
               }
               disableGutters
-              sx={{ mb: 1 }}
+              sx={{
+                mb: 1,
+                px: 2,
+                borderRadius: 1,
+                bgcolor: "background.paper",
+                boxShadow: 1,
+                transition: "background-color 0.3s ease",
+                "&:hover": {
+                  bgcolor: "primary.light",
+                },
+              }}
             >
               <ListItemText
                 primary={
@@ -248,9 +264,7 @@ const Sidebar = ({ open, onClose }) => {
     { path: "/lessons", icon: <Book />, text: "Browse Lessons" },
   ];
 
-  const learnerLinks = [
-    { path: "/learner", icon: <Home />, text: "Dashboard" },
-  ];
+  const learnerLinks = [{ path: "/learner", icon: <Home />, text: "Dashboard" }];
 
   const contributorLinks = [
     {
@@ -296,19 +310,36 @@ const Sidebar = ({ open, onClose }) => {
 
   return (
     <>
-      <Drawer anchor="left" open={open} onClose={onClose}>
+      <Drawer
+        anchor="left"
+        open={open}
+        onClose={onClose}
+        PaperProps={{
+          sx: {
+            bgcolor: "#031227",
+            color: "#e0e6f2",
+          },
+        }}
+      >
         <List sx={{ width: 250 }}>
           {links.map((link, index) =>
             link.isSection ? (
               <React.Fragment key={index}>
-                <ListItemButton onClick={() => toggleSection(link.sectionKey)}>
-                  <ListItemIcon>{link.icon}</ListItemIcon>
+                <ListItemButton
+                  onClick={() => toggleSection(link.sectionKey)}
+                  sx={{
+                    color: "#e0e6f2",
+                    "&:hover": {
+                      bgcolor: "#1a3a70",
+                      transform: "scale(1.05)",
+                      transition: "all 0.3s ease",
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <ListItemIcon sx={{ color: "#a3bffa" }}>{link.icon}</ListItemIcon>
                   <ListItemText primary={link.text} />
-                  {expandedSections[link.sectionKey] ? (
-                    <ExpandLess />
-                  ) : (
-                    <ExpandMore />
-                  )}
+                  {expandedSections[link.sectionKey] ? <ExpandLess /> : <ExpandMore />}
                 </ListItemButton>
                 <Collapse
                   in={expandedSections[link.sectionKey]}
@@ -318,7 +349,18 @@ const Sidebar = ({ open, onClose }) => {
                   <List component="div" disablePadding>
                     {link.children.map((child, idx) => (
                       <ListItemButton
-                        sx={{ pl: 4 }}
+                        sx={{
+                          pl: 4,
+                          color: "#e0e6f2",
+                          "&:hover": {
+                            bgcolor: "#274472",
+                            transform: "scale(1.05)",
+                            transition: "all 0.3s ease",
+                          },
+                          transition: "all 0.3s ease",
+                          borderRadius: 1,
+                          mb: 0.5,
+                        }}
                         key={idx}
                         onClick={
                           child.onClick
@@ -326,7 +368,9 @@ const Sidebar = ({ open, onClose }) => {
                             : () => handleNavigate(child.path)
                         }
                       >
-                        <ListItemIcon>{child.icon}</ListItemIcon>
+                        <ListItemIcon sx={{ color: "#a3bffa" }}>
+                          {child.icon}
+                        </ListItemIcon>
                         <ListItemText primary={child.text} />
                         {child.badge ? (
                           <Badge
@@ -342,8 +386,20 @@ const Sidebar = ({ open, onClose }) => {
               </React.Fragment>
             ) : (
               <ListItem disablePadding key={index}>
-                <ListItemButton onClick={() => handleNavigate(link.path)}>
-                  <ListItemIcon>{link.icon}</ListItemIcon>
+                <ListItemButton
+                  onClick={() => handleNavigate(link.path)}
+                  sx={{
+                    color: "#e0e6f2",
+                    "&:hover": {
+                      bgcolor: "#1a3a70",
+                      transform: "scale(1.05)",
+                      transition: "all 0.3s ease",
+                      borderRadius: 1,
+                    },
+                    transition: "all 0.3s ease",
+                  }}
+                >
+                  <ListItemIcon sx={{ color: "#a3bffa" }}>{link.icon}</ListItemIcon>
                   <ListItemText primary={link.text} />
                   {link.badge ? (
                     <Badge
@@ -359,7 +415,6 @@ const Sidebar = ({ open, onClose }) => {
         </List>
       </Drawer>
 
-      {/* Pending Approvals Dialog */}
       <PendingApprovalsDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -368,19 +423,15 @@ const Sidebar = ({ open, onClose }) => {
         loadingApprove={loadingApprove}
       />
 
-      {/* Confirmation Dialog */}
       <ConfirmDialog
         open={confirmDialogOpen}
         onClose={handleConfirmClose}
         onConfirm={handleConfirmApprove}
-        message={
-          lessonToApprove
-            ? `Are you sure you want to approve "${lessonToApprove.title}"?`
-            : ""
-        }
+        message={`Are you sure you want to approve the lesson: "${
+          lessonToApprove?.title || "this lesson"
+        }"?`}
       />
 
-      {/* Snackbar for success/error/info */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -388,8 +439,8 @@ const Sidebar = ({ open, onClose }) => {
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
-          onClose={handleSnackbarClose}
           severity={snackbar.severity}
+          onClose={handleSnackbarClose}
           sx={{ width: "100%" }}
         >
           {snackbar.message}

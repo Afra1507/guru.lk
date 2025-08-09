@@ -55,7 +55,6 @@ const Header = () => {
     navigate("/login");
   };
 
-  // Optional: Close menu when user logs out externally
   useEffect(() => {
     if (!user) {
       setAnchorEl(null);
@@ -68,22 +67,30 @@ const Header = () => {
 
       <AppBar
         position="static"
-        color="primary"
-        sx={{ boxShadow: 3, fontFamily: "'Poppins', sans-serif" }}
+        color="transparent"
+        sx={{
+          bgcolor: "#031227ff",
+          boxShadow: 3,
+          fontFamily: "'Poppins', sans-serif",
+        }}
       >
         <Toolbar>
           {/* Sidebar toggle */}
           <IconButton
             edge="start"
-            color="inherit"
-            sx={{ mr: 2 }}
+            sx={{
+              mr: 2,
+              color: "#e0e6f2",
+              transition: "color 0.3s ease",
+              "&:hover": { color: "#a3bffa", transform: "scale(1.1)" },
+            }}
             onClick={handleSidebarToggle}
             aria-label="open drawer"
           >
             <MenuIcon />
           </IconButton>
 
-          {/* Brand Title with custom font */}
+          {/* Brand Title with hover effect */}
           <Typography
             variant="h5"
             sx={{
@@ -93,8 +100,26 @@ const Header = () => {
               fontFamily: "'Poppins', sans-serif",
               letterSpacing: 2,
               userSelect: "none",
-              color: "white",
-              "&:hover": { color: "secondary.light" },
+              color: "#e0e6f2",
+              position: "relative",
+              overflow: "hidden",
+              transition: "color 0.3s ease",
+              "&:hover": {
+                color: "#a3bffa",
+                "&::after": {
+                  width: "100%",
+                },
+              },
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                height: "3px",
+                width: 0,
+                backgroundColor: "#a3bffa",
+                transition: "width 0.3s ease",
+              },
             }}
             onClick={() => navigate("/")}
             noWrap
@@ -102,32 +127,46 @@ const Header = () => {
             GURU.Ik
           </Typography>
 
-          {/* Navigation Buttons */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1, mr: 2 }}>
-            <Button
-              color="inherit"
-              startIcon={<HomeIcon />}
-              onClick={() => navigate("/")}
-              sx={{ textTransform: "capitalize", fontWeight: "600" }}
-            >
-              Home
-            </Button>
-            <Button
-              color="inherit"
-              startIcon={<SchoolIcon />}
-              onClick={() => navigate("/lessons")}
-              sx={{ textTransform: "capitalize", fontWeight: "600" }}
-            >
-              Lessons
-            </Button>
-            <Button
-              color="inherit"
-              startIcon={<ForumIcon />}
-              onClick={() => navigate("/qna")}
-              sx={{ textTransform: "capitalize", fontWeight: "600" }}
-            >
-              Q&A Forum
-            </Button>
+          {/* Navigation Buttons with underline animation */}
+          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2, mr: 2 }}>
+            {["Home", "Lessons", "Q&A Forum"].map((label, index) => {
+              const icons = [<HomeIcon />, <SchoolIcon />, <ForumIcon />];
+              const paths = ["/", "/lessons", "/qna"];
+              return (
+                <Button
+                  key={label}
+                  color="inherit"
+                  startIcon={icons[index]}
+                  onClick={() => navigate(paths[index])}
+                  sx={{
+                    textTransform: "capitalize",
+                    fontWeight: "600",
+                    color: "#e0e6f2",
+                    position: "relative",
+                    overflow: "hidden",
+                    transition: "color 0.3s ease",
+                    "&:hover": {
+                      color: "#a3bffa",
+                      "&::after": {
+                        width: "100%",
+                      },
+                    },
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      height: "2px",
+                      width: 0,
+                      backgroundColor: "#a3bffa",
+                      transition: "width 0.3s ease",
+                    },
+                  }}
+                >
+                  {label}
+                </Button>
+              );
+            })}
           </Box>
 
           <LanguageSelector />
@@ -141,8 +180,8 @@ const Header = () => {
                 startIcon={
                   <Avatar
                     sx={{
-                      bgcolor: "#fff",
-                      color: "primary.main",
+                      bgcolor: "#e0e6f2",
+                      color: "#031227",
                       fontWeight: "bold",
                       textTransform: "uppercase",
                     }}
@@ -155,6 +194,12 @@ const Header = () => {
                   fontWeight: 600,
                   letterSpacing: 0.5,
                   ml: 2,
+                  color: "#e0e6f2",
+                  transition: "color 0.3s ease, transform 0.3s ease",
+                  "&:hover": {
+                    color: "#a3bffa",
+                    transform: "scale(1.05)",
+                  },
                 }}
                 aria-controls={menuOpen ? "account-menu" : undefined}
                 aria-haspopup="true"
@@ -173,7 +218,13 @@ const Header = () => {
                   sx: {
                     mt: 1,
                     minWidth: 220,
+                    bgcolor: "#031227",
+                    color: "#e0e6f2",
                     "& .MuiMenuItem-root": { fontWeight: 600 },
+                    "& .MuiMenuItem-root:hover": {
+                      bgcolor: "#1a3a70",
+                      color: "#a3bffa",
+                    },
                   },
                 }}
               >
@@ -191,7 +242,7 @@ const Header = () => {
                     sx={{ fontWeight: "bold" }}
                   />
                 </MenuItem>
-                <Divider />
+                <Divider sx={{ bgcolor: "#1a3a70" }} />
                 <MenuItem onClick={handleDashboardRedirect} disableRipple>
                   <DashboardIcon sx={{ mr: 1, color: "primary.main" }} />
                   {user.role === "ADMIN"
@@ -220,7 +271,7 @@ const Header = () => {
                   <NotificationsIcon sx={{ mr: 1, color: "primary.main" }} />
                   Notifications
                 </MenuItem>
-                <Divider />
+                <Divider sx={{ bgcolor: "#1a3a70" }} />
                 <MenuItem
                   onClick={handleLogout}
                   disableRipple
@@ -238,7 +289,17 @@ const Header = () => {
                   color="inherit"
                   startIcon={<LoginIcon />}
                   onClick={() => navigate("/login")}
-                  sx={{ textTransform: "capitalize", fontWeight: "600", ml: 2 }}
+                  sx={{
+                    textTransform: "capitalize",
+                    fontWeight: "600",
+                    ml: 2,
+                    color: "#e0e6f2",
+                    transition: "color 0.3s ease, transform 0.3s ease",
+                    "&:hover": {
+                      color: "#a3bffa",
+                      transform: "scale(1.05)",
+                    },
+                  }}
                 >
                   Login
                 </Button>
@@ -248,7 +309,16 @@ const Header = () => {
                   color="inherit"
                   startIcon={<AppRegistrationIcon />}
                   onClick={() => navigate("/register")}
-                  sx={{ textTransform: "capitalize", fontWeight: "600" }}
+                  sx={{
+                    textTransform: "capitalize",
+                    fontWeight: "600",
+                    color: "#e0e6f2",
+                    transition: "color 0.3s ease, transform 0.3s ease",
+                    "&:hover": {
+                      color: "#a3bffa",
+                      transform: "scale(1.05)",
+                    },
+                  }}
                 >
                   Register
                 </Button>
