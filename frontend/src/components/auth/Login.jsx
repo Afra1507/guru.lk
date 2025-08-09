@@ -21,6 +21,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { translate } from "../../utils/language";
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -29,6 +30,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+
+  // Get current language from localStorage (or change to your context/state)
+  const language = localStorage.getItem("language") || "sinhala";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,13 +48,10 @@ const Login = () => {
       const { token } = await loginUser(formData);
       await login(token);
 
-      const role = localStorage.getItem("user")
-        ? JSON.parse(localStorage.getItem("user")).role.toLowerCase()
-        : "learner";
-
+      // You can handle roles here if needed
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed.");
+      setError(err.response?.data?.message || translate("loginPage.loginFailed", language) || "Login failed.");
     }
 
     setLoading(false);
@@ -92,10 +93,10 @@ const Login = () => {
               <FaSignInAlt size={32} color="white" />
             </Box>
             <Typography variant="h5" fontWeight="bold">
-              Welcome Back
+              {translate("loginPage.welcomeBack", language)}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Please login to continue
+              {translate("loginPage.pleaseLogin", language)}
             </Typography>
           </Box>
 
@@ -109,7 +110,7 @@ const Login = () => {
           {/* Login form */}
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
-              label="Username"
+              label={translate("loginPage.username", language)}
               name="username"
               value={formData.username}
               onChange={handleChange}
@@ -126,7 +127,7 @@ const Login = () => {
             />
 
             <TextField
-              label="Password"
+              label={translate("loginPage.password", language)}
               type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
@@ -145,7 +146,7 @@ const Login = () => {
                     <IconButton
                       onClick={handleClickShowPassword}
                       edge="end"
-                      aria-label="toggle password visibility"
+                      aria-label={translate("loginPage.togglePasswordVisibility", language)}
                     >
                       <Fade in={!showPassword} timeout={200} unmountOnExit>
                         <VisibilityOff color="action" />
@@ -171,19 +172,19 @@ const Login = () => {
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                "Login"
+                translate("loginPage.loginButton", language)
               )}
             </Button>
           </Box>
 
           {/* Register link */}
           <Typography variant="body2" textAlign="center" sx={{ mt: 3 }}>
-            Don&apos;t have an account?{" "}
+            {translate("loginPage.dontHaveAccount", language)}{" "}
             <Link
               to="/register"
               style={{ color: "#1976d2", textDecoration: "none" }}
             >
-              Register
+              {translate("loginPage.registerHere", language)}
             </Link>
           </Typography>
         </CardContent>

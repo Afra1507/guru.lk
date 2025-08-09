@@ -133,4 +133,23 @@ body {
   .main-content {
     margin-left: 0;
   }
+  @media (max-width: 600px) {
+  /* Make header buttons smaller on mobile */
+  .MuiButton-root {
+    font-size: 0.85rem !important;
+    padding: 6px 10px !important;
+  }
+
+  /* Reduce brand title font size */
+  .MuiTypography-h5 {
+    font-size: 1.2rem !important;
+  }
+
+  /* Optional: reduce spacing between header items */
+  .MuiToolbar-root {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
 }

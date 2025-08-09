@@ -1,29 +1,25 @@
+// context/LanguageContext.jsx
 import React, { createContext, useState, useEffect } from "react";
-import {
-  initLanguage,
-  setLanguage as persistLanguage,
-} from "../utils/language";
 
-export const LanguageContext = createContext({
-  language: "sinhala",
-  setLanguage: () => {},
-});
+export const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLang] = useState(initLanguage());
-
-  const changeLanguage = (langCode) => {
-    persistLanguage(langCode); // Save to localStorage and update <html> lang
-    setLang(langCode); // Update React state to re-render components
-  };
+  const [language, setLanguage] = useState("sinhala");
 
   useEffect(() => {
-    // Sync html lang attribute on mount and when language changes
-    document.documentElement.lang = language;
-  }, [language]);
+    const savedLanguage = localStorage.getItem("language") || "sinhala";
+    setLanguage(savedLanguage);
+    document.documentElement.lang = savedLanguage;
+  }, []);
+
+  const changeLanguage = (newLang) => {
+    setLanguage(newLang);
+    localStorage.setItem("language", newLang);
+    document.documentElement.lang = newLang;
+  };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: changeLanguage }}>
+    <LanguageContext.Provider value={{ language, changeLanguage }}>
       {children}
     </LanguageContext.Provider>
   );

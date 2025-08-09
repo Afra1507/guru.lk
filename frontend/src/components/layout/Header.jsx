@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   AppBar,
   Toolbar,
@@ -24,14 +24,19 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
+
 import { useNavigate } from "react-router-dom";
 import LanguageSelector from "./LanguageSelector";
 import { useAuth } from "../../auth/useAuth";
 import Sidebar from "./Sidebar";
+import { LanguageContext } from "../../context/LanguageContext";
+import { translate } from "../../utils/language";
 
 const Header = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const { language, changeLanguage } = useContext(LanguageContext);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -60,6 +65,12 @@ const Header = () => {
       setAnchorEl(null);
     }
   }, [user]);
+
+  const navItems = [
+    { key: "home", icon: <HomeIcon />, path: "/" },
+    { key: "lessons", icon: <SchoolIcon />, path: "/lessons" },
+    { key: "forum", icon: <ForumIcon />, path: "/qna" },
+  ];
 
   return (
     <>
@@ -129,47 +140,46 @@ const Header = () => {
 
           {/* Navigation Buttons with underline animation */}
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2, mr: 2 }}>
-            {["Home", "Lessons", "Q&A Forum"].map((label, index) => {
-              const icons = [<HomeIcon />, <SchoolIcon />, <ForumIcon />];
-              const paths = ["/", "/lessons", "/qna"];
-              return (
-                <Button
-                  key={label}
-                  color="inherit"
-                  startIcon={icons[index]}
-                  onClick={() => navigate(paths[index])}
-                  sx={{
-                    textTransform: "capitalize",
-                    fontWeight: "600",
-                    color: "#e0e6f2",
-                    position: "relative",
-                    overflow: "hidden",
-                    transition: "color 0.3s ease",
-                    "&:hover": {
-                      color: "#a3bffa",
-                      "&::after": {
-                        width: "100%",
-                      },
-                    },
+            {navItems.map(({ key, icon, path }) => (
+              <Button
+                key={key}
+                color="inherit"
+                startIcon={icon}
+                onClick={() => navigate(path)}
+                sx={{
+                  textTransform: "capitalize",
+                  fontWeight: "600",
+                  color: "#e0e6f2",
+                  position: "relative",
+                  overflow: "hidden",
+                  transition: "color 0.3s ease",
+                  "&:hover": {
+                    color: "#a3bffa",
                     "&::after": {
-                      content: '""',
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                      height: "2px",
-                      width: 0,
-                      backgroundColor: "#a3bffa",
-                      transition: "width 0.3s ease",
+                      width: "100%",
                     },
-                  }}
-                >
-                  {label}
-                </Button>
-              );
-            })}
+                  },
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    height: "2px",
+                    width: 0,
+                    backgroundColor: "#a3bffa",
+                    transition: "width 0.3s ease",
+                  },
+                }}
+              >
+                {translate(key, language)}
+              </Button>
+            ))}
           </Box>
 
-          <LanguageSelector />
+          <LanguageSelector
+            selectedLanguage={language}
+            onChange={changeLanguage}
+          />
 
           {/* User Account Section */}
           {user ? (
@@ -205,7 +215,7 @@ const Header = () => {
                 aria-haspopup="true"
                 aria-expanded={menuOpen ? "true" : undefined}
               >
-                Account
+                {translate("account", language)}
               </Button>
               <Menu
                 id="account-menu"
@@ -246,10 +256,13 @@ const Header = () => {
                 <MenuItem onClick={handleDashboardRedirect} disableRipple>
                   <DashboardIcon sx={{ mr: 1, color: "primary.main" }} />
                   {user.role === "ADMIN"
-                    ? "Admin Dashboard"
+                    ? translate("dashboardLabels.adminDashboard", language)
                     : user.role === "CONTRIBUTOR"
-                    ? "Contributor Dashboard"
-                    : "My Dashboard"}
+                    ? translate(
+                        "dashboardLabels.contributorDashboard",
+                        language
+                      )
+                    : translate("dashboardLabels.myDashboard", language)}
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
@@ -259,17 +272,17 @@ const Header = () => {
                   disableRipple
                 >
                   <PersonIcon sx={{ mr: 1, color: "primary.main" }} />
-                  My Profile
+                  {translate("myProfile", language)}
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    alert("No new notifications");
+                    alert(translate("noNotifications", language));
                     handleMenuClose();
                   }}
                   disableRipple
                 >
                   <NotificationsIcon sx={{ mr: 1, color: "primary.main" }} />
-                  Notifications
+                  {translate("notifications", language)}
                 </MenuItem>
                 <Divider sx={{ bgcolor: "#1a3a70" }} />
                 <MenuItem
@@ -278,13 +291,13 @@ const Header = () => {
                   sx={{ color: "error.main" }}
                 >
                   <LogoutIcon sx={{ mr: 1 }} />
-                  Logout
+                  {translate("logout", language)}
                 </MenuItem>
               </Menu>
             </>
           ) : (
             <>
-              <Tooltip title="Login">
+              <Tooltip title={translate("login", language)}>
                 <Button
                   color="inherit"
                   startIcon={<LoginIcon />}
@@ -301,10 +314,10 @@ const Header = () => {
                     },
                   }}
                 >
-                  Login
+                  {translate("login", language)}
                 </Button>
               </Tooltip>
-              <Tooltip title="Register">
+              <Tooltip title={translate("register", language)}>
                 <Button
                   color="inherit"
                   startIcon={<AppRegistrationIcon />}
@@ -320,7 +333,7 @@ const Header = () => {
                     },
                   }}
                 >
-                  Register
+                  {translate("register", language)}
                 </Button>
               </Tooltip>
             </>

@@ -16,7 +16,8 @@ import LanguageIcon from "@mui/icons-material/Language";
 import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
 import contentService from "../../services/contentService";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
+import { translate } from "../../utils/language";
 
 const ContentCard = ({ lesson }) => {
   const navigate = useNavigate();
@@ -24,22 +25,21 @@ const ContentCard = ({ lesson }) => {
 
   const [isDownloading, setIsDownloading] = useState(false);
 
-  // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "info",
   });
 
-  // Function to get userId from JWT token
+  const currentLanguage = localStorage.getItem("language") || "sinhala";
+
   const getUserIdFromToken = () => {
     try {
-      const token = localStorage.getItem("token"); // Adjust key if you store token elsewhere
+      const token = localStorage.getItem("token");
       if (!token) return undefined;
       const decoded = jwtDecode(token);
-      return decoded?.id || decoded?.userId || decoded?.sub; // depends on your token structure
+      return decoded?.id || decoded?.userId || decoded?.sub;
     } catch (e) {
-      // silent fail, no console log here
       return undefined;
     }
   };
@@ -50,7 +50,7 @@ const ContentCard = ({ lesson }) => {
     if (!isAuthenticated) {
       setSnackbar({
         open: true,
-        message: "Please login to download.",
+        message: translate("contentCard.pleaseLoginToDownload", currentLanguage),
         severity: "warning",
       });
       return;
@@ -62,7 +62,7 @@ const ContentCard = ({ lesson }) => {
     if (!userId) {
       setSnackbar({
         open: true,
-        message: "Could not determine user ID. Please login again.",
+        message: translate("contentCard.userIdNotFound", currentLanguage),
         severity: "error",
       });
       return;
@@ -71,7 +71,6 @@ const ContentCard = ({ lesson }) => {
     try {
       setIsDownloading(true);
 
-      // Call the createDownload endpoint to register download and get JSON response
       const downloadResponse = await contentService.createDownload(
         userId,
         lessonId
@@ -80,7 +79,7 @@ const ContentCard = ({ lesson }) => {
       if (!downloadResponse?.fileUrl) {
         setSnackbar({
           open: true,
-          message: "Download URL not found in the response.",
+          message: translate("contentCard.downloadUrlNotFound", currentLanguage),
           severity: "error",
         });
         return;
@@ -88,16 +87,17 @@ const ContentCard = ({ lesson }) => {
 
       setSnackbar({
         open: true,
-        message: "Download registered! Starting download...",
+        message: translate("contentCard.downloadRegistered", currentLanguage),
         severity: "success",
       });
 
-      // Open the fileUrl in a new tab
       window.open(downloadResponse.fileUrl, "_blank");
     } catch (err) {
       setSnackbar({
         open: true,
-        message: err?.message || "Download failed. Please try again.",
+        message:
+          err?.message ||
+          translate("contentCard.downloadFailed", currentLanguage),
         severity: "error",
       });
     } finally {
@@ -162,12 +162,13 @@ const ContentCard = ({ lesson }) => {
             onFocus={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            {isDownloading ? "Processing..." : "Download"}
+            {isDownloading
+              ? translate("contentCard.downloadProcessing", currentLanguage)
+              : translate("contentCard.download", currentLanguage)}
           </Button>
         </CardActions>
       </Card>
 
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

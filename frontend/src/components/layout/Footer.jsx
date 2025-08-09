@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Container,
   Grid,
@@ -23,8 +23,11 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 
+import { translate, initLanguage } from "../../utils/language";
+
 const Footer = () => {
   const theme = useTheme();
+  const [language] = useState(initLanguage());
 
   const socialIcons = [
     { icon: FaFacebook, label: "Facebook", href: "#" },
@@ -36,17 +39,17 @@ const Footer = () => {
 
   const quickLinks = [
     {
-      label: "Home",
+      label: translate("home", language),
       href: "/",
       icon: <HomeOutlinedIcon fontSize="small" sx={{ mr: 0.7 }} />,
     },
     {
-      label: "Lessons",
+      label: translate("lessons", language),
       href: "/lessons",
       icon: <MenuBookOutlinedIcon fontSize="small" sx={{ mr: 0.7 }} />,
     },
     {
-      label: "Q&A Forum",
+      label: translate("forum", language), // fixed key from qnaForum to forum (your translations use forum)
       href: "/qna",
       icon: <ForumOutlinedIcon fontSize="small" sx={{ mr: 0.7 }} />,
     },
@@ -85,15 +88,13 @@ const Footer = () => {
               fontWeight="700"
               sx={{ letterSpacing: 1, color: "#fff" }}
             >
-              About GURU.Ik
+              {translate("footer.aboutTitle", language)}
             </Typography>
             <Typography
               variant="body2"
               sx={{ color: "#cbd5f7", lineHeight: 1.6, mb: 3 }}
             >
-              A community knowledge sharing platform for inclusive education in
-              Sri Lanka. Bridging the gap between learners and educators across
-              the country.
+              {translate("footer.aboutDescription", language)}
             </Typography>
             <Stack direction="row" spacing={1}>
               {socialIcons.map(({ icon: Icon, label, href }) => (
@@ -127,7 +128,7 @@ const Footer = () => {
               fontWeight="700"
               sx={{ letterSpacing: 1, color: "#fff" }}
             >
-              Quick Links
+              {translate("footer.quickLinksTitle", language)}
             </Typography>
             <Stack
               component="ul"
@@ -165,7 +166,7 @@ const Footer = () => {
               fontWeight="700"
               sx={{ letterSpacing: 1, color: "#fff" }}
             >
-              Contact Us
+              {translate("footer.contactUsTitle", language)}
             </Typography>
             <Box
               component="address"
@@ -177,15 +178,18 @@ const Footer = () => {
               }}
             >
               <Typography>
-                <strong>University of Sri Jayewardenepura</strong>
+                <strong>
+                  {translate("footer.universityName", language)}
+                </strong>
               </Typography>
-              <Typography>Faculty of Applied Sciences</Typography>
-              <Typography>Department of Computer Science</Typography>
+              <Typography>{translate("footer.faculty", language)}</Typography>
+              <Typography>{translate("footer.department", language)}</Typography>
               <Typography sx={{ mt: 1 }}>
-                <strong>P:</strong> +94 112 803 803
+                <strong>{translate("footer.phoneLabel", language)}:</strong> +94
+                112 803 803
               </Typography>
               <Typography>
-                <strong>E:</strong>{" "}
+                <strong>{translate("footer.emailLabel", language)}:</strong>{" "}
                 <Link
                   href="mailto:info@guru.lk"
                   sx={{
@@ -208,10 +212,11 @@ const Footer = () => {
 
         <Box textAlign="center" color="#819cff" userSelect="none">
           <Typography variant="body2" fontWeight={500}>
-            &copy; {new Date().getFullYear()} GURU.Ik - All Rights Reserved
+            &copy; {new Date().getFullYear()} GURU.Ik -{" "}
+            {translate("footer.copyrightText", language)}
           </Typography>
           <Typography variant="caption" display="block" mt={0.5}>
-            Developed by AS2022468
+            {translate("footer.developedBy", language)} AS2022468
           </Typography>
         </Box>
       </Container>

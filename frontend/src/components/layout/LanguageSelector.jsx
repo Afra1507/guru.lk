@@ -22,7 +22,10 @@ const LanguageSelector = ({ selectedLanguage, onChange }) => {
           <Dropdown.Item
             key={language.code}
             active={selectedLanguage === language.code}
-            onClick={() => onChange(language.code)}
+            onClick={() => {
+              onChange(language.code);
+              window.location.reload();
+            }}
           >
             {language.name}
           </Dropdown.Item>

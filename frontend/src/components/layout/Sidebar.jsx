@@ -33,6 +33,7 @@ import {
 import { useContent } from "../../hooks/useContent";
 import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
+import { translate, initLanguage } from "../../utils/language";
 
 const PendingApprovalsDialog = ({
   open,
@@ -40,13 +41,14 @@ const PendingApprovalsDialog = ({
   pendingLessons,
   onApproveClick,
   loadingApprove,
+  language,
 }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ position: "relative" }}>
-        Pending Lesson Approvals
+        {translate("pendingLessonApprovals", language)}
         <IconButton
-          aria-label="close"
+          aria-label={translate("close", language)}
           onClick={onClose}
           sx={{ position: "absolute", right: 8, top: 8 }}
         >
@@ -56,7 +58,7 @@ const PendingApprovalsDialog = ({
 
       <DialogContent dividers>
         {pendingLessons.length === 0 ? (
-          <Typography>No pending lessons to approve.</Typography>
+          <Typography>{translate("noPendingLessons", language)}</Typography>
         ) : (
           pendingLessons.map((lesson) => (
             <ListItem
@@ -79,7 +81,7 @@ const PendingApprovalsDialog = ({
                   {loadingApprove ? (
                     <CircularProgress size={20} color="inherit" />
                   ) : (
-                    "Approve"
+                    translate("approve", language)
                   )}
                 </Button>
               }
@@ -98,10 +100,15 @@ const PendingApprovalsDialog = ({
             >
               <ListItemText
                 primary={
-                  lesson.title || `Lesson ID: ${lesson.lessonId || lesson.id}`
+                  lesson.title ||
+                  `${translate("lessonId", language)}: ${
+                    lesson.lessonId || lesson.id
+                  }`
                 }
-                secondary={`Uploaded by: ${
-                  lesson.uploaderName || lesson.uploaderId || "Unknown"
+                secondary={`${translate("uploadedBy", language)}: ${
+                  lesson.uploaderName ||
+                  lesson.uploaderId ||
+                  translate("unknown", language)
                 }`}
               />
             </ListItem>
@@ -110,23 +117,23 @@ const PendingApprovalsDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{translate("close", language)}</Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-const ConfirmDialog = ({ open, onClose, onConfirm, message }) => {
+const ConfirmDialog = ({ open, onClose, onConfirm, message, language }) => {
   return (
     <Dialog open={open} onClose={() => onClose(false)} maxWidth="xs" fullWidth>
-      <DialogTitle>Confirm Approval</DialogTitle>
+      <DialogTitle>{translate("confirmApproval", language)}</DialogTitle>
       <DialogContent>
         <Typography>{message}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => onClose(false)}>Cancel</Button>
+        <Button onClick={() => onClose(false)}>{translate("cancel", language)}</Button>
         <Button variant="contained" onClick={() => onConfirm()} color="primary">
-          Yes
+          {translate("yes", language)}
         </Button>
       </DialogActions>
     </Dialog>
@@ -142,16 +149,17 @@ const Sidebar = ({ open, onClose }) => {
   const [loadingApprove, setLoadingApprove] = useState(false);
   const [loadingPending, setLoadingPending] = useState(false);
 
-  // New state for confirmation dialog
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [lessonToApprove, setLessonToApprove] = useState(null);
 
-  // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "info",
   });
+
+  // Language state
+  const [language, setLanguage] = useState(initLanguage());
 
   const { user } = useAuth();
   const { getPendingLessons, approveLesson } = useContent();
@@ -194,13 +202,11 @@ const Sidebar = ({ open, onClose }) => {
     }
   };
 
-  // When approve button clicked: open confirmation dialog
   const handleApproveClick = (lessonId, lessonTitle) => {
     setLessonToApprove({ id: lessonId, title: lessonTitle });
     setConfirmDialogOpen(true);
   };
 
-  // On confirm approval dialog Yes clicked
   const handleConfirmApprove = async () => {
     if (!lessonToApprove) return;
     setLoadingApprove(true);
@@ -215,13 +221,13 @@ const Sidebar = ({ open, onClose }) => {
       setPendingApprovalsCount((count) => Math.max(count - 1, 0));
       setSnackbar({
         open: true,
-        message: "Lesson approved successfully!",
+        message: translate("lessonApprovedSuccess", language),
         severity: "success",
       });
     } catch (err) {
       setSnackbar({
         open: true,
-        message: "Failed to approve lesson.",
+        message: translate("lessonApprovedFail", language),
         severity: "error",
       });
     } finally {
@@ -230,13 +236,12 @@ const Sidebar = ({ open, onClose }) => {
     }
   };
 
-  // On cancel approval dialog Cancel clicked
   const handleConfirmClose = (confirmed) => {
     setConfirmDialogOpen(false);
     if (!confirmed) {
       setSnackbar({
         open: true,
-        message: "Approval cancelled.",
+        message: translate("approvalCancelled", language),
         severity: "info",
       });
     }
@@ -260,35 +265,49 @@ const Sidebar = ({ open, onClose }) => {
   };
 
   const commonLinks = [
-    { path: "/profile", icon: <Person />, text: "My Profile" },
-    { path: "/lessons", icon: <Book />, text: "Browse Lessons" },
+    { path: "/profile", icon: <Person />, text: translate("myProfile", language) },
+    { path: "/lessons", icon: <Book />, text: translate("browseLessons", language) },
   ];
 
-  const learnerLinks = [{ path: "/learner", icon: <Home />, text: "Dashboard" }];
+  const learnerLinks = [
+    { path: "/learner", icon: <Home />, text: translate("dashboard", language) },
+  ];
 
   const contributorLinks = [
     {
       path: "/contributor/new",
       icon: <CloudUpload />,
-      text: "Start Uploading",
+      text: translate("startUploading", language),
     },
-    { path: "/contributor/my-uploads", icon: <Book />, text: "My Uploads" },
+    {
+      path: "/contributor/my-uploads",
+      icon: <Book />,
+      text: translate("myUploads", language),
+    },
     {
       path: "/contributor/stats",
       icon: <BarChart />,
-      text: "Upload Statistics",
+      text: translate("uploadStats", language),
     },
   ];
 
   const adminContentLinks = [
     {
       icon: <CheckCircle />,
-      text: "Pending Approvals",
+      text: translate("pendingApprovals", language),
       badge: pendingApprovalsCount,
       onClick: fetchPendingLessons,
     },
-    { path: "/admin/lessons", icon: <Book />, text: "All Lessons" },
-    { path: "/admin/analytics", icon: <BarChart />, text: "Content Analytics" },
+    {
+      path: "/admin/lessons",
+      icon: <Book />,
+      text: translate("allLessons", language),
+    },
+    {
+      path: "/admin/analytics",
+      icon: <BarChart />,
+      text: translate("contentAnalytics", language),
+    },
   ];
 
   let links = [...learnerLinks, ...commonLinks];
@@ -296,9 +315,9 @@ const Sidebar = ({ open, onClose }) => {
     links = [...contributorLinks, ...commonLinks];
   } else if (role === "admin") {
     links = [
-      { path: "/admin", icon: <Home />, text: "Dashboard" },
+      { path: "/admin", icon: <Home />, text: translate("dashboard", language) },
       {
-        text: "Content Management",
+        text: translate("contentManagement", language),
         icon: <Book />,
         isSection: true,
         sectionKey: "content",
@@ -307,6 +326,14 @@ const Sidebar = ({ open, onClose }) => {
       ...commonLinks,
     ];
   }
+
+  // Prepare confirm message with dynamic lesson title translation
+  const confirmMessage = lessonToApprove
+    ? translate("confirmApprovalMessage", language).replace(
+        "$title",
+        lessonToApprove.title || translate("thisLesson", language)
+      )
+    : "";
 
   return (
     <>
@@ -325,19 +352,10 @@ const Sidebar = ({ open, onClose }) => {
           {links.map((link, index) =>
             link.isSection ? (
               <React.Fragment key={index}>
-                <ListItemButton
-                  onClick={() => toggleSection(link.sectionKey)}
-                  sx={{
-                    color: "#e0e6f2",
-                    "&:hover": {
-                      bgcolor: "#1a3a70",
-                      transform: "scale(1.05)",
-                      transition: "all 0.3s ease",
-                    },
-                    transition: "all 0.3s ease",
-                  }}
-                >
-                  <ListItemIcon sx={{ color: "#a3bffa" }}>{link.icon}</ListItemIcon>
+                <ListItemButton onClick={() => toggleSection(link.sectionKey)}>
+                  <ListItemIcon sx={{ color: "#e0e6f2" }}>
+                    {link.icon}
+                  </ListItemIcon>
                   <ListItemText primary={link.text} />
                   {expandedSections[link.sectionKey] ? <ExpandLess /> : <ExpandMore />}
                 </ListItemButton>
@@ -347,69 +365,43 @@ const Sidebar = ({ open, onClose }) => {
                   unmountOnExit
                 >
                   <List component="div" disablePadding>
-                    {link.children.map((child, idx) => (
+                    {link.children.map((child, cIndex) => (
                       <ListItemButton
-                        sx={{
-                          pl: 4,
-                          color: "#e0e6f2",
-                          "&:hover": {
-                            bgcolor: "#274472",
-                            transform: "scale(1.05)",
-                            transition: "all 0.3s ease",
-                          },
-                          transition: "all 0.3s ease",
-                          borderRadius: 1,
-                          mb: 0.5,
+                        key={cIndex}
+                        sx={{ pl: 4 }}
+                        onClick={() => {
+                          if (child.onClick) child.onClick();
+                          else if (child.path) {
+                            handleNavigate(child.path);
+                          }
                         }}
-                        key={idx}
-                        onClick={
-                          child.onClick
-                            ? child.onClick
-                            : () => handleNavigate(child.path)
-                        }
                       >
-                        <ListItemIcon sx={{ color: "#a3bffa" }}>
+                        <ListItemIcon sx={{ color: "#e0e6f2" }}>
                           {child.icon}
                         </ListItemIcon>
                         <ListItemText primary={child.text} />
-                        {child.badge ? (
-                          <Badge
-                            badgeContent={child.badge}
-                            color="error"
-                            sx={{ ml: "auto" }}
-                          />
-                        ) : null}
+                        {child.badge && child.badge > 0 && (
+                          <Badge badgeContent={child.badge} color="error" />
+                        )}
                       </ListItemButton>
                     ))}
                   </List>
                 </Collapse>
               </React.Fragment>
             ) : (
-              <ListItem disablePadding key={index}>
-                <ListItemButton
-                  onClick={() => handleNavigate(link.path)}
-                  sx={{
-                    color: "#e0e6f2",
-                    "&:hover": {
-                      bgcolor: "#1a3a70",
-                      transform: "scale(1.05)",
-                      transition: "all 0.3s ease",
-                      borderRadius: 1,
-                    },
-                    transition: "all 0.3s ease",
-                  }}
-                >
-                  <ListItemIcon sx={{ color: "#a3bffa" }}>{link.icon}</ListItemIcon>
-                  <ListItemText primary={link.text} />
-                  {link.badge ? (
-                    <Badge
-                      badgeContent={link.badge}
-                      color="error"
-                      sx={{ ml: "auto" }}
-                    />
-                  ) : null}
-                </ListItemButton>
-              </ListItem>
+              <ListItemButton
+                key={index}
+                onClick={() => {
+                  if (link.onClick) link.onClick();
+                  else if (link.path) handleNavigate(link.path);
+                }}
+              >
+                <ListItemIcon sx={{ color: "#e0e6f2" }}>{link.icon}</ListItemIcon>
+                <ListItemText primary={link.text} />
+                {link.badge && link.badge > 0 && (
+                  <Badge badgeContent={link.badge} color="error" />
+                )}
+              </ListItemButton>
             )
           )}
         </List>
@@ -421,25 +413,26 @@ const Sidebar = ({ open, onClose }) => {
         pendingLessons={pendingLessons}
         onApproveClick={handleApproveClick}
         loadingApprove={loadingApprove}
+        language={language}
       />
 
       <ConfirmDialog
         open={confirmDialogOpen}
         onClose={handleConfirmClose}
         onConfirm={handleConfirmApprove}
-        message={`Are you sure you want to approve the lesson: "${
-          lessonToApprove?.title || "this lesson"
-        }"?`}
+        message={confirmMessage}
+        language={language}
       />
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={3000}
+        autoHideDuration={4000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           severity={snackbar.severity}
+          variant="filled"
           onClose={handleSnackbarClose}
           sx={{ width: "100%" }}
         >
