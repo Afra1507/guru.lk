@@ -10,6 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -17,29 +22,46 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
+        private final JwtAuthFilter jwtAuthFilter;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers(
-                                "/community/debug/**",
-                                "/questions/**",
-                                "/answers/**",
-                                "/votes/**")
-                        .permitAll()
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(AbstractHttpConfigurer::disable)
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .authorizeHttpRequests(auth -> auth
+                                                // Public endpoints
+                                                .requestMatchers(
+                                                                "/community/debug/**",
+                                                                "/questions/**",
+                                                                "/answers/**",
+                                                                "/votes/**")
+                                                .permitAll()
 
-                        // Protected endpoints (using hasRole)
-                        .requestMatchers(HttpMethod.POST, "/questions/create").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/answers/create").hasAnyRole("ADMIN", "CONTRIBUTOR")
-                        .requestMatchers(HttpMethod.POST, "/votes/create").hasAnyRole("LEARNER", "CONTRIBUTOR")
+                                                // Protected endpoints (using hasRole)
+                                                .requestMatchers(HttpMethod.POST, "/questions/create")
+                                                .hasAnyRole("LEARNER", "CONTRIBUTOR", "ADMIN")
+                                                .requestMatchers(HttpMethod.POST, "/answers/create")
+                                                .hasAnyRole("ADMIN", "LEARNER", "CONTRIBUTOR")
+                                                .requestMatchers(HttpMethod.POST, "/votes/create")
+                                                .hasAnyRole("ADMIN", "LEARNER", "CONTRIBUTOR")
 
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                                                .anyRequest().authenticated())
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
+
+        @Bean
+        CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(List.of("*"));
+                configuration.setAllowCredentials(true);
+
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 }

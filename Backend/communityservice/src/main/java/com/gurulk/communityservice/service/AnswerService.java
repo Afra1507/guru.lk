@@ -28,7 +28,8 @@ public class AnswerService {
 
     public AnswerResponse createAnswer(Long userId, AnswerRequest request) {
         Question question = questionRepository.findById(request.getQuestionId())
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + request.getQuestionId()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Question not found with id: " + request.getQuestionId()));
 
         Answer answer = Answer.builder()
                 .question(question)
@@ -91,6 +92,17 @@ public class AnswerService {
         if (!answer.getUserId().equals(userId) && !"ADMIN".equals(userRole)) {
             throw new UnauthorizedException("User is not authorized to perform this action");
         }
+    }
+
+    public List<AnswerResponse> getAnswersByUserId(Long userId) {
+        List<Answer> answers = answerRepository.findByUserId(userId);
+        return answers.stream()
+                .map(answer -> {
+                    AnswerResponse response = mapToResponse(answer);
+                    response.setVoteCount(voteRepository.countByAnswerAnswerId(answer.getAnswerId()));
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 
     private AnswerResponse mapToResponse(Answer answer) {

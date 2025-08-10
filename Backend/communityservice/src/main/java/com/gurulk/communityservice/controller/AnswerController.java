@@ -19,7 +19,7 @@ public class AnswerController {
     private final AnswerService answerService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN', 'LEARNER')")
     public ResponseEntity<AnswerResponse> createAnswer(
             @RequestParam Long userId,
             @Valid @RequestBody AnswerRequest request) {
@@ -35,7 +35,7 @@ public class AnswerController {
     }
 
     @PutMapping("/update/{id}")
-    @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN', 'LEARNER')")
     public ResponseEntity<AnswerResponse> updateAnswer(
             @RequestParam Long userId,
             @RequestParam String role,
@@ -45,7 +45,7 @@ public class AnswerController {
     }
 
     @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('CONTRIBUTOR', 'ADMIN', 'LEARNER')")
     public ResponseEntity<Void> deleteAnswer(
             @RequestParam Long userId,
             @RequestParam String role,
@@ -63,4 +63,11 @@ public class AnswerController {
         answerService.acceptAnswer(userId, role, id);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<AnswerResponse>> getAnswersByUserId(@PathVariable Long userId) {
+        List<AnswerResponse> answers = answerService.getAnswersByUserId(userId);
+        return ResponseEntity.ok(answers);
+    }
+
 }

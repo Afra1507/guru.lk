@@ -17,7 +17,7 @@ public class VoteController {
     private final VoteService voteService;
 
     @PostMapping("/create")
-    @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR')")
+    @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
     public ResponseEntity<VoteResponse> createVote(
             @RequestParam Long userId,
             @RequestParam String role,
@@ -37,7 +37,7 @@ public class VoteController {
     }
 
     @DeleteMapping("/remove/{answerId}")
-    @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR')")
+    @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
     public ResponseEntity<Void> removeVote(
             @RequestParam Long userId,
             @RequestParam String role,

@@ -60,4 +60,12 @@ public class QuestionController {
         questionService.deleteQuestion(userId, role, id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasAnyRole('LEARNER', 'CONTRIBUTOR', 'ADMIN')")
+    public ResponseEntity<List<QuestionResponse>> getQuestionsByUserId(@PathVariable Long userId) {
+        List<QuestionResponse> questions = questionService.getQuestionsByUserId(userId);
+        return ResponseEntity.ok(questions);
+    }
+
 }

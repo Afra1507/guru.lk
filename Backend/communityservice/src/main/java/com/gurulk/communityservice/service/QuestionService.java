@@ -84,6 +84,13 @@ public class QuestionService {
         }
     }
 
+    public List<QuestionResponse> getQuestionsByUserId(Long userId) {
+        List<Question> questions = questionRepository.findByUserId(userId);
+        return questions.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     private QuestionResponse mapToResponse(Question question) {
         int answerCount = answerRepository.countByQuestionQuestionId(question.getQuestionId());
         return QuestionResponse.builder()
