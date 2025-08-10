@@ -49,6 +49,7 @@ const QnAPage = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          fontFamily: "'Poppins', sans-serif",
         }}
       >
         <CircularProgress color="primary" size={64} />
@@ -57,7 +58,7 @@ const QnAPage = () => {
 
   if (error)
     return (
-      <Box sx={{ width: "100%", mt: 4 }}>
+      <Box sx={{ width: "100%", mt: 4, fontFamily: "'Poppins', sans-serif" }}>
         <Alert severity="error">{error}</Alert>
       </Box>
     );
@@ -72,6 +73,7 @@ const QnAPage = () => {
         display: "flex",
         flexDirection: "row",
         gap: 3,
+        fontFamily: "'Poppins', sans-serif",
       }}
     >
       {/* Left side - Ask Question */}
@@ -139,7 +141,7 @@ const QnAPage = () => {
                   color="action"
                   sx={{
                     position: "absolute",
-                    left: 8, // inside padding now
+                    left: 8,
                     top: 12,
                     fontSize: 28,
                     opacity: 0.25,

@@ -27,6 +27,11 @@ import contentService from "../services/contentService";
 
 import { useAuth } from "../auth/useAuth";
 
+// Import Poppins font in your main index.html or _app.js for React projects
+// Or add it here with Helmet if preferred, e.g.:
+// import { Helmet } from "react-helmet";
+// and add <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+
 const sliderImages = [
   {
     src: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1350&q=80",
@@ -65,27 +70,23 @@ const Home = () => {
     message: "",
   });
 
-  // Refs to track snackbar status and current user id to avoid repeats
   const roleInfoShownRef = useRef(false);
   const welcomeShownForUserRef = useRef(null);
 
   const navigate = useNavigate();
 
-  // On user login change, show welcome message only once per user login
   useEffect(() => {
     if (user && welcomeShownForUserRef.current !== user.id) {
-      // Show welcome snackbar once per login (user.id as unique id)
       setSnackbar({
         open: true,
         severity: "success",
         message: getWelcomeMessage(user.role),
       });
       welcomeShownForUserRef.current = user.id;
-      roleInfoShownRef.current = false; // reset role info shown for this user
+      roleInfoShownRef.current = false;
     }
   }, [user]);
 
-  // Load popular lessons once
   useEffect(() => {
     setLoadingPopular(true);
     setErrorPopular(null);
@@ -138,11 +139,11 @@ const Home = () => {
   const sliderSettings = {
     dots: true,
     infinite: true,
-    speed: 50, // a smooth fade speed (try 300)
+    speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 4000,
+    autoplaySpeed: 4500,
     arrows: true,
     pauseOnHover: true,
     fade: true,
@@ -154,15 +155,13 @@ const Home = () => {
 
     setSnackbar((prev) => ({ ...prev, open: false }));
 
-    // After welcome snackbar closes, show role info snackbar only once
     if (
       !roleInfoShownRef.current &&
       (role === "CONTRIBUTOR" || role === "ADMIN") &&
-      snackbar.severity === "success" // This means welcome just closed
+      snackbar.severity === "success"
     ) {
       roleInfoShownRef.current = true;
 
-      // Show role-specific info snackbar after welcome
       if (role === "CONTRIBUTOR") {
         setTimeout(() => {
           setSnackbar({
@@ -171,7 +170,7 @@ const Home = () => {
             message:
               "Welcome, contributor! Head to your profile to upload or edit your lessons.",
           });
-        }, 300); // slight delay for smoothness
+        }, 300);
       } else if (role === "ADMIN") {
         setTimeout(() => {
           setSnackbar({
@@ -186,8 +185,8 @@ const Home = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 3, mb: 6 }}>
-      {/* Header Section */}
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 6, fontFamily: "'Poppins', sans-serif" }}>
+      {/* Header */}
       <Grid
         container
         alignItems="center"
@@ -200,14 +199,14 @@ const Home = () => {
             variant="h3"
             component="h1"
             gutterBottom
-            sx={{ color: "#031227ff", fontWeight: "bold" }}
+            sx={{ color: "#031227", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}
           >
             Welcome to GURU.Ik
           </Typography>
           <Typography
             variant="h6"
             color="text.secondary"
-            sx={{ color: "rgba(3, 18, 39, 0.7)", fontWeight: 500 }}
+            sx={{ color: "rgba(3, 18, 39, 0.7)", fontWeight: 500, fontFamily: "'Poppins', sans-serif" }}
           >
             Community Knowledge Sharing Platform for All Sri Lankans
           </Typography>
@@ -233,7 +232,8 @@ const Home = () => {
                 size="large"
                 sx={{
                   textTransform: "capitalize",
-                  fontWeight: "600",
+                  fontWeight: 600,
+                  borderRadius: 3,
                   transition: "all 0.3s ease",
                   "&:hover": {
                     transform: "scale(1.05)",
@@ -251,7 +251,8 @@ const Home = () => {
                 size="large"
                 sx={{
                   textTransform: "capitalize",
-                  fontWeight: "600",
+                  fontWeight: 600,
+                  borderRadius: 3,
                   transition: "all 0.3s ease",
                   "&:hover": {
                     backgroundColor: "error.main",
@@ -273,7 +274,8 @@ const Home = () => {
                 size="large"
                 sx={{
                   textTransform: "capitalize",
-                  fontWeight: "600",
+                  fontWeight: 600,
+                  borderRadius: 3,
                   transition: "all 0.3s ease",
                   "&:hover": {
                     transform: "scale(1.05)",
@@ -291,7 +293,8 @@ const Home = () => {
                 size="large"
                 sx={{
                   textTransform: "capitalize",
-                  fontWeight: "600",
+                  fontWeight: 600,
+                  borderRadius: 3,
                   transition: "all 0.3s ease",
                   "&:hover": {
                     backgroundColor: "primary.main",
@@ -307,8 +310,8 @@ const Home = () => {
         </Grid>
       </Grid>
 
-      {/* Slider Section */}
-      <Box sx={{ mb: 5 }}>
+      {/* Slider */}
+      <Box sx={{ mb: 5, borderRadius: 2, overflow: "hidden", boxShadow: 3 }}>
         <Slider {...sliderSettings}>
           {sliderImages.map(({ src, alt, caption }, idx) => (
             <Box key={idx} sx={{ position: "relative" }}>
@@ -320,6 +323,7 @@ const Home = () => {
                   width: "100%",
                   maxHeight: "400px",
                   objectFit: "cover",
+                  transition: "transform 1s ease",
                   borderRadius: "8px",
                 }}
               />
@@ -330,9 +334,10 @@ const Home = () => {
                   bottom: "10%",
                   left: "5%",
                   color: "white",
-                  fontWeight: "bold",
-                  textShadow: "1px 1px 5px rgba(0,0,0,0.7)",
+                  fontWeight: "700",
+                  textShadow: "1px 1px 7px rgba(0,0,0,0.8)",
                   userSelect: "none",
+                  fontFamily: "'Poppins', sans-serif",
                 }}
               >
                 {caption}
@@ -350,7 +355,7 @@ const Home = () => {
       {/* Popular Lessons */}
       <Typography
         variant="h5"
-        sx={{ mb: 2, fontWeight: "600", color: "#031227ff" }}
+        sx={{ mb: 2, fontWeight: 600, color: "#031227", fontFamily: "'Poppins', sans-serif" }}
       >
         Popular Lessons
       </Typography>
@@ -362,13 +367,16 @@ const Home = () => {
       )}
 
       {errorPopular && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert severity="error" sx={{ mb: 3, fontFamily: "'Poppins', sans-serif" }}>
           {errorPopular}
         </Alert>
       )}
 
       {!loadingPopular && !errorPopular && popularLessons.length === 0 && (
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
+        <Typography
+          color="text.secondary"
+          sx={{ mb: 3, fontFamily: "'Poppins', sans-serif" }}
+        >
           No popular lessons available at the moment.
         </Typography>
       )}
@@ -384,7 +392,7 @@ const Home = () => {
       {/* Snackbar Notifications */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={2000}
+        autoHideDuration={2500}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         slotProps={{
@@ -396,7 +404,12 @@ const Home = () => {
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ width: "100%", fontWeight: "600", fontSize: "1rem" }}
+          sx={{
+            width: "100%",
+            fontWeight: 600,
+            fontSize: "1rem",
+            fontFamily: "'Poppins', sans-serif",
+          }}
           icon={iconMapping[snackbar.severity]}
           variant="filled"
         >

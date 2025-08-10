@@ -8,6 +8,8 @@ import {
   Grid,
   CircularProgress,
   Fade,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import SchoolIcon from "@mui/icons-material/School";
 import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
@@ -33,7 +35,11 @@ function TabPanel(props) {
       aria-labelledby={`learner-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+      {value === index && (
+        <Fade in timeout={600}>
+          <Box sx={{ py: 3, minHeight: "300px" }}>{children}</Box>
+        </Fade>
+      )}
     </div>
   );
 }
@@ -50,6 +56,9 @@ const LearnerDashboard = () => {
   const [loadingAnswers, setLoadingAnswers] = useState(true);
 
   const [tabIndex, setTabIndex] = useState(0);
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const getUserIdFromToken = () => {
     try {
@@ -115,151 +124,195 @@ const LearnerDashboard = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
+    <Container maxWidth="lg" sx={{ mt: 5, mb: 8 }}>
+      <Typography
+        variant={isSmallScreen ? "h4" : "h3"}
+        fontWeight="bold"
+        gutterBottom
+        sx={{ textAlign: "center", color: "#001f54", mb: 4 }}
+      >
         Learner Dashboard
       </Typography>
 
-      <Tabs
-        value={tabIndex}
-        onChange={handleTabChange}
-        aria-label="learner dashboard tabs"
-        variant="fullWidth"
-        textColor="primary"
-        indicatorColor="primary"
-        sx={{ mb: 3 }}
+      <Box
+        sx={{
+          bgcolor: "#fff",
+          boxShadow: theme.shadows[3],
+          borderRadius: 2,
+          mb: 4,
+        }}
       >
-        <Tab
-          label="Recent Lessons"
-          icon={<SchoolIcon />}
-          iconPosition="start"
-          id="learner-tab-0"
-          aria-controls="learner-tabpanel-0"
-        />
-        <Tab
-          label="My Downloads"
-          icon={<DownloadDoneIcon />}
-          iconPosition="start"
-          id="learner-tab-1"
-          aria-controls="learner-tabpanel-1"
-        />
-        <Tab
-          label="My Questions"
-          icon={<QuestionAnswerIcon />}
-          iconPosition="start"
-          id="learner-tab-2"
-          aria-controls="learner-tabpanel-2"
-        />
-        <Tab
-          label="My Answers"
-          icon={<AnswerIcon />}
-          iconPosition="start"
-          id="learner-tab-3"
-          aria-controls="learner-tabpanel-3"
-        />
-      </Tabs>
+        <Tabs
+          value={tabIndex}
+          onChange={handleTabChange}
+          aria-label="learner dashboard tabs"
+          variant={isSmallScreen ? "scrollable" : "fullWidth"}
+          scrollButtons={isSmallScreen ? "auto" : false}
+          textColor="primary"
+          indicatorColor="primary"
+          sx={{
+            minHeight: 56,
+            "& .MuiTab-root": {
+              minHeight: 56,
+              fontWeight: 600,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 1,
+              fontSize: isSmallScreen ? "0.8rem" : "1rem",
+              px: 2,
+              whiteSpace: "nowrap",
+            },
+            "& .MuiTab-root.Mui-selected": {
+              color: "#001f54",
+              fontWeight: "bold",
+            },
+          }}
+        >
+          <Tab
+            label="Recent Lessons"
+            icon={<SchoolIcon />}
+            iconPosition="start"
+            id="learner-tab-0"
+            aria-controls="learner-tabpanel-0"
+          />
+          <Tab
+            label="My Downloads"
+            icon={<DownloadDoneIcon />}
+            iconPosition="start"
+            id="learner-tab-1"
+            aria-controls="learner-tabpanel-1"
+          />
+          <Tab
+            label="My Questions"
+            icon={<QuestionAnswerIcon />}
+            iconPosition="start"
+            id="learner-tab-2"
+            aria-controls="learner-tabpanel-2"
+          />
+          <Tab
+            label="My Answers"
+            icon={<AnswerIcon />}
+            iconPosition="start"
+            id="learner-tab-3"
+            aria-controls="learner-tabpanel-3"
+          />
+        </Tabs>
+      </Box>
 
       {/* Recent Lessons */}
       <TabPanel value={tabIndex} index={0}>
         {loadingRecent ? (
-          <Box textAlign="center" py={5}>
+          <Box textAlign="center" py={8}>
             <CircularProgress />
           </Box>
         ) : recentLessons.length === 0 ? (
-          <Typography variant="body1" color="text.secondary" textAlign="center">
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            textAlign="center"
+            sx={{ mt: 4 }}
+          >
             No recent lessons found.
           </Typography>
         ) : (
-          <Fade in timeout={600}>
-            <Grid container spacing={3}>
-              {recentLessons.map((lesson) => (
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={4}
-                  key={lesson.lessonId || lesson.id}
-                >
-                  <ContentCard lesson={lesson} />
-                </Grid>
-              ))}
-            </Grid>
-          </Fade>
+          <Grid container spacing={3}>
+            {recentLessons.map((lesson) => (
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={lesson.lessonId || lesson.id}
+              >
+                <ContentCard lesson={lesson} />
+              </Grid>
+            ))}
+          </Grid>
         )}
       </TabPanel>
 
       {/* My Downloads */}
       <TabPanel value={tabIndex} index={1}>
         {loadingDownloads ? (
-          <Box textAlign="center" py={5}>
+          <Box textAlign="center" py={8}>
             <CircularProgress />
           </Box>
         ) : downloadedLessons.length === 0 ? (
-          <Typography variant="body1" color="text.secondary" textAlign="center">
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            textAlign="center"
+            sx={{ mt: 4 }}
+          >
             No downloads found.
           </Typography>
         ) : (
-          <Fade in timeout={600}>
-            <Grid container spacing={3}>
-              {downloadedLessons.map((lesson) => (
-                <Grid
-                  item
-                  xs={12}
-                  sm={6}
-                  md={4}
-                  key={lesson.lessonId || lesson.id}
-                >
-                  <ContentCard lesson={lesson} />
-                </Grid>
-              ))}
-            </Grid>
-          </Fade>
+          <Grid container spacing={3}>
+            {downloadedLessons.map((lesson) => (
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                key={lesson.lessonId || lesson.id}
+              >
+                <ContentCard lesson={lesson} />
+              </Grid>
+            ))}
+          </Grid>
         )}
       </TabPanel>
 
       {/* My Questions */}
       <TabPanel value={tabIndex} index={2}>
         {loadingQuestions ? (
-          <Box textAlign="center" py={5}>
+          <Box textAlign="center" py={8}>
             <CircularProgress />
           </Box>
         ) : myQuestions.length === 0 ? (
-          <Typography variant="body1" color="text.secondary" textAlign="center">
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            textAlign="center"
+            sx={{ mt: 4 }}
+          >
             You have no questions yet.
           </Typography>
         ) : (
-          <Fade in timeout={600}>
-            <Grid container spacing={3}>
-              {myQuestions.map((question) => (
-                <Grid item xs={12} key={question.questionId}>
-                  <QuestionCard question={question} />
-                </Grid>
-              ))}
-            </Grid>
-          </Fade>
+          <Grid container spacing={3}>
+            {myQuestions.map((question) => (
+              <Grid item xs={12} key={question.questionId}>
+                <QuestionCard question={question} />
+              </Grid>
+            ))}
+          </Grid>
         )}
       </TabPanel>
 
       {/* My Answers */}
       <TabPanel value={tabIndex} index={3}>
         {loadingAnswers ? (
-          <Box textAlign="center" py={5}>
+          <Box textAlign="center" py={8}>
             <CircularProgress />
           </Box>
         ) : myAnswers.length === 0 ? (
-          <Typography variant="body1" color="text.secondary" textAlign="center">
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            textAlign="center"
+            sx={{ mt: 4 }}
+          >
             You have not answered any questions yet.
           </Typography>
         ) : (
-          <Fade in timeout={600}>
-            <Grid container spacing={3}>
-              {myAnswers.map((answer) => (
-                <Grid item xs={12} key={answer.answerId}>
-                  <AnswerCard answer={answer} />
-                </Grid>
-              ))}
-            </Grid>
-          </Fade>
+          <Grid container spacing={3}>
+            {myAnswers.map((answer) => (
+              <Grid item xs={12} key={answer.answerId}>
+                <AnswerCard answer={answer} />
+              </Grid>
+            ))}
+          </Grid>
         )}
       </TabPanel>
     </Container>

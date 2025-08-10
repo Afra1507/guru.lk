@@ -131,7 +131,9 @@ const ConfirmDialog = ({ open, onClose, onConfirm, message, language }) => {
         <Typography>{message}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => onClose(false)}>{translate("cancel", language)}</Button>
+        <Button onClick={() => onClose(false)}>
+          {translate("cancel", language)}
+        </Button>
         <Button variant="contained" onClick={() => onConfirm()} color="primary">
           {translate("yes", language)}
         </Button>
@@ -265,15 +267,32 @@ const Sidebar = ({ open, onClose }) => {
   };
 
   const commonLinks = [
-    { path: "/profile", icon: <Person />, text: translate("myProfile", language) },
-    { path: "/lessons", icon: <Book />, text: translate("browseLessons", language) },
+    {
+      path: "/profile",
+      icon: <Person />,
+      text: translate("myProfile", language),
+    },
+    {
+      path: "/lessons",
+      icon: <Book />,
+      text: translate("browseLessons", language),
+    },
   ];
 
   const learnerLinks = [
-    { path: "/learner", icon: <Home />, text: translate("dashboard", language) },
+    {
+      path: "/learner",
+      icon: <Home />,
+      text: translate("dashboard", language),
+    },
   ];
 
   const contributorLinks = [
+    {
+      path: "/contributor",
+      icon: <Home />,
+      text: translate("dashboard", language),
+    },
     {
       path: "/contributor/new",
       icon: <CloudUpload />,
@@ -315,7 +334,11 @@ const Sidebar = ({ open, onClose }) => {
     links = [...contributorLinks, ...commonLinks];
   } else if (role === "admin") {
     links = [
-      { path: "/admin", icon: <Home />, text: translate("dashboard", language) },
+      {
+        path: "/admin",
+        icon: <Home />,
+        text: translate("dashboard", language),
+      },
       {
         text: translate("contentManagement", language),
         icon: <Book />,
@@ -357,7 +380,11 @@ const Sidebar = ({ open, onClose }) => {
                     {link.icon}
                   </ListItemIcon>
                   <ListItemText primary={link.text} />
-                  {expandedSections[link.sectionKey] ? <ExpandLess /> : <ExpandMore />}
+                  {expandedSections[link.sectionKey] ? (
+                    <ExpandLess />
+                  ) : (
+                    <ExpandMore />
+                  )}
                 </ListItemButton>
                 <Collapse
                   in={expandedSections[link.sectionKey]}
@@ -396,7 +423,9 @@ const Sidebar = ({ open, onClose }) => {
                   else if (link.path) handleNavigate(link.path);
                 }}
               >
-                <ListItemIcon sx={{ color: "#e0e6f2" }}>{link.icon}</ListItemIcon>
+                <ListItemIcon sx={{ color: "#e0e6f2" }}>
+                  {link.icon}
+                </ListItemIcon>
                 <ListItemText primary={link.text} />
                 {link.badge && link.badge > 0 && (
                   <Badge badgeContent={link.badge} color="error" />

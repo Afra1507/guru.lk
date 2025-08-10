@@ -14,7 +14,7 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import contentService from "../../services/contentService";
-import {jwtDecode} from "jwt-decode"; // fixed import, jwtDecode is default export
+import {jwtDecode} from "jwt-decode";
 
 const UploadStats = () => {
   const [stats, setStats] = useState(null);
@@ -25,10 +25,12 @@ const UploadStats = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
+
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No token found, please login.");
 
         const decoded = jwtDecode(token);
+        // You might have id or userId in the token
         const userId = decoded.id || decoded.userId;
         if (!userId) throw new Error("User ID not found in token.");
 
@@ -37,10 +39,11 @@ const UploadStats = () => {
         const totalUploads = lessons.length;
         const approvedUploads = lessons.filter((l) => l.isApproved).length;
         const pendingUploads = totalUploads - approvedUploads;
-        const totalViews = lessons.reduce(
-          (sum, l) => sum + (l.viewCount || 0),
-          0
-        );
+
+        // Sum viewCount, default to 0 if missing
+        const totalViews = lessons.reduce((sum, l) => sum + (l.viewCount || 0), 0);
+
+        // Sum downloadCount, default to 0 if missing
         const totalDownloads = lessons.reduce(
           (sum, l) => sum + (l.downloadCount || 0),
           0
@@ -134,14 +137,13 @@ const UploadStats = () => {
                 justifyContent: "center",
                 textAlign: "center",
                 width: "100%",
-                boxShadow:
-                  "rgba(0, 0, 0, 0.1) 0px 4px 12px",
-                transition: "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
+                boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
+                transition:
+                  "transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease",
                 cursor: "default",
                 "&:hover": {
                   transform: "scale(1.05)",
-                  boxShadow:
-                    "rgba(0, 0, 0, 0.25) 0px 8px 20px",
+                  boxShadow: "rgba(0, 0, 0, 0.25) 0px 8px 20px",
                   bgcolor: (theme) => theme.palette.grey[200],
                 },
               }}

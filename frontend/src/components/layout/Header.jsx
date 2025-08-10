@@ -49,7 +49,7 @@ const Header = () => {
   const handleDashboardRedirect = () => {
     if (!user) return;
     if (user.role === "ADMIN") navigate("/admin");
-    else if (user.role === "CONTRIBUTOR") navigate("/contributor/uploads");
+    else if (user.role === "CONTRIBUTOR") navigate("/contributor");
     else navigate("/learner");
     handleMenuClose();
   };

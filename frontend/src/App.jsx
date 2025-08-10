@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Container } from "react-bootstrap";
@@ -5,12 +6,12 @@ import { Container } from "react-bootstrap";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
+import LoadingSpinner from "./components/ui/LoadingSpinner"; // Import custom spinner
 import NotFound from "./pages/NotFound";
 
 import { AuthProvider } from "./auth/AuthContext";
 import "./styles/main.scss";
 import { RequireAuth, RequireRole } from "./utils/ProtectedRoutes";
-
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home"));
@@ -36,6 +37,8 @@ const ContributorStats = lazy(() =>
 const ContributorNewUpload = lazy(() =>
   import("./components/contributor/ContributorNewUpload")
 );
+const ContributorDashboard = lazy(() => import("./pages/ContributorDashboard"));
+
 const ContributorHome = lazy(() => import("./pages/ContributorHome"));
 const MyUploads = lazy(() => import("./components/contributor/MyUploads"));
 
@@ -46,9 +49,6 @@ const LessonAnalytics = lazy(() => import("./pages/LessonAnalytics"));
 const UserManagement = lazy(() => import("./components/admin/UserManagement"));
 const QuestionDetail = lazy(() => import("./components/forum/QuestionDetail"));
 const QuestionForm = lazy(() => import("./components/forum/QuestionForm"));
-const QuestionCard = lazy(() => import("./components/forum/QuestionCard"));
-const AnswerForm = lazy(() => import("./components/forum/AnswerForm"));
-const AnswerCard = lazy(() => import("./components/forum/AnswerCard"));
 
 function App() {
   return (
@@ -59,7 +59,9 @@ function App() {
         <Header />
         <main className="py-4">
           <Container fluid>
-            <Suspense fallback={<p>Loading...</p>}>
+            <Suspense
+              fallback={<LoadingSpinner size="lg" message="Loading..." />}
+            >
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
@@ -104,6 +106,7 @@ function App() {
                     </RequireRole>
                   }
                 >
+                  <Route path="" element={<ContributorDashboard />} />
                   <Route index element={<ContributorHome />} />
                   <Route path="uploads" element={<ContributorUploads />} />
                   <Route path="stats" element={<ContributorStats />} />
@@ -153,10 +156,7 @@ function App() {
                   }
                 />
                 {/* Forum Routes */}
-                <Route
-                  path="/questions/:id"
-                  element={<QuestionDetail />}
-                />
+                <Route path="/questions/:id" element={<QuestionDetail />} />
                 <Route
                   path="/new-question"
                   element={
@@ -165,10 +165,7 @@ function App() {
                     </RequireAuth>
                   }
                 />
-                <Route
-                  path="/questions"
-                  element={<QnA />}
-                />
+                <Route path="/questions" element={<QnA />} />
 
                 {/* 404 fallback */}
                 <Route path="*" element={<NotFound />} />

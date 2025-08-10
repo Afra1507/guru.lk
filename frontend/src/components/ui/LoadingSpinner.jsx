@@ -1,21 +1,31 @@
 import React from "react";
-import { Spinner } from "react-bootstrap";
+import { Box, CircularProgress, Typography } from "@mui/material";
 
 const LoadingSpinner = ({ size = "md", message = "Loading..." }) => {
-  const spinnerSize = size === "sm" ? "sm" : size === "lg" ? "lg" : undefined;
+  // Map size prop to MUI CircularProgress size in pixels
+  const sizeMap = {
+    sm: 24,
+    md: 40,
+    lg: 60,
+  };
+  const spinnerSize = sizeMap[size] || sizeMap.md;
 
   return (
-    <div className="d-flex flex-column align-items-center justify-content-center my-5">
-      <Spinner
-        animation="border"
-        role="status"
-        size={spinnerSize}
-        className="mb-3"
-      >
-        <span className="visually-hidden">Loading...</span>
-      </Spinner>
-      <p className="text-muted">{message}</p>
-    </div>
+    <Box
+      sx={{
+        my: 5,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 1,
+      }}
+    >
+      <CircularProgress size={spinnerSize} />
+      <Typography variant="body2" color="text.secondary">
+        {message}
+      </Typography>
+    </Box>
   );
 };
 

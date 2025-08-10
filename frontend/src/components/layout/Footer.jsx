@@ -178,12 +178,12 @@ const Footer = () => {
               }}
             >
               <Typography>
-                <strong>
-                  {translate("footer.universityName", language)}
-                </strong>
+                <strong>{translate("footer.universityName", language)}</strong>
               </Typography>
               <Typography>{translate("footer.faculty", language)}</Typography>
-              <Typography>{translate("footer.department", language)}</Typography>
+              <Typography>
+                {translate("footer.department", language)}
+              </Typography>
               <Typography sx={{ mt: 1 }}>
                 <strong>{translate("footer.phoneLabel", language)}:</strong> +94
                 112 803 803
@@ -216,7 +216,7 @@ const Footer = () => {
             {translate("footer.copyrightText", language)}
           </Typography>
           <Typography variant="caption" display="block" mt={0.5}>
-            {translate("footer.developedBy", language)} AS2022468
+            {translate("footer.developedBy", language)}
           </Typography>
         </Box>
       </Container>

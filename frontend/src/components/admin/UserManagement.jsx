@@ -16,14 +16,25 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Avatar,
+  Stack,
+  Divider,
+  Tooltip,
+  useTheme,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import PersonIcon from "@mui/icons-material/Person";
+import LanguageIcon from "@mui/icons-material/Language";
+import PublicIcon from "@mui/icons-material/Public";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { API } from "../../api/axiosInstances";
 
 const roles = ["LEARNER", "CONTRIBUTOR", "ADMIN"];
 
 const UserManagement = () => {
+  const theme = useTheme();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -140,7 +151,6 @@ const UserManagement = () => {
     }
   };
 
-  // New: handlers to close dialogs and show cancellation snackbar
   const handleDeleteDialogClose = () => {
     setShowDeleteModal(false);
     setUserToDelete(null);
@@ -167,7 +177,7 @@ const UserManagement = () => {
   };
 
   return (
-    <Box p={3}>
+    <Box p={{ xs: 2, md: 4 }}>
       <Typography
         variant="h4"
         gutterBottom
@@ -175,7 +185,9 @@ const UserManagement = () => {
           fontWeight: 700,
           fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
           letterSpacing: "0.05em",
-          color: "#001f54", // navy blue
+          color: theme.palette.primary.dark,
+          textAlign: "center",
+          mb: 4,
         }}
       >
         User Management
@@ -183,73 +195,120 @@ const UserManagement = () => {
 
       {loading ? (
         <Box display="flex" justifyContent="center" p={5}>
-          <CircularProgress />
+          <CircularProgress color="primary" size={50} />
         </Box>
       ) : error ? (
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error" sx={{ maxWidth: 600, mx: "auto" }}>
+          {error}
+        </Alert>
       ) : (
         <Box
           sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 3, // theme spacing(3) = 24px
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(3, 1fr)",
+            },
+            gap: 3,
+            maxWidth: 1100,
+            mx: "auto",
           }}
         >
           {users.map((user) => (
-            <Box
+            <Paper
               key={user.userId}
+              elevation={5}
               sx={{
-                flex: "0 1 calc(33.33% - 16px)", // 3 cards per row approx minus gap
-                maxWidth: "350px",
-                minWidth: "280px",
-                marginBottom: 3,
+                p: 3,
+                borderRadius: 3,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                transition: "transform 0.2s",
+                "&:hover": {
+                  transform: "translateY(-6px)",
+                  boxShadow: `0 12px 20px ${theme.palette.primary.light}`,
+                },
               }}
             >
-              <Paper elevation={3} sx={{ p: 2 }}>
-                <Typography variant="h6">{user.username}</Typography>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  {user.email}
-                </Typography>
-
-                <Typography variant="body2" gutterBottom>
-                  <strong>Role:</strong> {formatRole(user.role)} <br />
-                  <strong>Language:</strong> {user.preferredLanguage || "N/A"}{" "}
-                  <br />
-                  <strong>Region:</strong> {user.region || "N/A"} <br />
-                  <strong>Low Income:</strong> {user.isLowIncome ? "Yes" : "No"}{" "}
-                  <br />
-                  <strong>Joined:</strong>{" "}
-                  {new Date(user.createdAt).toLocaleDateString()}
-                </Typography>
-
-                <Box mt={2} display="flex" justifyContent="flex-end" gap={1}>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => handleDeleteClick(user)}
-                    disabled={user.username === currentUsername}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<EditIcon />}
-                    onClick={() => handleRoleChangeClick(user)}
-                    disabled={user.username === currentUsername}
-                  >
-                    Change Role
-                  </Button>
+              <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                  <PersonIcon />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {user.username}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" noWrap>
+                    {user.email}
+                  </Typography>
                 </Box>
-              </Paper>
-            </Box>
+              </Stack>
+
+              <Divider sx={{ mb: 2 }} />
+
+              <Stack spacing={1} mb={2}>
+                <Typography variant="body2" color="text.primary">
+                  <strong>Role:</strong> {formatRole(user.role)}
+                </Typography>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <LanguageIcon fontSize="small" color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    {user.preferredLanguage || "N/A"}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <PublicIcon fontSize="small" color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    {user.region || "N/A"}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <MonetizationOnIcon fontSize="small" color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    Low Income: {user.isLowIncome ? "Yes" : "No"}
+                  </Typography>
+                </Stack>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <CalendarTodayIcon fontSize="small" color="action" />
+                  <Typography variant="body2" color="text.secondary">
+                    Joined: {new Date(user.createdAt).toLocaleDateString()}
+                  </Typography>
+                </Stack>
+              </Stack>
+
+              <Box mt="auto" display="flex" justifyContent="flex-end" gap={1}>
+                <Tooltip title={user.username === currentUsername ? "You cannot delete your own account" : "Delete User"}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleDeleteClick(user)}
+                      disabled={user.username === currentUsername}
+                    >
+                      Delete
+                    </Button>
+                  </span>
+                </Tooltip>
+
+                <Tooltip title={user.username === currentUsername ? "You cannot modify your own role" : "Change User Role"}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => handleRoleChangeClick(user)}
+                      disabled={user.username === currentUsername}
+                    >
+                      Change Role
+                    </Button>
+                  </span>
+                </Tooltip>
+              </Box>
+            </Paper>
           ))}
         </Box>
       )}

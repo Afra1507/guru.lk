@@ -271,9 +271,9 @@ const translations = {
       english: "All Rights Reserved",
     },
     developedBy: {
-      sinhala: "සංවර්ධනය කළේ AS2022468 විසින්",
-      tamil: "AS2022468 இன் மூலம் உருவாக்கப்பட்டது",
-      english: "Developed by AS2022468",
+      sinhala: "සංවර්ධනය කළේ AS2022468, AS2022471 විසින්",
+      tamil: "AS2022468, AS2022471 இன் மூலம் உருவாக்கப்பட்டது",
+      english: "Developed by AS2022468, AS2022471",
     },
   },
   loginPage: {

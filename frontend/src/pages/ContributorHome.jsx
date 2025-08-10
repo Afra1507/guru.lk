@@ -1,11 +1,12 @@
 import React from "react";
 import UploadStats from "../components/contributor/UploadStats";
+import ContributorDashboard from "./ContributorDashboard";
+
+
 const ContributorHome = () => {
   return (
     <div>
-      <h4>Welcome to Contributor Dashboard</h4>
-      <p className="text-muted">Track your uploads and performance here.</p>
-      <UploadStats />
+      <ContributorDashboard />
     </div>
   );
 };
