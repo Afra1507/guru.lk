@@ -4,6 +4,8 @@ const authBaseURL =
   process.env.REACT_APP_AUTH_BASE_URL || "http://localhost:8081";
 const contentBaseURL =
   process.env.REACT_APP_CONTENT_BASE_URL || "http://localhost:8082";
+const communityBaseURL =
+  process.env.REACT_APP_COMMUNITY_BASE_URL || "http://localhost:8083";
 
 // Create axios instance for auth API
 export const API = axios.create({
@@ -18,6 +20,12 @@ export const API = axios.create({
 export const contentAPI = axios.create({
   baseURL: contentBaseURL,
   withCredentials: true, // Important for CORS with credentials
+});
+
+// Create axios instance for community API
+export const communityAPI = axios.create({
+  baseURL: communityBaseURL,
+  withCredentials: true,
 });
 
 // Request interceptor for both API instances
@@ -40,7 +48,7 @@ const responseErrorInterceptor = (error) => {
 };
 
 // Add interceptors to both API instances
-[API, contentAPI].forEach((instance) => {
+[API, contentAPI,communityAPI].forEach((instance) => {
   instance.interceptors.request.use(requestInterceptor);
   instance.interceptors.response.use(
     (response) => response,

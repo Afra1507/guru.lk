@@ -1,31 +1,23 @@
-import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  Spinner,
-  Alert,
-} from "react-bootstrap";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import * as communityService from "../services/communityService";
 import QuestionCard from "../components/forum/QuestionCard";
-import { getQuestions } from "../services/forumService";
+import QuestionForm from "../components/forum/QuestionForm";
+import { Container, Spinner, Alert } from "react-bootstrap";
 
-const QnA = () => {
+const QnAPage = () => {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
         setLoading(true);
-        const data = await getQuestions();
-        setQuestions(data);
-        setLoading(false);
+        const res = await communityService.getAllQuestions();
+        setQuestions(res.data);
       } catch (err) {
-        setError("Failed to load questions. Please try again.");
+        setError("Failed to load questions.");
+      } finally {
         setLoading(false);
       }
     };
@@ -33,55 +25,28 @@ const QnA = () => {
     fetchQuestions();
   }, []);
 
-  if (loading) {
-    return (
-      <Container className="text-center my-5">
-        <Spinner animation="border" />
-      </Container>
-    );
-  }
+  const handleQuestionCreated = (newQuestion) => {
+    // Add new question to top of list
+    setQuestions((prev) => [newQuestion, ...prev]);
+  };
 
-  if (error) {
-    return (
-      <Container className="my-5">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
-    );
-  }
+  if (loading) return <Spinner animation="border" />;
+
+  if (error) return <Alert variant="danger">{error}</Alert>;
 
   return (
-    <Container className="my-4">
-      <Row className="mb-4">
-        <Col>
-          <h1>Q&A Forum</h1>
-        </Col>
-        <Col className="text-end">
-          <Button as={Link} to="/ask" variant="primary">
-            Ask a Question
-          </Button>
-        </Col>
-      </Row>
+    <Container>
+      <h1 className="my-4">Community Questions</h1>
 
-      <Row>
-        <Col>
-          {questions.length > 0 ? (
-            questions.map((question) => (
-              <QuestionCard key={question.id} question={question} />
-            ))
-          ) : (
-            <Card>
-              <Card.Body className="text-center">
-                <p>No questions found. Be the first to ask!</p>
-                <Button as={Link} to="/ask" variant="primary">
-                  Ask a Question
-                </Button>
-              </Card.Body>
-            </Card>
-          )}
-        </Col>
-      </Row>
+      <QuestionForm onQuestionCreated={handleQuestionCreated} />
+
+      {questions.length === 0 ? (
+        <p>No questions yet. Be the first to ask!</p>
+      ) : (
+        questions.map((q) => <QuestionCard key={q.questionId} question={q} />)
+      )}
     </Container>
   );
 };
 
-export default QnA;
+export default QnAPage;

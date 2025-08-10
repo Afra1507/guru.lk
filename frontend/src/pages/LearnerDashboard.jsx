@@ -12,9 +12,15 @@ import {
 import SchoolIcon from "@mui/icons-material/School";
 import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
+import AnswerIcon from "@mui/icons-material/QuestionAnswerOutlined"; // icon for Answers tab
 import ContentCard from "../components/content/ContentCard";
 import contentService from "../services/contentService";
 import {jwtDecode} from "jwt-decode";
+import * as communityService from "../services/communityService";
+
+// Import your forum components
+import QuestionCard from "../components/forum/QuestionCard";
+import AnswerCard from "../components/forum/AnswerCard";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -27,11 +33,7 @@ function TabPanel(props) {
       aria-labelledby={`learner-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ py: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -39,11 +41,16 @@ function TabPanel(props) {
 const LearnerDashboard = () => {
   const [recentLessons, setRecentLessons] = useState([]);
   const [downloadedLessons, setDownloadedLessons] = useState([]);
+  const [myQuestions, setMyQuestions] = useState([]);
+  const [myAnswers, setMyAnswers] = useState([]);
+
   const [loadingRecent, setLoadingRecent] = useState(true);
   const [loadingDownloads, setLoadingDownloads] = useState(true);
+  const [loadingQuestions, setLoadingQuestions] = useState(true);
+  const [loadingAnswers, setLoadingAnswers] = useState(true);
+
   const [tabIndex, setTabIndex] = useState(0);
 
-  // Get userId from token
   const getUserIdFromToken = () => {
     try {
       const token = localStorage.getItem("token");
@@ -61,15 +68,19 @@ const LearnerDashboard = () => {
     if (!userId) {
       setLoadingRecent(false);
       setLoadingDownloads(false);
+      setLoadingQuestions(false);
+      setLoadingAnswers(false);
       return;
     }
 
+    // Fetch recent lessons
     contentService
       .getApprovedLessons()
       .then((lessons) => setRecentLessons(lessons))
       .catch((err) => console.error("Failed to load recent lessons", err))
       .finally(() => setLoadingRecent(false));
 
+    // Fetch user downloads
     contentService
       .getUserDownloads(userId)
       .then((downloads) => {
@@ -83,6 +94,20 @@ const LearnerDashboard = () => {
       })
       .catch((err) => console.error("Failed to load downloads", err))
       .finally(() => setLoadingDownloads(false));
+
+    // Fetch user questions
+    communityService
+      .getQuestionsByUserId(userId)
+      .then((res) => setMyQuestions(res.data))
+      .catch((err) => console.error("Failed to load user's questions", err))
+      .finally(() => setLoadingQuestions(false));
+
+    // Fetch user answers
+    communityService
+      .getAnswersByUserId(userId)
+      .then((res) => setMyAnswers(res.data))
+      .catch((err) => console.error("Failed to load user's answers", err))
+      .finally(() => setLoadingAnswers(false));
   }, []);
 
   const handleTabChange = (event, newValue) => {
@@ -125,6 +150,13 @@ const LearnerDashboard = () => {
           id="learner-tab-2"
           aria-controls="learner-tabpanel-2"
         />
+        <Tab
+          label="My Answers"
+          icon={<AnswerIcon />}
+          iconPosition="start"
+          id="learner-tab-3"
+          aria-controls="learner-tabpanel-3"
+        />
       </Tabs>
 
       {/* Recent Lessons */}
@@ -141,7 +173,13 @@ const LearnerDashboard = () => {
           <Fade in timeout={600}>
             <Grid container spacing={3}>
               {recentLessons.map((lesson) => (
-                <Grid item xs={12} sm={6} md={4} key={lesson.lessonId || lesson.id}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  key={lesson.lessonId || lesson.id}
+                >
                   <ContentCard lesson={lesson} />
                 </Grid>
               ))}
@@ -164,7 +202,13 @@ const LearnerDashboard = () => {
           <Fade in timeout={600}>
             <Grid container spacing={3}>
               {downloadedLessons.map((lesson) => (
-                <Grid item xs={12} sm={6} md={4} key={lesson.lessonId || lesson.id}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  key={lesson.lessonId || lesson.id}
+                >
                   <ContentCard lesson={lesson} />
                 </Grid>
               ))}
@@ -175,9 +219,48 @@ const LearnerDashboard = () => {
 
       {/* My Questions */}
       <TabPanel value={tabIndex} index={2}>
-        <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mt: 4 }}>
-          Your questions will appear here.
-        </Typography>
+        {loadingQuestions ? (
+          <Box textAlign="center" py={5}>
+            <CircularProgress />
+          </Box>
+        ) : myQuestions.length === 0 ? (
+          <Typography variant="body1" color="text.secondary" textAlign="center">
+            You have no questions yet.
+          </Typography>
+        ) : (
+          <Fade in timeout={600}>
+            <Grid container spacing={3}>
+              {myQuestions.map((question) => (
+                <Grid item xs={12} key={question.questionId}>
+                  <QuestionCard question={question} />
+                </Grid>
+              ))}
+            </Grid>
+          </Fade>
+        )}
+      </TabPanel>
+
+      {/* My Answers */}
+      <TabPanel value={tabIndex} index={3}>
+        {loadingAnswers ? (
+          <Box textAlign="center" py={5}>
+            <CircularProgress />
+          </Box>
+        ) : myAnswers.length === 0 ? (
+          <Typography variant="body1" color="text.secondary" textAlign="center">
+            You have not answered any questions yet.
+          </Typography>
+        ) : (
+          <Fade in timeout={600}>
+            <Grid container spacing={3}>
+              {myAnswers.map((answer) => (
+                <Grid item xs={12} key={answer.answerId}>
+                  <AnswerCard answer={answer} />
+                </Grid>
+              ))}
+            </Grid>
+          </Fade>
+        )}
       </TabPanel>
     </Container>
   );

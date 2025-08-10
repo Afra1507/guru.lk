@@ -44,6 +44,11 @@ const PendingLessons = lazy(() => import("./pages/PendingLessons"));
 const AdminAllLessons = lazy(() => import("./pages/AdminAllLessons"));
 const LessonAnalytics = lazy(() => import("./pages/LessonAnalytics"));
 const UserManagement = lazy(() => import("./components/admin/UserManagement"));
+const QuestionDetail = lazy(() => import("./components/forum/QuestionDetail"));
+const QuestionForm = lazy(() => import("./components/forum/QuestionForm"));
+const QuestionCard = lazy(() => import("./components/forum/QuestionCard"));
+const AnswerForm = lazy(() => import("./components/forum/AnswerForm"));
+const AnswerCard = lazy(() => import("./components/forum/AnswerCard"));
 
 function App() {
   return (
@@ -146,6 +151,23 @@ function App() {
                       <LessonAnalytics />
                     </RequireRole>
                   }
+                />
+                {/* Forum Routes */}
+                <Route
+                  path="/questions/:id"
+                  element={<QuestionDetail />}
+                />
+                <Route
+                  path="/new-question"
+                  element={
+                    <RequireAuth>
+                      <QuestionForm />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/questions"
+                  element={<QnA />}
                 />
 
                 {/* 404 fallback */}
