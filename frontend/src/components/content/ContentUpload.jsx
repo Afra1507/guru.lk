@@ -1,17 +1,112 @@
 import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import contentService from "../../services/contentService";
-import {jwtDecode} from "jwt-decode"; // fixed import
+import { jwtDecode } from "jwt-decode"; // fixed import
 
 // Material UI Icons
-import TitleIcon from '@mui/icons-material/Title';
-import DescriptionIcon from '@mui/icons-material/Description';
-import CategoryIcon from '@mui/icons-material/Category';
-import LanguageIcon from '@mui/icons-material/Language';
-import GroupIcon from '@mui/icons-material/Group';
-import SubjectIcon from '@mui/icons-material/MenuBook';
-import LinkIcon from '@mui/icons-material/Link';
-import PersonIcon from '@mui/icons-material/Person';
+import TitleIcon from "@mui/icons-material/Title";
+import DescriptionIcon from "@mui/icons-material/Description";
+import CategoryIcon from "@mui/icons-material/Category";
+import LanguageIcon from "@mui/icons-material/Language";
+import GroupIcon from "@mui/icons-material/Group";
+import SubjectIcon from "@mui/icons-material/MenuBook";
+import LinkIcon from "@mui/icons-material/Link";
+import PersonIcon from "@mui/icons-material/Person";
+
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+
+const subjectsByCategory = {
+  "Grades 1-9": [
+    "Mathematics",
+    "Science",
+    "Sinhala",
+    "Tamil",
+    "English",
+    "History",
+    "Geography",
+    "Civics",
+    "Religion",
+    "Health & Physical Education",
+    "Art",
+    "Music",
+    "Information & Communication Technology",
+    "Commerce",
+    "Literature",
+  ],
+  "O-Level Subjects": [
+    "Mathematics",
+    "Science",
+    "Sinhala",
+    "Tamil",
+    "English",
+    "History",
+    "Geography",
+    "Civics",
+    "Religion",
+    "Health & Physical Education",
+    "Art",
+    "Music",
+    "Information & Communication Technology",
+    "Commerce",
+    "Literature",
+    "Combined Mathematics",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Accounting",
+    "Business Studies",
+    "Economics",
+    "Agriculture",
+    "Engineering Technology",
+    "Political Science",
+    "Logic",
+  ],
+  "A-Level Subjects": [
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Combined Mathematics",
+    "Accounting",
+    "Business Studies",
+    "Economics",
+    "Agriculture",
+    "Engineering Technology",
+    "Political Science",
+    "Logic",
+  ],
+  "Campus Major Subjects": [
+    "Computer Science",
+    "Law",
+    "Medicine",
+    "Engineering",
+    "Nursing",
+    "Architecture",
+    "Management",
+    "Psychology",
+    "Environmental Science",
+    "Finance",
+    "Marketing",
+    "Statistics",
+    "Economics",
+    "Political Science",
+    "Information Technology",
+    "Business",
+    "Data science",
+    "Artificial Intelligence",
+    "Cyber Security",
+    "Software Engineering",
+    "Web Development",
+    "Mobile App Development",
+    "Mathematics",
+    "Applied Mathematics",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Bio Science",
+  ],
+  Other: ["Other"],
+};
 
 const ContentUpload = () => {
   const [formData, setFormData] = useState({
@@ -26,6 +121,13 @@ const ContentUpload = () => {
   });
 
   const [submitting, setSubmitting] = useState(false);
+
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success", // success, error, info, warning
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -54,18 +156,32 @@ const ContentUpload = () => {
     e.preventDefault();
 
     if (!formData.fileUrl) {
-      alert("Please provide a file URL.");
+      setSnackbar({
+        open: true,
+        message: "Please provide a file URL.",
+        severity: "warning",
+      });
       return;
     }
     if (!formData.uploaderId) {
-      alert("User not authenticated.");
+      setSnackbar({
+        open: true,
+        message: "User not authenticated.",
+        severity: "error",
+      });
       return;
     }
 
     try {
       setSubmitting(true);
       await contentService.createLesson(formData);
-      alert("Lesson created successfully!");
+
+      setSnackbar({
+        open: true,
+        message: "Lesson created successfully! Waiting for approval.",
+        severity: "success",
+      });
+
       setFormData({
         title: "",
         description: "",
@@ -77,15 +193,22 @@ const ContentUpload = () => {
         uploaderId: formData.uploaderId,
       });
     } catch (err) {
-      alert(
-        "Submission failed: " + (err.response?.data?.message || err.message)
-      );
+      setSnackbar({
+        open: true,
+        message:
+          "Submission failed: " + (err.response?.data?.message || err.message),
+        severity: "error",
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Icon + label wrapper to keep consistent style
+  const handleSnackbarClose = (_, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
   const LabelWithIcon = ({ icon, text }) => (
     <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
       {icon}
@@ -189,10 +312,19 @@ const ContentUpload = () => {
               onChange={handleChange}
             >
               <option value="all">All Ages</option>
-              <option value="5-10">5-10</option>
-              <option value="11-14">11-14</option>
-              <option value="15-17">15-17</option>
-              <option value="18+">18+</option>
+              <option value="primary">
+                Primary School (5-10 years, Grades 1-5)
+              </option>
+              <option value="junior_secondary">
+                Junior Secondary (10-13 years, Grades 6-9)
+              </option>
+              <option value="senior_secondary">
+                Senior Secondary (14-16 years, Grades 10-11, GCE O-Level)
+              </option>
+              <option value="collegiate">
+                Collegiate Level (16-18/19 years, GCE A-Level)
+              </option>
+              <option value="postgrad">Campus Postgraduates & Others</option>
             </Form.Select>
           </Form.Group>
         </Row>
@@ -202,13 +334,27 @@ const ContentUpload = () => {
             <Form.Label>
               <LabelWithIcon icon={<SubjectIcon />} text="Subject" />
             </Form.Label>
-            <Form.Control
-              type="text"
+            <Form.Select
               name="subject"
               value={formData.subject}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="" disabled>
+                -- Select Subject --
+              </option>
+              {Object.entries(subjectsByCategory).map(
+                ([category, subjects]) => (
+                  <optgroup key={category} label={category}>
+                    {subjects.map((subject) => (
+                      <option key={subject} value={subject}>
+                        {subject}
+                      </option>
+                    ))}
+                  </optgroup>
+                )
+              )}
+            </Form.Select>
           </Form.Group>
         </Row>
 
@@ -232,6 +378,24 @@ const ContentUpload = () => {
           {submitting ? "Submitting..." : "Submit"}
         </Button>
       </Form>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+          elevation={6}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

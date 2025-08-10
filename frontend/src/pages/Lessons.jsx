@@ -1,7 +1,17 @@
 // src/pages/Lessons.jsx
 
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
+import {
+  Container,
+  Grid,
+  CircularProgress,
+  Alert,
+  Typography,
+  Box,
+  Paper,
+} from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ContentCard from "../components/content/ContentCard";
 import SearchFilter from "../components/content/SearchFilter";
 import { useContent } from "../hooks/useContent";
@@ -68,18 +78,26 @@ const Lessons = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center mt-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </div>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mt: 8,
+        }}
+      >
+        <CircularProgress color="primary" size={60} />
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <Container className="my-4">
-        <Alert variant="danger">
+      <Container maxWidth="md" sx={{ mt: 6 }}>
+        <Alert
+          severity="error"
+          icon={<ErrorOutlineIcon fontSize="inherit" />}
+          sx={{ fontWeight: "600" }}
+        >
           Error loading lessons: {error.toString()}
         </Alert>
       </Container>
@@ -87,29 +105,73 @@ const Lessons = () => {
   }
 
   return (
-    <Container className="my-4">
-      <h2 className="mb-4">Available Lessons</h2>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
+      <Typography
+        variant="h4"
+        component="h2"
+        gutterBottom
+        sx={{
+          fontWeight: "700",
+          letterSpacing: 1,
+          color: "#031227ff",
+          textAlign: "center",
+          mb: 4,
+          fontFamily: "'Poppins', sans-serif",
+        }}
+      >
+        Available Lessons
+      </Typography>
 
-      {/* Updated to use the new filter handler */}
-      <SearchFilter onFilter={handleFilter} />
+      {/* Paper wrapper for search filter with padding and shadow */}
+      <Paper
+        elevation={3}
+        sx={{
+          maxWidth: 900,
+          mx: "auto",
+          p: 3,
+          mb: 4,
+          borderRadius: 2,
+          bgcolor: "#f9fafb",
+        }}
+      >
+        <SearchFilter onFilter={handleFilter} />
+      </Paper>
 
-      <Row className="mt-3 g-4">
+      <Grid container spacing={4} justifyContent="center" sx={{ mt: 1 }}>
         {filteredLessons.length > 0 ? (
           filteredLessons.map((lesson) => (
-            <Col key={lesson.lessonId} xs={12} md={6} lg={4}>
-              <ContentCard lesson={lesson} createDownload={createDownload} />
-            </Col>
+            <Grid
+              item
+              key={lesson.lessonId}
+              xs={12}
+              sm={6}
+              md={4}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <ContentCard
+                lesson={lesson}
+                createDownload={createDownload}
+                sx={{ width: "100%", maxWidth: 350 }}
+              />
+            </Grid>
           ))
         ) : (
-          <Col>
-            <Alert variant="info" className="text-center">
+          <Grid item xs={12}>
+            <Alert
+              severity="info"
+              icon={<InfoIcon fontSize="inherit" />}
+              sx={{ fontWeight: "600", textAlign: "center" }}
+            >
               {lessons.length === 0
                 ? "No lessons available"
                 : "No lessons match your filter criteria"}
             </Alert>
-          </Col>
+          </Grid>
         )}
-      </Row>
+      </Grid>
     </Container>
   );
 };

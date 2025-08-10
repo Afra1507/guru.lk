@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+// src/pages/Home.jsx
+import React, { useEffect, useState, useRef } from "react";
 import Slider from "react-slick";
 import {
   Container,
   Grid,
   Typography,
   Button,
+  Snackbar,
   Alert,
   Box,
   CircularProgress,
@@ -15,12 +17,15 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import InfoIcon from "@mui/icons-material/Info";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 import SearchFilter from "../components/content/SearchFilter";
 import ContentCard from "../components/content/ContentCard";
 import contentService from "../services/contentService";
 
-import { useAuth } from "../auth/useAuth"; // Your auth hook
+import { useAuth } from "../auth/useAuth";
 
 const sliderImages = [
   {
@@ -40,33 +45,47 @@ const sliderImages = [
   },
 ];
 
+const iconMapping = {
+  info: <InfoIcon fontSize="small" />,
+  warning: <WarningAmberIcon fontSize="small" />,
+  success: <CheckCircleOutlineIcon fontSize="small" />,
+};
+
 const Home = () => {
   const { user, logout } = useAuth();
-  const [showWelcome, setShowWelcome] = useState(false);
   const [popularLessons, setPopularLessons] = useState([]);
   const [loadingPopular, setLoadingPopular] = useState(true);
   const [errorPopular, setErrorPopular] = useState(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    severity: "info",
+    message: "",
+  });
+
+  // Refs to track snackbar status and current user id to avoid repeats
+  const roleInfoShownRef = useRef(false);
+  const welcomeShownForUserRef = useRef(null);
 
   const navigate = useNavigate();
 
-  // Show welcome alert on login
+  // On user login change, show welcome message only once per user login
   useEffect(() => {
-    if (user) {
-      setShowWelcome(true);
-    } else {
-      setShowWelcome(false);
+    if (user && welcomeShownForUserRef.current !== user.id) {
+      // Show welcome snackbar once per login (user.id as unique id)
+      setSnackbar({
+        open: true,
+        severity: "success",
+        message: getWelcomeMessage(user.role),
+      });
+      welcomeShownForUserRef.current = user.id;
+      roleInfoShownRef.current = false; // reset role info shown for this user
     }
   }, [user]);
 
-  // Hide welcome after 5 seconds
-  useEffect(() => {
-    if (showWelcome) {
-      const timer = setTimeout(() => setShowWelcome(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showWelcome]);
-
-  // Fetch popular lessons on mount (same for all roles)
+  // Load popular lessons once
   useEffect(() => {
     setLoadingPopular(true);
     setErrorPopular(null);
@@ -79,6 +98,11 @@ const Home = () => {
       .catch((err) => {
         setErrorPopular("Failed to load popular lessons.");
         setLoadingPopular(false);
+        setSnackbar({
+          open: true,
+          severity: "error",
+          message: "Failed to load popular lessons.",
+        });
         console.error(err);
       });
   }, []);
@@ -87,9 +111,8 @@ const Home = () => {
   const handleRegister = () => navigate("/register");
   const handleLogout = () => {
     logout();
-    window.location.href = "/login"; // reload + redirect
+    window.location.href = "/login";
   };
-
   const handleProfileRedirect = () => {
     if (user?.role === "ADMIN") {
       navigate("/admin");
@@ -98,9 +121,8 @@ const Home = () => {
     }
   };
 
-  const getWelcomeMessage = () => {
-    if (!user) return null;
-    switch (user.role) {
+  function getWelcomeMessage(role) {
+    switch (role) {
       case "ADMIN":
         return "Welcome, Admin!";
       case "CONTRIBUTOR":
@@ -109,19 +131,58 @@ const Home = () => {
       default:
         return "Welcome, Learner!";
     }
-  };
+  }
 
   const role = user?.role;
 
   const sliderSettings = {
     dots: true,
     infinite: true,
-    speed: 600,
+    speed: 50, // a smooth fade speed (try 300)
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 4000,
     arrows: true,
+    pauseOnHover: true,
+    fade: true,
+    beforeChange: (current, next) => setActiveSlide(next),
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+
+    setSnackbar((prev) => ({ ...prev, open: false }));
+
+    // After welcome snackbar closes, show role info snackbar only once
+    if (
+      !roleInfoShownRef.current &&
+      (role === "CONTRIBUTOR" || role === "ADMIN") &&
+      snackbar.severity === "success" // This means welcome just closed
+    ) {
+      roleInfoShownRef.current = true;
+
+      // Show role-specific info snackbar after welcome
+      if (role === "CONTRIBUTOR") {
+        setTimeout(() => {
+          setSnackbar({
+            open: true,
+            severity: "info",
+            message:
+              "Welcome, contributor! Head to your profile to upload or edit your lessons.",
+          });
+        }, 300); // slight delay for smoothness
+      } else if (role === "ADMIN") {
+        setTimeout(() => {
+          setSnackbar({
+            open: true,
+            severity: "warning",
+            message:
+              "You have admin privileges. Use the admin tools below to manage users and review content.",
+          });
+        }, 300);
+      }
+    }
   };
 
   return (
@@ -135,10 +196,19 @@ const Home = () => {
         justifyContent="space-between"
       >
         <Grid item xs={12} md={8}>
-          <Typography variant="h3" component="h1" gutterBottom>
+          <Typography
+            variant="h3"
+            component="h1"
+            gutterBottom
+            sx={{ color: "#031227ff", fontWeight: "bold" }}
+          >
             Welcome to GURU.Ik
           </Typography>
-          <Typography variant="h6" color="text.secondary">
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            sx={{ color: "rgba(3, 18, 39, 0.7)", fontWeight: 500 }}
+          >
             Community Knowledge Sharing Platform for All Sri Lankans
           </Typography>
         </Grid>
@@ -161,7 +231,15 @@ const Home = () => {
                 color={role === "ADMIN" ? "error" : "primary"}
                 onClick={handleProfileRedirect}
                 size="large"
-                sx={{ textTransform: "capitalize", fontWeight: "600" }}
+                sx={{
+                  textTransform: "capitalize",
+                  fontWeight: "600",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    boxShadow: "0 6px 12px rgba(0,0,0,0.12)",
+                  },
+                }}
               >
                 {role === "ADMIN" ? "Admin Dashboard" : "My Profile"}
               </Button>
@@ -171,7 +249,16 @@ const Home = () => {
                 color="error"
                 onClick={handleLogout}
                 size="large"
-                sx={{ textTransform: "capitalize", fontWeight: "600" }}
+                sx={{
+                  textTransform: "capitalize",
+                  fontWeight: "600",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "error.main",
+                    color: "white",
+                    boxShadow: "0 6px 12px rgba(255,0,0,0.4)",
+                  },
+                }}
               >
                 Logout
               </Button>
@@ -184,7 +271,15 @@ const Home = () => {
                 color="primary"
                 onClick={handleLogin}
                 size="large"
-                sx={{ textTransform: "capitalize", fontWeight: "600" }}
+                sx={{
+                  textTransform: "capitalize",
+                  fontWeight: "600",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    boxShadow: "0 6px 12px rgba(25, 118, 210, 0.5)",
+                  },
+                }}
               >
                 Login
               </Button>
@@ -194,7 +289,16 @@ const Home = () => {
                 color="primary"
                 onClick={handleRegister}
                 size="large"
-                sx={{ textTransform: "capitalize", fontWeight: "600" }}
+                sx={{
+                  textTransform: "capitalize",
+                  fontWeight: "600",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "primary.main",
+                    color: "white",
+                    boxShadow: "0 6px 12px rgba(25, 118, 210, 0.5)",
+                  },
+                }}
               >
                 Register
               </Button>
@@ -203,140 +307,102 @@ const Home = () => {
         </Grid>
       </Grid>
 
-      {/* Contributor Notice */}
-      {role === "CONTRIBUTOR" && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          Welcome, contributor! Head to your profile to upload or edit your
-          lessons.
-        </Alert>
-      )}
-
-      {/* Admin Notice */}
-      {role === "ADMIN" && (
-        <Alert severity="warning" sx={{ mb: 3 }}>
-          You have admin privileges. Use the admin tools below to manage users
-          and review content.
-        </Alert>
-      )}
-
-      {/* Image Slider */}
+      {/* Slider Section */}
       <Box sx={{ mb: 5 }}>
         <Slider {...sliderSettings}>
           {sliderImages.map(({ src, alt, caption }, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                position: "relative",
-                borderRadius: 3,
-                overflow: "hidden",
-                height: { xs: 180, sm: 300, md: 400 },
-                boxShadow: 3,
-              }}
-            >
+            <Box key={idx} sx={{ position: "relative" }}>
               <img
                 src={src}
                 alt={alt}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                loading="lazy"
+                className={activeSlide === idx ? "zoom-in" : ""}
+                style={{
+                  width: "100%",
+                  maxHeight: "400px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
               />
-              <Box
+              <Typography
+                variant="h4"
                 sx={{
                   position: "absolute",
-                  bottom: 20,
-                  left: 20,
+                  bottom: "10%",
+                  left: "5%",
                   color: "white",
-                  bgcolor: "rgba(0,0,0,0.6)",
-                  px: 2,
-                  py: 1,
-                  borderRadius: 1,
                   fontWeight: "bold",
-                  fontSize: { xs: "1rem", sm: "1.25rem" },
-                  maxWidth: "70%",
+                  textShadow: "1px 1px 5px rgba(0,0,0,0.7)",
                   userSelect: "none",
                 }}
               >
                 {caption}
-              </Box>
+              </Typography>
             </Box>
           ))}
         </Slider>
       </Box>
 
-      {/* Welcome Message */}
-      {user && showWelcome && (
-        <Alert severity="success" sx={{ mb: 3, textAlign: "center" }}>
-          {getWelcomeMessage()}
-        </Alert>
-      )}
-
-      {/* Filters */}
-      <Box sx={{ mb: 5 }}>
+      {/* Search Filter */}
+      <Box sx={{ mb: 4 }}>
         <SearchFilter />
       </Box>
 
       {/* Popular Lessons */}
-      <Typography variant="h4" gutterBottom>
-        Top Viewed Lessons
+      <Typography
+        variant="h5"
+        sx={{ mb: 2, fontWeight: "600", color: "#031227ff" }}
+      >
+        Popular Lessons
       </Typography>
 
-      {loadingPopular ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-          <CircularProgress />
+      {loadingPopular && (
+        <Box sx={{ textAlign: "center", mt: 4 }}>
+          <CircularProgress color="primary" />
         </Box>
-      ) : errorPopular ? (
-        <Alert severity="error" sx={{ my: 3 }}>
+      )}
+
+      {errorPopular && (
+        <Alert severity="error" sx={{ mb: 3 }}>
           {errorPopular}
         </Alert>
-      ) : popularLessons.length === 0 ? (
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 3 }}>
-          No popular lessons available yet.
+      )}
+
+      {!loadingPopular && !errorPopular && popularLessons.length === 0 && (
+        <Typography color="text.secondary" sx={{ mb: 3 }}>
+          No popular lessons available at the moment.
         </Typography>
-      ) : (
-        <Grid container spacing={4} sx={{ mt: 1 }}>
-          {popularLessons.map((lesson) => (
-            <Grid item key={lesson.id || lesson.lessonId} xs={12} sm={6} md={4}>
-              <ContentCard lesson={lesson} />
-            </Grid>
-          ))}
-        </Grid>
       )}
 
-      {/* Browse Button */}
-      <Box sx={{ textAlign: "center", mt: 6 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={() => navigate("/lessons")}
+      <Grid container spacing={3}>
+        {popularLessons.map((lesson) => (
+          <Grid item key={lesson.id} xs={12} sm={6} md={4}>
+            <ContentCard lesson={lesson} />
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Snackbar Notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={2000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        slotProps={{
+          transition: {
+            direction: "up",
+          },
+        }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%", fontWeight: "600", fontSize: "1rem" }}
+          icon={iconMapping[snackbar.severity]}
+          variant="filled"
         >
-          Browse All Lessons
-        </Button>
-      </Box>
-
-      {/* Admin-only Section */}
-      {role === "ADMIN" && (
-        <Box sx={{ mt: 8 }}>
-          <Typography variant="h5" gutterBottom>
-            Admin Tools
-          </Typography>
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => navigate("/admin/users")}
-            >
-              Manage Users
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => navigate("/admin/analytics")}
-            >
-              Review Content
-            </Button>
-          </Box>
-        </Box>
-      )}
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
