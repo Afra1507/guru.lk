@@ -10,21 +10,92 @@ import {
   Divider,
   Stack,
   useTheme,
+  styled,
+  keyframes
 } from "@mui/material";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import BookIcon from "@mui/icons-material/Book";
-import SubjectIcon from "@mui/icons-material/Subject";
-import LanguageIcon from "@mui/icons-material/Language";
-import CategoryIcon from "@mui/icons-material/Category";
-import PeopleIcon from "@mui/icons-material/People";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import StarIcon from "@mui/icons-material/Star";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import {
+  Visibility as ViewsIcon,
+  MenuBook as LessonsIcon,
+  Subject as SubjectsIcon,
+  Language as LanguagesIcon,
+  Category as CategoriesIcon,
+  People as UsersIcon,
+  ThumbUp as LikesIcon,
+  Verified as ApprovedIcon,
+  HourglassBottom as PendingIcon,
+  CloudUpload as UploadsIcon,
+  Star as StarIcon,
+  AccessTime as TimeIcon,
+  BarChart as AnalyticsIcon,
+  TrendingUp as TrendingIcon
+} from "@mui/icons-material";
 import { useContent } from "../hooks/useContent";
+
+// Animation keyframes
+const floatAnimation = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0px); }
+`;
+
+const pulseAnimation = keyframes`
+  0% { box-shadow: 0 0 0 0 rgba(0, 31, 84, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 31, 84, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 31, 84, 0); }
+`;
+
+// Styled components
+const StatCard = styled(Card)(({ theme, color }) => ({
+  height: "100%",
+  borderRadius: "16px",
+  padding: theme.spacing(3),
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: theme.spacing(1.5),
+  cursor: "default",
+  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+  background: theme.palette.background.paper,
+  boxShadow: `0 8px 24px ${theme.palette.primary.light}20`,
+  border: `1px solid ${theme.palette.divider}`,
+  "&:hover": {
+    transform: "translateY(-8px)",
+    boxShadow: `0 16px 32px ${color}40`,
+    "& .stat-icon": {
+      animation: `${floatAnimation} 2s ease-in-out infinite`
+    }
+  }
+}));
+
+const StatIconWrapper = styled(Box)(({ theme, color }) => ({
+  width: "64px",
+  height: "64px",
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: `linear-gradient(135deg, ${color}, ${theme.palette.getContrastText(color)})`,
+  color: "white",
+  boxShadow: theme.shadows[4],
+  marginBottom: theme.spacing(1)
+}));
+
+const LessonCard = styled(Card)(({ theme }) => ({
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  borderRadius: "16px",
+  overflow: "hidden",
+  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+  background: theme.palette.background.paper,
+  boxShadow: `0 8px 24px ${theme.palette.primary.light}20`,
+  border: `1px solid ${theme.palette.divider}`,
+  "&:hover": {
+    transform: "translateY(-8px)",
+    boxShadow: `0 16px 32px ${theme.palette.primary.light}40`
+  }
+}));
 
 const LoadingSpinner = () => (
   <Box
@@ -35,35 +106,66 @@ const LoadingSpinner = () => (
       minHeight: "40vh",
     }}
   >
-    <CircularProgress size={60} />
+    <CircularProgress size={60} thickness={4} sx={{ color: "primary.main" }} />
   </Box>
 );
 
-const iconMap = {
-  totalViews: (color) => <VisibilityIcon fontSize="large" sx={{ color }} />,
-  totalLessons: (color) => <BookIcon fontSize="large" sx={{ color }} />,
-  totalSubjects: (color) => <SubjectIcon fontSize="large" sx={{ color }} />,
-  totalLanguages: (color) => <LanguageIcon fontSize="large" sx={{ color }} />,
-  totalContentTypes: (color) => <CategoryIcon fontSize="large" sx={{ color }} />,
-  totalUsers: (color) => <PeopleIcon fontSize="large" sx={{ color }} />,
-  totalLikes: (color) => <ThumbUpIcon fontSize="large" sx={{ color }} />,
-  totalApproved: (color) => <VerifiedUserIcon fontSize="large" sx={{ color }} />,
-  totalPending: (color) => <HourglassBottomIcon fontSize="large" sx={{ color }} />,
-  totalUploads: (color) => <FileUploadIcon fontSize="large" sx={{ color }} />,
-};
-
-const bgColorMap = {
-  totalViews: "primary.main",
-  totalLessons: "info.main",
-  totalSubjects: "warning.main",
-  totalLanguages: "secondary.main",
-  totalContentTypes: "error.main",
-  totalUsers: "success.main",
-  totalLikes: "pink.main",
-  totalApproved: "success.main",
-  totalPending: "warning.main",
-  totalUploads: "grey.600",
-};
+const statsConfig = [
+  {
+    key: "totalViews",
+    label: "Total Views",
+    icon: <ViewsIcon />,
+    color: "#3f51b5" // indigo
+  },
+  {
+    key: "totalLessons",
+    label: "Total Lessons",
+    icon: <LessonsIcon />,
+    color: "#2196f3" // blue
+  },
+  {
+    key: "totalSubjects",
+    label: "Subjects",
+    icon: <SubjectsIcon />,
+    color: "#4caf50" // green
+  },
+  {
+    key: "totalContentTypes",
+    label: "Content Types",
+    icon: <CategoriesIcon />,
+    color: "#9c27b0" // purple
+  },
+  {
+    key: "totalUsers",
+    label: "Total Users",
+    icon: <UsersIcon />,
+    color: "#607d8b" // blue grey
+  },
+  {
+    key: "totalLikes",
+    label: "Total Likes",
+    icon: <LikesIcon />,
+    color: "#e91e63" // pink
+  },
+  {
+    key: "totalApproved",
+    label: "Approved",
+    icon: <ApprovedIcon />,
+    color: "#00bcd4" // cyan
+  },
+  {
+    key: "totalPending",
+    label: "Pending",
+    icon: <PendingIcon />,
+    color: "#ff5722" // deep orange
+  },
+  {
+    key: "totalUploads",
+    label: "Uploads",
+    icon: <UploadsIcon />,
+    color: "#795548" // brown
+  }
+];
 
 const LessonAnalytics = () => {
   const { getContentAnalytics, loading } = useContent();
@@ -83,9 +185,9 @@ const LessonAnalytics = () => {
       <Typography
         align="center"
         variant="h6"
-        sx={{ mt: 6, color: theme.palette.text.secondary }}
+        sx={{ mt: 6, color: "text.secondary" }}
       >
-        No analytics data found.
+        No analytics data available
       </Typography>
     );
 
@@ -94,166 +196,131 @@ const LessonAnalytics = () => {
   );
   const topViewedLessons = topViewedLessonsKey ? analytics[topViewedLessonsKey] : [];
 
-  const analyticsSummary = Object.entries(analytics).filter(
-    ([key]) => key !== topViewedLessonsKey
-  );
-
-  // Format key to human readable label
-  const formatLabel = (key) =>
-    key
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str) => str.toUpperCase());
-
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth="xl" sx={{ py: 6 }}>
       <Stack
         direction="row"
-        spacing={1}
+        spacing={2}
         alignItems="center"
         justifyContent="center"
-        sx={{ mb: 5, color: theme.palette.primary.main }}
+        sx={{ mb: 6 }}
       >
-        <BarChartIcon fontSize="large" />
-        <Typography variant="h4" fontWeight={700}>
+        <AnalyticsIcon sx={{ fontSize: 48, color: "primary.main" }} />
+        <Typography variant="h3" fontWeight={800} sx={{ color: "primary.main" }}>
           Content Analytics
         </Typography>
       </Stack>
 
-      {/* Summary Cards */}
-      <Grid container spacing={4} justifyContent="center">
-        {analyticsSummary.map(([key, value]) => {
-          const normalizedKey = key.replace(/\s/g, "").replace(/^[a-z]/, (m) => m.toLowerCase());
-          const color = theme.palette[bgColorMap[normalizedKey]?.split(".")[0]]?.[bgColorMap[normalizedKey]?.split(".")[1]] || theme.palette.primary.main;
-
-          const icon = iconMap[normalizedKey]
-            ? iconMap[normalizedKey](color)
-            : <BarChartIcon fontSize="large" sx={{ color }} />;
-
-          return (
-            <Grid item xs={6} sm={4} md={3} lg={2.4} key={key}>
-              <Card
-                elevation={10}
-                sx={{
-                  height: 160,
-                  borderRadius: 4,
-                  px: 3,
-                  py: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 1.5,
-                  cursor: "default",
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-6px)",
-                    boxShadow: `0 10px 25px ${color}80`,
-                  },
-                }}
-              >
-                <Box>{icon}</Box>
-                <Typography variant="subtitle1" fontWeight={700} color="text.primary">
-                  {formatLabel(key)}
-                </Typography>
-                <Typography variant="h4" fontWeight={800} color={color}>
-                  {value}
-                </Typography>
-              </Card>
-            </Grid>
-          );
-        })}
+      {/* Summary Stats */}
+      <Grid container spacing={4} sx={{ mb: 8 }}>
+        {statsConfig.map((stat) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={stat.key}>
+            <StatCard color={stat.color}>
+              <StatIconWrapper color={stat.color} className="stat-icon">
+                {React.cloneElement(stat.icon, { sx: { fontSize: 28 } })}
+              </StatIconWrapper>
+              <Typography variant="subtitle1" fontWeight={600} color="text.secondary">
+                {stat.label}
+              </Typography>
+              <Typography variant="h3" fontWeight={800} sx={{ color: stat.color }}>
+                {analytics[stat.key] || 0}
+              </Typography>
+            </StatCard>
+          </Grid>
+        ))}
       </Grid>
-
-      {/* Divider */}
-      <Divider sx={{ my: 6, mx: "auto", maxWidth: 600 }} />
 
       {/* Top Viewed Lessons */}
       {topViewedLessons.length > 0 && (
-        <Box sx={{ textAlign: "center" }}>
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            gutterBottom
-            sx={{ color: theme.palette.primary.main, mb: 4 }}
-          >
-            Top Viewed Lessons
-          </Typography>
-          <Grid container spacing={4} justifyContent="center">
+        <>
+          <Divider sx={{ my: 6, borderColor: "divider", borderWidth: 1 }} />
+          <Box sx={{ textAlign: "center", mb: 6 }}>
+            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+              <TrendingIcon sx={{ fontSize: 40, color: "primary.main" }} />
+              <Typography variant="h4" fontWeight={700} sx={{ color: "primary.main" }}>
+                Top Viewed Lessons
+              </Typography>
+            </Stack>
+          </Box>
+          <Grid container spacing={4}>
             {topViewedLessons.map((lesson) => (
-              <Grid item key={lesson.lessonId} xs={12} sm={6} md={4} lg={3}>
-                <Card
-                  elevation={8}
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    borderRadius: 4,
-                    cursor: "pointer",
-                    transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                    "&:hover": {
-                      transform: "translateY(-10px)",
-                      boxShadow: `0 15px 30px ${theme.palette.primary.light}80`,
-                    },
-                  }}
-                >
+              <Grid item xs={12} sm={6} md={4} lg={3} key={lesson.lessonId}>
+                <LessonCard>
                   <Box
                     sx={{
+                      p: 3,
+                      borderBottom: `1px solid ${theme.palette.divider}`,
+                      backgroundColor: "action.hover",
                       display: "flex",
                       alignItems: "center",
-                      gap: 1.5,
-                      p: 2,
-                      borderBottom: `1px solid ${theme.palette.divider}`,
-                      backgroundColor: theme.palette.action.hover,
+                      gap: 2
                     }}
                   >
-                    <BookIcon color="primary" />
-                    <Typography variant="h6" noWrap sx={{ flexGrow: 1, fontWeight: 700 }}>
+                    <LessonsIcon color="primary" sx={{ fontSize: 32 }} />
+                    <Typography variant="h6" fontWeight={700} noWrap sx={{ flexGrow: 1 }}>
                       {lesson.title}
                     </Typography>
-                    <Stack direction="row" alignItems="center" spacing={0.5} color={theme.palette.text.secondary}>
-                      <VisibilityIcon fontSize="small" />
-                      <Typography variant="body2">{lesson.viewCount}</Typography>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <ViewsIcon color="primary" />
+                      <Typography variant="body1" fontWeight={600}>
+                        {lesson.viewCount}
+                      </Typography>
                     </Stack>
                   </Box>
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="body2" color="text.secondary" mb={2} noWrap>
-                      {lesson.description}
+                    <Typography variant="body2" color="text.secondary" mb={3} sx={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
+                      {lesson.description || "No description available"}
                     </Typography>
-                    <Stack direction="row" spacing={2} flexWrap="wrap" color={theme.palette.text.secondary}>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <SubjectIcon fontSize="small" />
-                        <Typography variant="caption">{lesson.subject}</Typography>
-                      </Stack>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <CategoryIcon fontSize="small" />
-                        <Typography variant="caption">{lesson.contentType}</Typography>
-                      </Stack>
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <LanguageIcon fontSize="small" />
-                        <Typography variant="caption">{lesson.language}</Typography>
-                      </Stack>
-                    </Stack>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <SubjectsIcon fontSize="small" color="primary" />
+                          <Typography variant="caption">{lesson.subject || "N/A"}</Typography>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <CategoriesIcon fontSize="small" color="primary" />
+                          <Typography variant="caption">{lesson.contentType || "N/A"}</Typography>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <TimeIcon fontSize="small" color="primary" />
+                          <Typography variant="caption">{lesson.duration || "N/A"}</Typography>
+                        </Stack>
+                      </Grid>
+                    </Grid>
                   </CardContent>
                   <Box
                     sx={{
-                      p: 1,
+                      p: 2,
                       borderTop: `1px solid ${theme.palette.divider}`,
                       display: "flex",
-                      justifyContent: "flex-end",
-                      gap: 1,
-                      color: theme.palette.text.secondary,
+                      justifyContent: "space-between",
+                      alignItems: "center"
                     }}
                   >
-                    <StarIcon fontSize="small" color="warning" />
-                    <Typography variant="caption">{lesson.rating ?? "N/A"}</Typography>
-                    <AccessTimeIcon fontSize="small" />
-                    <Typography variant="caption">{lesson.duration ?? "N/A"}</Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <StarIcon fontSize="small" color="warning" />
+                      <Typography variant="body2" fontWeight={600}>
+                        {lesson.rating ? `${lesson.rating}/5` : "N/A"}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary">
+                      Last updated: {new Date(lesson.updatedAt).toLocaleDateString()}
+                    </Typography>
                   </Box>
-                </Card>
+                </LessonCard>
               </Grid>
             ))}
           </Grid>
-        </Box>
+        </>
       )}
     </Container>
   );

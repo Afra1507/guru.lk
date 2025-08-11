@@ -20,7 +20,11 @@ body {
   height: calc(100vh - 56px);
   overflow-y: auto;
   transition: transform 0.3s ease-in-out;
-  z-index: 1000;
+  z-index: 1300;   // increase z-index above header and hamburger
+  position: fixed; // add this if not already set
+  top: 56px;       // offset for header height if fixed header is 56px tall
+  left: 0;
+  background-color: #031227; // match your drawer bg color or add one
 }
 
 @media (max-width: 768px) {

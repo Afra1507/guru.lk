@@ -6,12 +6,20 @@ import { Container } from "react-bootstrap";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
-import LoadingSpinner from "./components/ui/LoadingSpinner"; // Import custom spinner
+import LoadingSpinner from "./components/ui/LoadingSpinner";
 import NotFound from "./pages/NotFound";
 
 import { AuthProvider } from "./auth/AuthContext";
 import "./styles/main.scss";
 import { RequireAuth, RequireRole } from "./utils/ProtectedRoutes";
+
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+const theme = createTheme({
+  typography: {
+    fontFamily: "'Poppins', 'Helvetica', 'Arial', sans-serif",
+  },
+});
 
 // Lazy-loaded pages
 const Home = lazy(() => import("./pages/Home"));
@@ -52,130 +60,134 @@ const QuestionForm = lazy(() => import("./components/forum/QuestionForm"));
 
 function App() {
   return (
+    <Suspense fallback={<LoadingSpinner message="Loading..." size="lg" />}>
     <AuthProvider>
-      {/* ✅ Wrap everything inside AuthProvider */}
-      <Router>
-        <ScrollToTop />
-        <Header />
-        <main className="py-4">
-          <Container fluid>
-            <Suspense
-              fallback={<LoadingSpinner size="lg" message="Loading..." />}
-            >
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/lessons" element={<Lessons />} />
-                <Route path="/qna" element={<QnA />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+      {/* Wrap everything inside ThemeProvider for MUI global theming */}
+      <ThemeProvider theme={theme}>
+        <Router>
+          <ScrollToTop />
+          <Header />
+          <main className="py-4">
+            <Container fluid>
+              <Suspense
+                fallback={<LoadingSpinner size="lg" message="Loading..." />}
+              >
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Home />} />
+                  <Route path="/lessons" element={<Lessons />} />
+                  <Route path="/qna" element={<QnA />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
 
-                {/* Protected Routes */}
-                <Route
-                  path="/profile"
-                  element={
-                    <RequireAuth>
-                      <Profile />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/learner"
-                  element={
-                    <RequireAuth>
-                      <LearnerDashboard />
-                    </RequireAuth>
-                  }
-                />
+                  {/* Protected Routes */}
+                  <Route
+                    path="/profile"
+                    element={
+                      <RequireAuth>
+                        <Profile />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/learner"
+                    element={
+                      <RequireAuth>
+                        <LearnerDashboard />
+                      </RequireAuth>
+                    }
+                  />
 
-                <Route
-                  path="/lessons/:id"
-                  element={
-                    <RequireAuth>
-                      <LessonViewer />
-                    </RequireAuth>
-                  }
-                />
+                  <Route
+                    path="/lessons/:id"
+                    element={
+                      <RequireAuth>
+                        <LessonViewer />
+                      </RequireAuth>
+                    }
+                  />
 
-                {/* Contributor Routes */}
-                <Route
-                  path="/contributor/*"
-                  element={
-                    <RequireRole allowedRoles={["CONTRIBUTOR"]}>
-                      <ContributorLayout />
-                    </RequireRole>
-                  }
-                >
-                  <Route path="" element={<ContributorDashboard />} />
-                  <Route index element={<ContributorHome />} />
-                  <Route path="uploads" element={<ContributorUploads />} />
-                  <Route path="stats" element={<ContributorStats />} />
-                  <Route path="my-uploads" element={<MyUploads />} />
-                  <Route path="new" element={<ContributorNewUpload />} />
-                </Route>
+                  {/* Contributor Routes */}
+                  <Route
+                    path="/contributor/*"
+                    element={
+                      <RequireRole allowedRoles={["CONTRIBUTOR"]}>
+                        <ContributorLayout />
+                      </RequireRole>
+                    }
+                  >
+                    <Route path="" element={<ContributorDashboard />} />
+                    <Route index element={<ContributorHome />} />
+                    <Route path="uploads" element={<ContributorUploads />} />
+                    <Route path="stats" element={<ContributorStats />} />
+                    <Route path="my-uploads" element={<MyUploads />} />
+                    <Route path="new" element={<ContributorNewUpload />} />
+                  </Route>
 
-                {/* Admin Routes */}
-                <Route
-                  path="/admin"
-                  element={
-                    <RequireRole allowedRoles={["ADMIN"]}>
-                      <AdminDashboard />
-                    </RequireRole>
-                  }
-                />
-                <Route
-                  path="/admin/users"
-                  element={
-                    <RequireRole allowedRoles={["ADMIN"]}>
-                      <UserManagement />
-                    </RequireRole>
-                  }
-                />
-                <Route
-                  path="/admin/approvals"
-                  element={
-                    <RequireRole allowedRoles={["ADMIN"]}>
-                      <PendingLessons />
-                    </RequireRole>
-                  }
-                />
-                <Route
-                  path="/admin/lessons"
-                  element={
-                    <RequireRole allowedRoles={["ADMIN"]}>
-                      <AdminAllLessons />
-                    </RequireRole>
-                  }
-                />
-                <Route
-                  path="/admin/analytics"
-                  element={
-                    <RequireRole allowedRoles={["ADMIN"]}>
-                      <LessonAnalytics />
-                    </RequireRole>
-                  }
-                />
-                {/* Forum Routes */}
-                <Route path="/questions/:id" element={<QuestionDetail />} />
-                <Route
-                  path="/new-question"
-                  element={
-                    <RequireAuth>
-                      <QuestionForm />
-                    </RequireAuth>
-                  }
-                />
-                <Route path="/questions" element={<QnA />} />
+                  {/* Admin Routes */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <RequireRole allowedRoles={["ADMIN"]}>
+                        <AdminDashboard />
+                      </RequireRole>
+                    }
+                  />
+                  <Route
+                    path="/admin/users"
+                    element={
+                      <RequireRole allowedRoles={["ADMIN"]}>
+                        <UserManagement />
+                      </RequireRole>
+                    }
+                  />
+                  <Route
+                    path="/admin/approvals"
+                    element={
+                      <RequireRole allowedRoles={["ADMIN"]}>
+                        <PendingLessons />
+                      </RequireRole>
+                    }
+                  />
+                  <Route
+                    path="/admin/lessons"
+                    element={
+                      <RequireRole allowedRoles={["ADMIN"]}>
+                        <AdminAllLessons />
+                      </RequireRole>
+                    }
+                  />
+                  <Route
+                    path="/admin/analytics"
+                    element={
+                      <RequireRole allowedRoles={["ADMIN"]}>
+                        <LessonAnalytics />
+                      </RequireRole>
+                    }
+                  />
+                  {/* Forum Routes */}
+                  <Route path="/questions/:id" element={<QuestionDetail />} />
+                  <Route
+                    path="/new-question"
+                    element={
+                      <RequireAuth>
+                        <QuestionForm />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route path="/questions" element={<QnA />} />
 
-                {/* 404 fallback */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </Container>
-        </main>
-        <Footer />
-      </Router>
+                  {/* 404 fallback */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </Container>
+          </main>
+          <Footer />
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
+    </Suspense>
   );
 }
 

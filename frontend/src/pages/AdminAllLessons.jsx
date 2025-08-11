@@ -29,6 +29,7 @@ const AdminAllLessons = () => {
           fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
           letterSpacing: "0.05em",
           color: "#001f54", // navy blue
+          textAlign: "center",
         }}
       >
         All Lessons (Admin View)
@@ -44,10 +45,28 @@ const AdminAllLessons = () => {
           Please check back later.
         </Alert>
       ) : (
-        <Grid container spacing={3}>
+        <Grid
+          container
+          spacing={4}
+          justifyContent="center"   // centers grid items horizontally
+          sx={{ mt: 2 }}
+        >
           {lessons.map((lesson) => (
-            <Grid item xs={12} md={6} lg={4} key={lesson.lessonId}>
-              <ContentCard lesson={lesson} />
+            <Grid
+              item
+              key={lesson.lessonId}
+              xs={12}
+              sm={8}   // smaller screen size: occupy 8 columns (centered by container)
+              md={6}
+              lg={4}
+              sx={{
+                display: "flex",
+                justifyContent: "center", // center the card inside the grid item
+              }}
+            >
+              <Box sx={{ width: "100%", maxWidth: 360 }}>
+                <ContentCard lesson={lesson} />
+              </Box>
             </Grid>
           ))}
         </Grid>

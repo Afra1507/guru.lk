@@ -1,31 +1,67 @@
 import React from "react";
-import { Box, CircularProgress, Typography } from "@mui/material";
 
-const LoadingSpinner = ({ size = "md", message = "Loading..." }) => {
-  // Map size prop to MUI CircularProgress size in pixels
-  const sizeMap = {
-    sm: 24,
-    md: 40,
-    lg: 60,
+const LoadingSpinner = ({ message = "", size = "md" }) => {
+  const sizes = {
+    sm: 6,
+    md: 10,
+    lg: 14,
   };
-  const spinnerSize = sizeMap[size] || sizeMap.md;
+  const barWidth = sizes[size] || sizes.md;
 
   return (
-    <Box
-      sx={{
-        my: 5,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 1,
-      }}
-    >
-      <CircularProgress size={spinnerSize} />
-      <Typography variant="body2" color="text.secondary">
-        {message}
-      </Typography>
-    </Box>
+    <>
+      <style>{`
+        .loader3 {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 4px;
+          margin: 20px 0;
+        }
+
+        .bars {
+          width: ${barWidth}px;
+          height: ${barWidth * 2}px;
+          border-radius: 4px;
+          background-color: #4285F4;
+          animation: loader3 3s ease-in-out infinite;
+        }
+
+        .bar1 { animation-delay: -0.8s; }
+        .bar2 { animation-delay: -0.7s; }
+        .bar3 { animation-delay: -0.6s; }
+        .bar4 { animation-delay: -0.5s; }
+        .bar5 { animation-delay: -0.4s; }
+        .bar6 { animation-delay: -0.3s; }
+        .bar7 { animation-delay: -0.2s; }
+        .bar8 { animation-delay: -0.1s; }
+        .bar9 { animation-delay: 0s; }
+        .bar10 { animation-delay: 0.1s; }
+
+        @keyframes loader3 {
+          0% { transform: scale(1); }
+          20% { transform: scale(1, 2.32); }
+          40% { transform: scale(1); }
+        }
+
+        .loading-message {
+          text-align: center;
+          color: #555;
+          font-size: 14px;
+          margin-top: 8px;
+          font-family: Arial, sans-serif;
+        }
+      `}</style>
+
+      <div role="status" aria-live="polite" aria-busy="true">
+        <div className="loader3">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className={`bars bar${i + 1}`} />
+          ))}
+        </div>
+        {message && <div className="loading-message">{message}</div>}
+      </div>
+    </>
   );
 };
 

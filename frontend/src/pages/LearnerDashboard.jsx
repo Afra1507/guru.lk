@@ -123,6 +123,23 @@ const LearnerDashboard = () => {
     setTabIndex(newValue);
   };
 
+  // Helper function for consistent grid items centering and card sizing
+  const renderGridItem = (key, content, xs = 12, sm = 6, md = 4) => (
+    <Grid
+      item
+      key={key}
+      xs={xs}
+      sm={sm}
+      md={md}
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <Box sx={{ width: "100%", maxWidth: 360 }}>{content}</Box>
+    </Grid>
+  );
+
   return (
     <Container maxWidth="lg" sx={{ mt: 5, mb: 8 }}>
       <Typography
@@ -216,18 +233,10 @@ const LearnerDashboard = () => {
             No recent lessons found.
           </Typography>
         ) : (
-          <Grid container spacing={3}>
-            {recentLessons.map((lesson) => (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                key={lesson.lessonId || lesson.id}
-              >
-                <ContentCard lesson={lesson} />
-              </Grid>
-            ))}
+          <Grid container spacing={3} justifyContent="center">
+            {recentLessons.map((lesson) =>
+              renderGridItem(lesson.lessonId || lesson.id, <ContentCard lesson={lesson} />)
+            )}
           </Grid>
         )}
       </TabPanel>
@@ -248,18 +257,10 @@ const LearnerDashboard = () => {
             No downloads found.
           </Typography>
         ) : (
-          <Grid container spacing={3}>
-            {downloadedLessons.map((lesson) => (
-              <Grid
-                item
-                xs={12}
-                sm={6}
-                md={4}
-                key={lesson.lessonId || lesson.id}
-              >
-                <ContentCard lesson={lesson} />
-              </Grid>
-            ))}
+          <Grid container spacing={3} justifyContent="center">
+            {downloadedLessons.map((lesson) =>
+              renderGridItem(lesson.lessonId || lesson.id, <ContentCard lesson={lesson} />)
+            )}
           </Grid>
         )}
       </TabPanel>
@@ -280,12 +281,10 @@ const LearnerDashboard = () => {
             You have no questions yet.
           </Typography>
         ) : (
-          <Grid container spacing={3}>
-            {myQuestions.map((question) => (
-              <Grid item xs={12} key={question.questionId}>
-                <QuestionCard question={question} />
-              </Grid>
-            ))}
+          <Grid container spacing={3} justifyContent="center">
+            {myQuestions.map((question) =>
+              renderGridItem(question.questionId, <QuestionCard question={question} />, 12, 12, 8)
+            )}
           </Grid>
         )}
       </TabPanel>
@@ -306,12 +305,10 @@ const LearnerDashboard = () => {
             You have not answered any questions yet.
           </Typography>
         ) : (
-          <Grid container spacing={3}>
-            {myAnswers.map((answer) => (
-              <Grid item xs={12} key={answer.answerId}>
-                <AnswerCard answer={answer} />
-              </Grid>
-            ))}
+          <Grid container spacing={3} justifyContent="center">
+            {myAnswers.map((answer) =>
+              renderGridItem(answer.answerId, <AnswerCard answer={answer} />, 12, 12, 8)
+            )}
           </Grid>
         )}
       </TabPanel>

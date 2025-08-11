@@ -18,6 +18,8 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  styled,
+  keyframes
 } from "@mui/material";
 import {
   ExpandLess,
@@ -35,6 +37,204 @@ import { useAuth } from "../../auth/useAuth";
 import { useNavigate } from "react-router-dom";
 import { translate, initLanguage } from "../../utils/language";
 
+// Animation keyframes
+const floatAnimation = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+  100% { transform: translateY(0px); }
+`;
+
+const pulseAnimation = keyframes`
+  0% { box-shadow: 0 0 0 0 rgba(79, 195, 247, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(79, 195, 247, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(79, 195, 247, 0); }
+`;
+
+// Color palette
+const colors = {
+  primary: "#002855",
+  secondary: "#4fc3f7",
+  accent: "#FFC107",
+  darkBg: "#031227",
+  lightText: "#e0e0e0",
+  glassBorder: "rgba(255, 255, 255, 0.1)"
+};
+
+// Styled components
+const GlassDrawer = styled(Drawer)({
+  "& .MuiDrawer-paper": {
+    background: `linear-gradient(135deg, rgba(3, 18, 39, 0.95), rgba(3, 18, 39, 0.85))`,
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    borderRight: `1px solid ${colors.glassBorder}`,
+    boxShadow: "0 8px 32px rgba(0, 40, 85, 0.5)",
+    width: 280,
+    paddingTop: "16px",
+    paddingBottom: "16px",
+    zIndex: 1300,
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: "linear-gradient(135deg, rgba(0, 40, 85, 0.6), transparent)",
+      zIndex: -1
+    }
+  }
+});
+
+const AnimatedListItemButton = styled(ListItemButton)(({ theme }) => ({
+  borderRadius: "12px",
+  margin: "4px 12px",
+  padding: "10px 16px",
+  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+  background: "rgba(0, 40, 85, 0.3)",
+  "&:hover": {
+    background: "rgba(79, 195, 247, 0.15)",
+    transform: "translateX(4px) scale(1.02)",
+    boxShadow: "0 4px 20px rgba(79, 195, 247, 0.2)",
+    "& .MuiListItemIcon-root": {
+      color: colors.accent,
+      transform: "scale(1.2)"
+    },
+    "& .MuiListItemText-primary": {
+      color: colors.accent,
+      textShadow: "0 0 8px rgba(255, 193, 7, 0.5)"
+    }
+  },
+  "&.Mui-selected": {
+    background: "rgba(79, 195, 247, 0.25)",
+    borderLeft: `3px solid ${colors.secondary}`
+  }
+}));
+
+const AnimatedListItemIcon = styled(ListItemIcon)({
+  color: colors.secondary,
+  transition: "all 0.3s ease",
+  minWidth: "36px !important"
+});
+
+const AnimatedListItemText = styled(ListItemText)({
+  "& .MuiTypography-root": {
+    color: colors.lightText,
+    fontWeight: 500,
+    fontSize: "0.95rem",
+    letterSpacing: "0.5px",
+    transition: "all 0.3s ease"
+  }
+});
+
+const Backdrop = styled("div")(({ open }) => ({
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  pointerEvents: open ? "auto" : "none",
+  opacity: open ? 1 : 0,
+  transition: "opacity 0.4s ease",
+  backdropFilter: open ? "blur(8px)" : "none",
+  WebkitBackdropFilter: open ? "blur(8px)" : "none",
+  backgroundColor: open ? "rgba(3, 18, 39, 0.5)" : "transparent",
+  zIndex: 1200
+}));
+
+const PremiumBadge = styled(Badge)({
+  "& .MuiBadge-badge": {
+    right: -3,
+    top: 8,
+    border: `2px solid ${colors.darkBg}`,
+    padding: "0 4px",
+    animation: `${pulseAnimation} 2s infinite`,
+    fontWeight: "bold"
+  }
+});
+
+const SectionHeader = styled(ListItemButton)({
+  "&:hover": {
+    "& .MuiListItemIcon-root": {
+      animation: `${floatAnimation} 2s ease-in-out infinite`
+    }
+  }
+});
+
+const GlassDialog = styled(Dialog)({
+  "& .MuiPaper-root": {
+    background: `linear-gradient(135deg, rgba(3, 18, 39, 0.98), rgba(3, 18, 39, 0.9))`,
+    backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)",
+    border: `1px solid ${colors.glassBorder}`,
+    borderRadius: "16px",
+    boxShadow: "0 8px 32px rgba(0, 40, 85, 0.6)",
+    color: colors.lightText
+  }
+});
+
+const DialogTitleStyled = styled(DialogTitle)({
+  background: `linear-gradient(90deg, ${colors.primary}, transparent)`,
+  borderBottom: `1px solid ${colors.glassBorder}`,
+  color: colors.accent,
+  fontWeight: "bold",
+  letterSpacing: "1px",
+  padding: "16px 24px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center"
+});
+
+const DialogContentStyled = styled(DialogContent)({
+  padding: "24px",
+  "& .MuiListItem-root": {
+    background: "rgba(0, 40, 85, 0.3)",
+    borderRadius: "8px",
+    marginBottom: "8px",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      background: "rgba(79, 195, 247, 0.15)"
+    }
+  }
+});
+
+const DialogActionsStyled = styled(DialogActions)({
+  borderTop: `1px solid ${colors.glassBorder}`,
+  padding: "16px 24px",
+  justifyContent: "flex-end"
+});
+
+const ApproveButton = styled(Button)({
+  background: `linear-gradient(90deg, ${colors.accent}, #FFAB00)`,
+  color: "#000",
+  fontWeight: "bold",
+  borderRadius: "8px",
+  padding: "8px 20px",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: `0 4px 12px rgba(255, 193, 7, 0.4)`,
+    background: `linear-gradient(90deg, ${colors.accent}, #FF8F00)`
+  },
+  "&:disabled": {
+    background: "rgba(255, 193, 7, 0.5)"
+  }
+});
+
+const SecondaryButton = styled(Button)({
+  border: `1px solid ${colors.secondary}`,
+  color: colors.secondary,
+  fontWeight: "bold",
+  borderRadius: "8px",
+  padding: "8px 20px",
+  marginRight: "12px",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    background: "rgba(79, 195, 247, 0.1)",
+    transform: "translateY(-2px)",
+    boxShadow: `0 4px 12px rgba(79, 195, 247, 0.2)`
+  }
+});
+
 const PendingApprovalsDialog = ({
   open,
   onClose,
@@ -44,101 +244,110 @@ const PendingApprovalsDialog = ({
   language,
 }) => {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ position: "relative" }}>
+    <GlassDialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitleStyled>
         {translate("pendingLessonApprovals", language)}
         <IconButton
           aria-label={translate("close", language)}
           onClick={onClose}
-          sx={{ position: "absolute", right: 8, top: 8 }}
+          sx={{ color: colors.accent }}
         >
           <CloseIcon />
         </IconButton>
-      </DialogTitle>
+      </DialogTitleStyled>
 
-      <DialogContent dividers>
+      <DialogContentStyled dividers>
         {pendingLessons.length === 0 ? (
-          <Typography>{translate("noPendingLessons", language)}</Typography>
+          <Typography sx={{ color: colors.lightText }}>
+            {translate("noPendingLessons", language)}
+          </Typography>
         ) : (
           pendingLessons.map((lesson) => (
             <ListItem
               key={lesson.lessonId || lesson.id}
               secondaryAction={
-                <Button
+                <ApproveButton
                   variant="contained"
-                  color="primary"
                   onClick={() =>
                     onApproveClick(lesson.lessonId || lesson.id, lesson.title)
                   }
                   disabled={loadingApprove}
-                  sx={{
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: loadingApprove ? "none" : "scale(1.05)",
-                    },
-                  }}
                 >
                   {loadingApprove ? (
                     <CircularProgress size={20} color="inherit" />
                   ) : (
                     translate("approve", language)
                   )}
-                </Button>
+                </ApproveButton>
               }
-              disableGutters
               sx={{
                 mb: 1,
                 px: 2,
-                borderRadius: 1,
-                bgcolor: "background.paper",
-                boxShadow: 1,
-                transition: "background-color 0.3s ease",
+                py: 1.5,
+                transition: "all 0.3s ease",
                 "&:hover": {
-                  bgcolor: "primary.light",
-                },
+                  transform: "translateX(4px)"
+                }
               }}
             >
               <ListItemText
                 primary={
-                  lesson.title ||
-                  `${translate("lessonId", language)}: ${
-                    lesson.lessonId || lesson.id
-                  }`
+                  <Typography sx={{ color: colors.lightText, fontWeight: 500 }}>
+                    {lesson.title ||
+                    `${translate("lessonId", language)}: ${
+                      lesson.lessonId || lesson.id
+                    }`}
+                  </Typography>
                 }
-                secondary={`${translate("uploadedBy", language)}: ${
-                  lesson.uploaderName ||
-                  lesson.uploaderId ||
-                  translate("unknown", language)
-                }`}
+                secondary={
+                  <Typography sx={{ color: colors.secondary, fontSize: "0.8rem" }}>
+                    {`${translate("uploadedBy", language)}: ${
+                      lesson.uploaderName ||
+                      lesson.uploaderId ||
+                      translate("unknown", language)
+                    }`}
+                  </Typography>
+                }
               />
             </ListItem>
           ))
         )}
-      </DialogContent>
+      </DialogContentStyled>
 
-      <DialogActions>
-        <Button onClick={onClose}>{translate("close", language)}</Button>
-      </DialogActions>
-    </Dialog>
+      <DialogActionsStyled>
+        <SecondaryButton onClick={onClose}>
+          {translate("close", language)}
+        </SecondaryButton>
+      </DialogActionsStyled>
+    </GlassDialog>
   );
 };
 
 const ConfirmDialog = ({ open, onClose, onConfirm, message, language }) => {
   return (
-    <Dialog open={open} onClose={() => onClose(false)} maxWidth="xs" fullWidth>
-      <DialogTitle>{translate("confirmApproval", language)}</DialogTitle>
-      <DialogContent>
-        <Typography>{message}</Typography>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => onClose(false)}>
+    <GlassDialog open={open} onClose={() => onClose(false)} maxWidth="xs" fullWidth>
+      <DialogTitleStyled>
+        {translate("confirmApproval", language)}
+        <IconButton
+          aria-label={translate("close", language)}
+          onClick={() => onClose(false)}
+          sx={{ color: colors.accent }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitleStyled>
+      <DialogContentStyled>
+        <Typography sx={{ color: colors.lightText }}>{message}</Typography>
+      </DialogContentStyled>
+      <DialogActionsStyled>
+        <SecondaryButton onClick={() => onClose(false)}>
           {translate("cancel", language)}
-        </Button>
-        <Button variant="contained" onClick={() => onConfirm()} color="primary">
+        </SecondaryButton>
+        <ApproveButton variant="contained" onClick={() => onConfirm()}>
           {translate("yes", language)}
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </ApproveButton>
+      </DialogActionsStyled>
+    </GlassDialog>
   );
 };
 
@@ -160,7 +369,6 @@ const Sidebar = ({ open, onClose }) => {
     severity: "info",
   });
 
-  // Language state
   const [language, setLanguage] = useState(initLanguage());
 
   const { user } = useAuth();
@@ -350,7 +558,6 @@ const Sidebar = ({ open, onClose }) => {
     ];
   }
 
-  // Prepare confirm message with dynamic lesson title translation
   const confirmMessage = lessonToApprove
     ? translate("confirmApprovalMessage", language).replace(
         "$title",
@@ -360,81 +567,89 @@ const Sidebar = ({ open, onClose }) => {
 
   return (
     <>
-      <Drawer
+      {/* Premium glass backdrop */}
+      <Backdrop open={open} onClick={onClose} />
+
+      <GlassDrawer
         anchor="left"
         open={open}
         onClose={onClose}
-        PaperProps={{
-          sx: {
-            bgcolor: "#031227",
-            color: "#e0e6f2",
-          },
+        ModalProps={{
+          keepMounted: true // Better open performance on mobile
         }}
       >
-        <List sx={{ width: 250 }}>
-          {links.map((link, index) =>
-            link.isSection ? (
-              <React.Fragment key={index}>
-                <ListItemButton onClick={() => toggleSection(link.sectionKey)}>
-                  <ListItemIcon sx={{ color: "#e0e6f2" }}>
-                    {link.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={link.text} />
-                  {expandedSections[link.sectionKey] ? (
-                    <ExpandLess />
-                  ) : (
-                    <ExpandMore />
-                  )}
-                </ListItemButton>
-                <Collapse
-                  in={expandedSections[link.sectionKey]}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  <List component="div" disablePadding>
-                    {link.children.map((child, cIndex) => (
-                      <ListItemButton
-                        key={cIndex}
-                        sx={{ pl: 4 }}
-                        onClick={() => {
-                          if (child.onClick) child.onClick();
-                          else if (child.path) {
-                            handleNavigate(child.path);
-                          }
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: "#e0e6f2" }}>
-                          {child.icon}
-                        </ListItemIcon>
-                        <ListItemText primary={child.text} />
-                        {child.badge && child.badge > 0 && (
-                          <Badge badgeContent={child.badge} color="error" />
-                        )}
-                      </ListItemButton>
-                    ))}
-                  </List>
-                </Collapse>
-              </React.Fragment>
-            ) : (
-              <ListItemButton
-                key={index}
-                onClick={() => {
-                  if (link.onClick) link.onClick();
-                  else if (link.path) handleNavigate(link.path);
-                }}
+        <List disablePadding sx={{ pt: 1 }}>
+          {links.map((link, idx) => {
+            if (link.isSection) {
+              const isExpanded = expandedSections[link.sectionKey];
+              return (
+                <React.Fragment key={link.sectionKey || idx}>
+                  <SectionHeader 
+                    onClick={() => toggleSection(link.sectionKey)}
+                    sx={{
+                      background: isExpanded ? "rgba(79, 195, 247, 0.1)" : "transparent",
+                      borderLeft: isExpanded ? `3px solid ${colors.secondary}` : "none"
+                    }}
+                  >
+                    <AnimatedListItemIcon>{link.icon}</AnimatedListItemIcon>
+                    <AnimatedListItemText primary={link.text} />
+                    {isExpanded ? (
+                      <ExpandLess sx={{ color: colors.secondary }} />
+                    ) : (
+                      <ExpandMore sx={{ color: colors.secondary }} />
+                    )}
+                  </SectionHeader>
+                  <Collapse 
+                    in={isExpanded} 
+                    timeout="auto" 
+                    unmountOnExit
+                    sx={{
+                      background: "rgba(0, 40, 85, 0.2)",
+                      borderRadius: "0 0 12px 12px",
+                      margin: "0 12px",
+                      borderLeft: `1px solid ${colors.glassBorder}`
+                    }}
+                  >
+                    <List component="div" disablePadding>
+                      {link.children.map((child, childIdx) => (
+                        <AnimatedListItemButton
+                          key={child.path || child.text || childIdx}
+                          onClick={child.onClick ? child.onClick : () => handleNavigate(child.path)}
+                          sx={{ pl: 4 }}
+                        >
+                          <AnimatedListItemIcon>
+                            {child.badge ? (
+                              <PremiumBadge
+                                badgeContent={child.badge}
+                                color="error"
+                                max={99}
+                              >
+                                {child.icon}
+                              </PremiumBadge>
+                            ) : (
+                              child.icon
+                            )}
+                          </AnimatedListItemIcon>
+                          <AnimatedListItemText primary={child.text} />
+                        </AnimatedListItemButton>
+                      ))}
+                    </List>
+                  </Collapse>
+                </React.Fragment>
+              );
+            }
+            return (
+              <AnimatedListItemButton
+                key={link.path || link.text || idx}
+                onClick={link.onClick ? link.onClick : () => handleNavigate(link.path)}
               >
-                <ListItemIcon sx={{ color: "#e0e6f2" }}>
-                  {link.icon}
-                </ListItemIcon>
-                <ListItemText primary={link.text} />
-                {link.badge && link.badge > 0 && (
-                  <Badge badgeContent={link.badge} color="error" />
-                )}
-              </ListItemButton>
-            )
-          )}
+                <AnimatedListItemIcon>{link.icon}</AnimatedListItemIcon>
+                <AnimatedListItemText primary={link.text} />
+              </AnimatedListItemButton>
+            );
+          })}
         </List>
-      </Drawer>
+      </GlassDrawer>
 
       <PendingApprovalsDialog
         open={dialogOpen}
@@ -460,10 +675,20 @@ const Sidebar = ({ open, onClose }) => {
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
+          onClose={handleSnackbarClose}
           severity={snackbar.severity}
           variant="filled"
-          onClose={handleSnackbarClose}
-          sx={{ width: "100%" }}
+          sx={{ 
+            width: "100%",
+            background: snackbar.severity === "error" 
+              ? "linear-gradient(90deg, #d32f2f, #b71c1c)"
+              : snackbar.severity === "success"
+              ? "linear-gradient(90deg, #388e3c, #1b5e20)"
+              : "linear-gradient(90deg, #1976d2, #0d47a1)",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.25)",
+            borderRadius: "12px",
+            fontWeight: "bold"
+          }}
         >
           {snackbar.message}
         </Alert>

@@ -9,6 +9,7 @@ import {
   Stack,
   Divider,
   useTheme,
+  Paper,
 } from "@mui/material";
 import {
   FaFacebook,
@@ -16,13 +17,16 @@ import {
   FaInstagram,
   FaYoutube,
   FaGithub,
+  FaLinkedin,
 } from "react-icons/fa";
-import PhoneIcon from "@mui/icons-material/Phone";
-import EmailIcon from "@mui/icons-material/Email";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
-import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
-
+import { MdEmail, MdPhone, MdLocationOn } from "react-icons/md";
+import {
+  HomeOutlined,
+  MenuBookOutlined,
+  ForumOutlined,
+  SchoolOutlined,
+  PersonOutline,
+} from "@mui/icons-material";
 import { translate, initLanguage } from "../../utils/language";
 
 const Footer = () => {
@@ -30,38 +34,56 @@ const Footer = () => {
   const [language] = useState(initLanguage());
 
   const socialIcons = [
-    { icon: FaFacebook, label: "Facebook", href: "#" },
-    { icon: FaTwitter, label: "Twitter", href: "#" },
-    { icon: FaInstagram, label: "Instagram", href: "#" },
-    { icon: FaYoutube, label: "YouTube", href: "#" },
-    { icon: FaGithub, label: "Github", href: "#" },
+    { icon: FaFacebook, label: "Facebook", href: "#", color: "#1877F2" },
+    { icon: FaTwitter, label: "Twitter", href: "#", color: "#1DA1F2" },
+    { icon: FaInstagram, label: "Instagram", href: "#", color: "#E4405F" },
+    { icon: FaYoutube, label: "YouTube", href: "#", color: "#FF0000" },
+    { icon: FaGithub, label: "Github", href: "#", color: "#181717" },
+    { icon: FaLinkedin, label: "LinkedIn", href: "#", color: "#0A66C2" },
   ];
 
   const quickLinks = [
     {
       label: translate("home", language),
       href: "/",
-      icon: <HomeOutlinedIcon fontSize="small" sx={{ mr: 0.7 }} />,
+      icon: <HomeOutlined fontSize="small" />,
     },
     {
       label: translate("lessons", language),
       href: "/lessons",
-      icon: <MenuBookOutlinedIcon fontSize="small" sx={{ mr: 0.7 }} />,
+      icon: <MenuBookOutlined fontSize="small" />,
     },
     {
-      label: translate("forum", language), // fixed key from qnaForum to forum (your translations use forum)
+      label: translate("forum", language),
       href: "/qna",
-      icon: <ForumOutlinedIcon fontSize="small" sx={{ mr: 0.7 }} />,
+      icon: <ForumOutlined fontSize="small" />,
     },
     {
-      label: "+94 112 803 803",
+      label: translate("dashboardLabels.myDashboard", language),
+      href: "/profile",
+      icon: <PersonOutline fontSize="small" />,
+    },
+    {
+      label: translate("footer.universityPortal", language),
+      href: "#",
+      icon: <SchoolOutlined fontSize="small" />,
+    },
+  ];
+
+  const contactInfo = [
+    {
+      icon: <MdLocationOn size={20} />,
+      text: translate("footer.address", language),
+    },
+    {
+      icon: <MdPhone size={20} />,
+      text: "+94 112 803 803",
       href: "tel:+94112803803",
-      icon: <PhoneIcon fontSize="small" sx={{ mr: 0.7 }} />,
     },
     {
-      label: "info@guru.lk",
+      icon: <MdEmail size={20} />,
+      text: "info@guru.lk",
       href: "mailto:info@guru.lk",
-      icon: <EmailIcon fontSize="small" sx={{ mr: 0.7 }} />,
     },
   ];
 
@@ -69,153 +91,254 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        bgcolor: "#031227ff",
-        color: "#e0e6f2",
+        bgcolor: "background.paper",
+        backgroundImage: "linear-gradient(135deg, #031227 0%, #0a2240 100%)",
+        color: "text.secondary",
         pt: 8,
-        pb: 4,
-        px: { xs: 3, sm: 6, md: 10 },
-        fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-        userSelect: "none",
+        pb: 6,
+        borderTop: `1px solid ${theme.palette.divider}`,
+        position: "relative",
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "4px",
+          background: "linear-gradient(90deg, #1976d2, #64b5f6)",
+        },
       }}
     >
       <Container maxWidth="lg">
         <Grid container spacing={6}>
-          {/* About */}
+          {/* About Section */}
           <Grid item xs={12} md={5}>
             <Typography
               variant="h6"
               gutterBottom
-              fontWeight="700"
-              sx={{ letterSpacing: 1, color: "#fff" }}
+              sx={{
+                fontWeight: 700,
+                color: "common.white",
+                mb: 3,
+                position: "relative",
+                display: "inline-block",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -8,
+                  left: 0,
+                  width: "60px",
+                  height: "3px",
+                  background: theme.palette.primary.main,
+                  borderRadius: 3,
+                },
+              }}
             >
               {translate("footer.aboutTitle", language)}
             </Typography>
             <Typography
-              variant="body2"
-              sx={{ color: "#cbd5f7", lineHeight: 1.6, mb: 3 }}
+              variant="body1"
+              sx={{
+                color: "rgba(255, 255, 255, 0.8)",
+                lineHeight: 1.7,
+                mb: 3,
+              }}
             >
               {translate("footer.aboutDescription", language)}
             </Typography>
             <Stack direction="row" spacing={1}>
-              {socialIcons.map(({ icon: Icon, label, href }) => (
+              {socialIcons.map(({ icon: Icon, label, href, color }) => (
                 <IconButton
                   key={label}
                   href={href}
                   aria-label={label}
                   sx={{
-                    color: "#a3bffa",
+                    color: "common.white",
                     bgcolor: "rgba(255,255,255,0.1)",
                     transition: "all 0.3s ease",
                     "&:hover": {
-                      color: "#0b2240",
-                      bgcolor: "#a3bffa",
-                      transform: "scale(1.1)",
+                      bgcolor: color,
+                      transform: "translateY(-3px)",
+                      boxShadow: `0 4px 12px ${color}80`,
                     },
                   }}
-                  size="large"
+                  size="medium"
                 >
-                  <Icon />
+                  <Icon size={18} />
                 </IconButton>
               ))}
             </Stack>
           </Grid>
 
           {/* Quick Links */}
-          <Grid item xs={6} md={4}>
-            <Typography
-              variant="h6"
-              gutterBottom
-              fontWeight="700"
-              sx={{ letterSpacing: 1, color: "#fff" }}
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper
+              elevation={0}
+              sx={{
+                bgcolor: "transparent",
+                p: 0,
+                "& .MuiListItem-root": {
+                  px: 0,
+                },
+              }}
             >
-              {translate("footer.quickLinksTitle", language)}
-            </Typography>
-            <Stack
-              component="ul"
-              spacing={1}
-              sx={{ listStyle: "none", p: 0, m: 0 }}
-            >
-              {quickLinks.map(({ label, href, icon }) => (
-                <li key={label}>
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  fontWeight: 700,
+                  color: "common.white",
+                  mb: 3,
+                  position: "relative",
+                  display: "inline-block",
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: -8,
+                    left: 0,
+                    width: "60px",
+                    height: "3px",
+                    background: theme.palette.primary.main,
+                    borderRadius: 3,
+                  },
+                }}
+              >
+                {translate("footer.quickLinksTitle", language)}
+              </Typography>
+              <Stack spacing={1.5}>
+                {quickLinks.map(({ label, href, icon }) => (
                   <Link
+                    key={label}
                     href={href}
-                    underline="hover"
+                    underline="none"
                     sx={{
-                      color: "#9bb0f7",
-                      fontWeight: 500,
-                      transition: "color 0.25s ease",
                       display: "flex",
                       alignItems: "center",
-                      "&:hover": { color: "#fff" },
-                      cursor: "pointer",
+                      color: "rgba(255, 255, 255, 0.7)",
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        color: theme.palette.primary.light,
+                        transform: "translateX(5px)",
+                      },
                     }}
                   >
-                    {icon}
+                    <Box
+                      sx={{
+                        mr: 1.5,
+                        display: "flex",
+                        alignItems: "center",
+                        color: "inherit",
+                      }}
+                    >
+                      {icon}
+                    </Box>
                     {label}
                   </Link>
-                </li>
-              ))}
-            </Stack>
+                ))}
+              </Stack>
+            </Paper>
           </Grid>
 
-          {/* Contact Us */}
-          <Grid item xs={12} md={3}>
+          {/* Contact Info */}
+          <Grid item xs={12} sm={6} md={3}>
             <Typography
               variant="h6"
               gutterBottom
-              fontWeight="700"
-              sx={{ letterSpacing: 1, color: "#fff" }}
+              sx={{
+                fontWeight: 700,
+                color: "common.white",
+                mb: 3,
+                position: "relative",
+                display: "inline-block",
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  bottom: -8,
+                  left: 0,
+                  width: "60px",
+                  height: "3px",
+                  background: theme.palette.primary.main,
+                  borderRadius: 3,
+                },
+              }}
             >
               {translate("footer.contactUsTitle", language)}
             </Typography>
-            <Box
-              component="address"
-              sx={{
-                fontStyle: "normal",
-                color: "#cbd5f7",
-                lineHeight: 1.7,
-                fontWeight: 500,
-              }}
-            >
-              <Typography>
-                <strong>{translate("footer.universityName", language)}</strong>
-              </Typography>
-              <Typography>{translate("footer.faculty", language)}</Typography>
-              <Typography>
-                {translate("footer.department", language)}
-              </Typography>
-              <Typography sx={{ mt: 1 }}>
-                <strong>{translate("footer.phoneLabel", language)}:</strong> +94
-                112 803 803
-              </Typography>
-              <Typography>
-                <strong>{translate("footer.emailLabel", language)}:</strong>{" "}
-                <Link
-                  href="mailto:info@guru.lk"
+            <Stack spacing={2}>
+              {contactInfo.map((item, index) => (
+                <Box
+                  key={index}
                   sx={{
-                    color: "#9bb0f7",
-                    textDecoration: "underline",
-                    "&:hover": { color: "#fff" },
+                    display: "flex",
+                    alignItems: "flex-start",
                   }}
                 >
-                  info@guru.lk
-                </Link>
-              </Typography>
-            </Box>
+                  <Box
+                    sx={{
+                      color: theme.palette.primary.light,
+                      mr: 2,
+                      mt: "2px",
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  {item.href ? (
+                    <Link
+                      href={item.href}
+                      underline="hover"
+                      sx={{
+                        color: "rgba(255, 255, 255, 0.7)",
+                        transition: "color 0.3s ease",
+                        "&:hover": {
+                          color: theme.palette.primary.light,
+                        },
+                      }}
+                    >
+                      {item.text}
+                    </Link>
+                  ) : (
+                    <Typography
+                      variant="body1"
+                      sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                    >
+                      {item.text}
+                    </Typography>
+                  )}
+                </Box>
+              ))}
+            </Stack>
           </Grid>
         </Grid>
 
         <Divider
-          sx={{ bgcolor: "#1a3a70", my: 4, borderWidth: 1 }}
-          variant="fullWidth"
+          sx={{
+            my: 6,
+            bgcolor: "rgba(255, 255, 255, 0.1)",
+            borderWidth: 1,
+          }}
         />
 
-        <Box textAlign="center" color="#819cff" userSelect="none">
-          <Typography variant="body2" fontWeight={500}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: "center",
+            textAlign: { xs: "center", sm: "left" },
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{ color: "rgba(255, 255, 255, 0.7)", mb: { xs: 2, sm: 0 } }}
+          >
             &copy; {new Date().getFullYear()} GURU.Ik -{" "}
             {translate("footer.copyrightText", language)}
           </Typography>
-          <Typography variant="caption" display="block" mt={0.5}>
+          <Typography
+            variant="body2"
+            sx={{ color: "rgba(255, 255, 255, 0.5)" }}
+          >
             {translate("footer.developedBy", language)}
           </Typography>
         </Box>
