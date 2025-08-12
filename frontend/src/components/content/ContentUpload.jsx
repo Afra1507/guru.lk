@@ -49,7 +49,7 @@ const GlassPanel = styled(Paper)(({ theme }) => ({
   backdropFilter: "blur(12px)",
   WebkitBackdropFilter: "blur(12px)",
   borderRadius: "16px",
-  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.21)",
   padding: theme.spacing(6),
   width: "100%",
   maxWidth: "1200px",
@@ -294,7 +294,6 @@ const ContentUpload = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%)",
         py: 8,
         px: { xs: 2, sm: 4 },
       }}
@@ -340,355 +339,358 @@ const ContentUpload = () => {
 
           {/* Form */}
           <Box component="form" onSubmit={handleSubmit} noValidate>
-            <Grid container spacing={4}>
-              {/* User ID */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <PersonIcon fontSize="medium" />
-                      <Typography variant="body1" fontWeight="500">
-                        User ID
-                      </Typography>
-                    </Box>
-                  }
-                  name="uploaderId"
-                  value={formData.uploaderId || ""}
-                  InputProps={{
-                    readOnly: true,
-                    style: { fontSize: "1rem" },
-                  }}
-                  variant="outlined"
-                  size="medium"
-                />
-              </Grid>
+            {/* User ID */}
+            <Box mb={4}>
+              <TextField
+                fullWidth
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <PersonIcon fontSize="medium" />
+                    <Typography variant="body1" fontWeight="500">
+                      User ID
+                    </Typography>
+                  </Box>
+                }
+                name="uploaderId"
+                value={formData.uploaderId || ""}
+                InputProps={{
+                  readOnly: true,
+                  style: { fontSize: "1rem" },
+                }}
+                variant="outlined"
+                size="medium"
+              />
+            </Box>
 
-              {/* Title */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <TitleIcon fontSize="medium" />
-                      <Typography variant="body1" fontWeight="500">
-                        Title
-                      </Typography>
-                    </Box>
-                  }
-                  name="title"
-                  value={formData.title}
+            {/* Title */}
+            <Box mb={4}>
+              <TextField
+                fullWidth
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <TitleIcon fontSize="medium" />
+                    <Typography variant="body1" fontWeight="500">
+                      Title
+                    </Typography>
+                  </Box>
+                }
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                error={!!errors.title}
+                helperText={errors.title}
+                variant="outlined"
+                size="medium"
+                InputProps={{
+                  style: { fontSize: "1rem" },
+                }}
+              />
+            </Box>
+
+            {/* Description */}
+            <Box mb={4}>
+              <TextField
+                fullWidth
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <DescriptionIcon fontSize="medium" />
+                    <Typography variant="body1" fontWeight="500">
+                      Description
+                    </Typography>
+                  </Box>
+                }
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+                error={!!errors.description}
+                helperText={errors.description}
+                multiline
+                rows={5}
+                variant="outlined"
+                size="medium"
+                InputProps={{
+                  style: { fontSize: "1rem" },
+                }}
+              />
+            </Box>
+
+            {/* Content Type */}
+            <Box mb={4}>
+              <FormControl fullWidth>
+                <InputLabel id="content-type-label" sx={{ fontSize: "1rem" }}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <CategoryIcon fontSize="medium" />
+                    <Typography variant="body1" fontWeight="500">
+                      Content Type
+                    </Typography>
+                  </Box>
+                </InputLabel>
+                <Select
+                  labelId="content-type-label"
+                  name="contentType"
+                  value={formData.contentType}
                   onChange={handleChange}
-                  required
-                  error={!!errors.title}
-                  helperText={errors.title}
-                  variant="outlined"
-                  size="medium"
-                  InputProps={{
-                    style: { fontSize: "1rem" },
-                  }}
-                />
-              </Grid>
-
-              {/* Description */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
                   label={
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <DescriptionIcon fontSize="medium" />
-                      <Typography variant="body1" fontWeight="500">
-                        Description
-                      </Typography>
-                    </Box>
-                  }
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                  error={!!errors.description}
-                  helperText={errors.description}
-                  multiline
-                  rows={5}
-                  variant="outlined"
-                  size="medium"
-                  InputProps={{
-                    style: { fontSize: "1rem" },
-                  }}
-                />
-              </Grid>
-
-              {/* Content Type, Language, Age Group */}
-              <Grid item xs={12} md={4}>
-                <FormControl fullWidth>
-                  <InputLabel id="content-type-label" sx={{ fontSize: "1rem" }}>
                     <Box display="flex" alignItems="center" gap={1}>
                       <CategoryIcon fontSize="medium" />
                       <Typography variant="body1" fontWeight="500">
                         Content Type
                       </Typography>
                     </Box>
-                  </InputLabel>
-                  <Select
-                    labelId="content-type-label"
-                    name="contentType"
-                    value={formData.contentType}
-                    onChange={handleChange}
-                    label={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <CategoryIcon fontSize="medium" />
-                        <Typography variant="body1" fontWeight="500">
-                          Content Type
-                        </Typography>
-                      </Box>
-                    }
-                    sx={{ fontSize: "1rem" }}
-                    MenuProps={{
-                      PaperProps: {
-                        style: {
-                          maxHeight: 300,
-                        },
+                  }
+                  sx={{ fontSize: "1rem" }}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
                       },
-                    }}
-                  >
-                    <MenuItem value="text" sx={{ fontSize: "1rem" }}>
-                      Text
-                    </MenuItem>
-                    <MenuItem value="video" sx={{ fontSize: "1rem" }}>
-                      Video
-                    </MenuItem>
-                    <MenuItem value="audio" sx={{ fontSize: "1rem" }}>
-                      Audio
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+                    },
+                  }}
+                >
+                  <MenuItem value="text" sx={{ fontSize: "1rem" }}>
+                    Text
+                  </MenuItem>
+                  <MenuItem value="video" sx={{ fontSize: "1rem" }}>
+                    Video
+                  </MenuItem>
+                  <MenuItem value="audio" sx={{ fontSize: "1rem" }}>
+                    Audio
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
-              <Grid item xs={12} md={4}>
-                <FormControl fullWidth>
-                  <InputLabel id="language-label" sx={{ fontSize: "1rem" }}>
+            {/* Language */}
+            <Box mb={4}>
+              <FormControl fullWidth>
+                <InputLabel id="language-label" sx={{ fontSize: "1rem" }}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <LanguageIcon fontSize="medium" />
+                    <Typography variant="body1" fontWeight="500">
+                      Language
+                    </Typography>
+                  </Box>
+                </InputLabel>
+                <Select
+                  labelId="language-label"
+                  name="language"
+                  value={formData.language}
+                  onChange={handleChange}
+                  label={
                     <Box display="flex" alignItems="center" gap={1}>
                       <LanguageIcon fontSize="medium" />
                       <Typography variant="body1" fontWeight="500">
                         Language
                       </Typography>
                     </Box>
-                  </InputLabel>
-                  <Select
-                    labelId="language-label"
-                    name="language"
-                    value={formData.language}
-                    onChange={handleChange}
-                    label={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <LanguageIcon fontSize="medium" />
-                        <Typography variant="body1" fontWeight="500">
-                          Language
-                        </Typography>
-                      </Box>
-                    }
-                    sx={{ fontSize: "1rem" }}
-                  >
-                    <MenuItem value="sinhala" sx={{ fontSize: "1rem" }}>
-                      Sinhala
-                    </MenuItem>
-                    <MenuItem value="tamil" sx={{ fontSize: "1rem" }}>
-                      Tamil
-                    </MenuItem>
-                    <MenuItem value="english" sx={{ fontSize: "1rem" }}>
-                      English
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+                  }
+                  sx={{ fontSize: "1rem" }}
+                >
+                  <MenuItem value="sinhala" sx={{ fontSize: "1rem" }}>
+                    Sinhala
+                  </MenuItem>
+                  <MenuItem value="tamil" sx={{ fontSize: "1rem" }}>
+                    Tamil
+                  </MenuItem>
+                  <MenuItem value="english" sx={{ fontSize: "1rem" }}>
+                    English
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
-              <Grid item xs={12} md={4}>
-                <FormControl fullWidth>
-                  <InputLabel id="age-group-label" sx={{ fontSize: "1rem" }}>
+            {/* Age Group */}
+            <Box mb={4}>
+              <FormControl fullWidth>
+                <InputLabel id="age-group-label" sx={{ fontSize: "1rem" }}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <GroupIcon fontSize="medium" />
+                    <Typography variant="body1" fontWeight="500">
+                      Age Group
+                    </Typography>
+                  </Box>
+                </InputLabel>
+                <Select
+                  labelId="age-group-label"
+                  name="ageGroup"
+                  value={formData.ageGroup}
+                  onChange={handleChange}
+                  label={
                     <Box display="flex" alignItems="center" gap={1}>
                       <GroupIcon fontSize="medium" />
                       <Typography variant="body1" fontWeight="500">
                         Age Group
                       </Typography>
                     </Box>
-                  </InputLabel>
-                  <Select
-                    labelId="age-group-label"
-                    name="ageGroup"
-                    value={formData.ageGroup}
-                    onChange={handleChange}
-                    label={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <GroupIcon fontSize="medium" />
-                        <Typography variant="body1" fontWeight="500">
-                          Age Group
-                        </Typography>
-                      </Box>
-                    }
+                  }
+                  sx={{ fontSize: "1rem" }}
+                >
+                  <MenuItem value="all" sx={{ fontSize: "1rem" }}>
+                    All Ages
+                  </MenuItem>
+                  <MenuItem value="primary" sx={{ fontSize: "1rem" }}>
+                    Primary School (5-10 years, Grades 1-5)
+                  </MenuItem>
+                  <MenuItem
+                    value="junior_secondary"
                     sx={{ fontSize: "1rem" }}
                   >
-                    <MenuItem value="all" sx={{ fontSize: "1rem" }}>
-                      All Ages
-                    </MenuItem>
-                    <MenuItem value="primary" sx={{ fontSize: "1rem" }}>
-                      Primary School (5-10 years, Grades 1-5)
-                    </MenuItem>
-                    <MenuItem
-                      value="junior_secondary"
-                      sx={{ fontSize: "1rem" }}
-                    >
-                      Junior Secondary (10-13 years, Grades 6-9)
-                    </MenuItem>
-                    <MenuItem
-                      value="senior_secondary"
-                      sx={{ fontSize: "1rem" }}
-                    >
-                      Senior Secondary (14-16 years, Grades 10-11, GCE O-Level)
-                    </MenuItem>
-                    <MenuItem value="collegiate" sx={{ fontSize: "1rem" }}>
-                      Collegiate Level (16-18/19 years, GCE A-Level)
-                    </MenuItem>
-                    <MenuItem value="postgrad" sx={{ fontSize: "1rem" }}>
-                      Campus Postgraduates & Others
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+                    Junior Secondary (10-13 years, Grades 6-9)
+                  </MenuItem>
+                  <MenuItem
+                    value="senior_secondary"
+                    sx={{ fontSize: "1rem" }}
+                  >
+                    Senior Secondary (14-16 years, Grades 10-11, GCE O-Level)
+                  </MenuItem>
+                  <MenuItem value="collegiate" sx={{ fontSize: "1rem" }}>
+                    Collegiate Level (16-18/19 years, GCE A-Level)
+                  </MenuItem>
+                  <MenuItem value="postgrad" sx={{ fontSize: "1rem" }}>
+                    Campus Postgraduates & Others
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
-              {/* Subject - Compact Version */}
-              <Grid item xs={12}>
-                <FormControl fullWidth error={!!errors.subject}>
-                  <InputLabel id="subject-label" sx={{ fontSize: "1rem" }}>
+            {/* Subject */}
+            <Box mb={4}>
+              <FormControl fullWidth error={!!errors.subject}>
+                <InputLabel id="subject-label" sx={{ fontSize: "1rem" }}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <SubjectIcon fontSize="medium" />
+                    Subject
+                  </Box>
+                </InputLabel>
+                <Select
+                  labelId="subject-label"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  label={
                     <Box display="flex" alignItems="center" gap={1}>
                       <SubjectIcon fontSize="medium" />
                       Subject
                     </Box>
-                  </InputLabel>
-                  <Select
-                    labelId="subject-label"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                    label={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <SubjectIcon fontSize="medium" />
-                        Subject
-                      </Box>
-                    }
-                    sx={{
-                      fontSize: "1rem",
-                      "& .MuiSelect-select": {
-                        whiteSpace: "normal",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: "vertical",
+                  }
+                  sx={{
+                    fontSize: "1rem",
+                    "& .MuiSelect-select": {
+                      whiteSpace: "normal",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 1,
+                      WebkitBoxOrient: "vertical",
+                    },
+                  }}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 400,
+                        maxWidth: 500,
                       },
-                    }}
-                    MenuProps={{
-                      PaperProps: {
-                        style: {
-                          maxHeight: 400,
-                          maxWidth: 500,
-                        },
-                      },
-                    }}
-                  >
-                    <MenuItem value="" disabled sx={{ fontSize: "1rem" }}>
-                      -- Select Subject --
-                    </MenuItem>
-                    {Object.entries(subjectsByCategory).map(
-                      ([category, subjects]) => [
+                    },
+                  }}
+                >
+                  <MenuItem value="" disabled sx={{ fontSize: "1rem" }}>
+                    -- Select Subject --
+                  </MenuItem>
+                  {Object.entries(subjectsByCategory).map(
+                    ([category, subjects]) => [
+                      <MenuItem
+                        key={category}
+                        value={category}
+                        disabled
+                        sx={{
+                          fontSize: "0.875rem",
+                          fontWeight: "bold",
+                          color: "text.primary",
+                          backgroundColor: "grey.100",
+                          "&.Mui-disabled": { opacity: 1 },
+                        }}
+                      >
+                        {category}
+                      </MenuItem>,
+                      ...subjects.map((subject) => (
                         <MenuItem
-                          key={category}
-                          value={category}
-                          disabled
+                          key={subject}
+                          value={subject}
                           sx={{
                             fontSize: "0.875rem",
-                            fontWeight: "bold",
-                            color: "text.primary",
-                            backgroundColor: "grey.100",
-                            "&.Mui-disabled": { opacity: 1 },
+                            pl: 4,
                           }}
                         >
-                          {category}
-                        </MenuItem>,
-                        ...subjects.map((subject) => (
-                          <MenuItem
-                            key={subject}
-                            value={subject}
-                            sx={{
-                              fontSize: "0.875rem",
-                              pl: 4,
-                            }}
-                          >
-                            {subject}
-                          </MenuItem>
-                        )),
-                      ]
-                    )}
-                  </Select>
-                  {errors.subject && (
-                    <FormHelperText sx={{ fontSize: "0.875rem" }}>
-                      {errors.subject}
-                    </FormHelperText>
+                          {subject}
+                        </MenuItem>
+                      )),
+                    ]
                   )}
-                </FormControl>
-              </Grid>
+                </Select>
+                {errors.subject && (
+                  <FormHelperText sx={{ fontSize: "0.875rem" }}>
+                    {errors.subject}
+                  </FormHelperText>
+                )}
+              </FormControl>
+            </Box>
 
-              {/* File URL */}
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <LinkIcon fontSize="medium" />
-                      <Typography variant="body1" fontWeight="500">
-                        File URL
-                      </Typography>
-                    </Box>
-                  }
-                  name="fileUrl"
-                  value={formData.fileUrl}
-                  onChange={handleChange}
-                  required
-                  error={!!errors.fileUrl}
-                  helperText={errors.fileUrl}
-                  variant="outlined"
-                  placeholder="https://example.com/file.pdf"
-                  size="medium"
-                  InputProps={{
-                    style: { fontSize: "1rem" },
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LinkIcon color="action" />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
+            {/* File URL */}
+            <Box mb={4}>
+              <TextField
+                fullWidth
+                label={
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <LinkIcon fontSize="medium" />
+                    <Typography variant="body1" fontWeight="500">
+                      File URL
+                    </Typography>
+                  </Box>
+                }
+                name="fileUrl"
+                value={formData.fileUrl}
+                onChange={handleChange}
+                required
+                error={!!errors.fileUrl}
+                helperText={errors.fileUrl}
+                variant="outlined"
+                placeholder="https://example.com/file.pdf"
+                size="medium"
+                InputProps={{
+                  style: { fontSize: "1rem" },
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LinkIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
 
-              {/* Submit Button */}
-              <Grid item xs={12}>
-                <Box display="flex" justifyContent="flex-end" mt={4}>
-                  <PremiumButton
-                    type="submit"
-                    disabled={submitting}
-                    startIcon={
-                      submitting ? (
-                        <CircularProgress size={24} color="inherit" />
-                      ) : (
-                        <CloudUploadIcon />
-                      )
-                    }
-                  >
-                    {submitting ? "Submitting..." : "Upload Content"}
-                  </PremiumButton>
-                </Box>
-              </Grid>
-            </Grid>
+            {/* Submit Button */}
+            <Box display="flex" justifyContent="flex-end" mt={6}>
+              <PremiumButton
+                type="submit"
+                disabled={submitting}
+                startIcon={
+                  submitting ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    <CloudUploadIcon />
+                  )
+                }
+                sx={{
+                  width: { xs: "100%", sm: "auto" },
+                  py: 2,
+                  px: 4,
+                }}
+              >
+                {submitting ? "Submitting..." : "Upload Content"}
+              </PremiumButton>
+            </Box>
           </Box>
         </GlassPanel>
       </Box>

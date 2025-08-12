@@ -18,7 +18,6 @@ const ContributorStats = () => {
           color: "#2c3e50",
         }}
       >
-        Upload Statistics
       </Typography>
       <UploadStats />
     </>

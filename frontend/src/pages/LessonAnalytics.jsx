@@ -11,7 +11,7 @@ import {
   Stack,
   useTheme,
   styled,
-  keyframes
+  keyframes,
 } from "@mui/material";
 import {
   Visibility as ViewsIcon,
@@ -27,7 +27,7 @@ import {
   Star as StarIcon,
   AccessTime as TimeIcon,
   BarChart as AnalyticsIcon,
-  TrendingUp as TrendingIcon
+  TrendingUp as TrendingIcon,
 } from "@mui/icons-material";
 import { useContent } from "../hooks/useContent";
 
@@ -63,9 +63,9 @@ const StatCard = styled(Card)(({ theme, color }) => ({
     transform: "translateY(-8px)",
     boxShadow: `0 16px 32px ${color}40`,
     "& .stat-icon": {
-      animation: `${floatAnimation} 2s ease-in-out infinite`
-    }
-  }
+      animation: `${floatAnimation} 2s ease-in-out infinite`,
+    },
+  },
 }));
 
 const StatIconWrapper = styled(Box)(({ theme, color }) => ({
@@ -75,10 +75,12 @@ const StatIconWrapper = styled(Box)(({ theme, color }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: `linear-gradient(135deg, ${color}, ${theme.palette.getContrastText(color)})`,
+  background: `linear-gradient(135deg, ${color}, ${theme.palette.getContrastText(
+    color
+  )})`,
   color: "white",
   boxShadow: theme.shadows[4],
-  marginBottom: theme.spacing(1)
+  marginBottom: theme.spacing(1),
 }));
 
 const LessonCard = styled(Card)(({ theme }) => ({
@@ -93,8 +95,8 @@ const LessonCard = styled(Card)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   "&:hover": {
     transform: "translateY(-8px)",
-    boxShadow: `0 16px 32px ${theme.palette.primary.light}40`
-  }
+    boxShadow: `0 16px 32px ${theme.palette.primary.light}40`,
+  },
 }));
 
 const LoadingSpinner = () => (
@@ -115,56 +117,56 @@ const statsConfig = [
     key: "totalViews",
     label: "Total Views",
     icon: <ViewsIcon />,
-    color: "#3f51b5" // indigo
+    color: "#3f51b5", // indigo
   },
   {
     key: "totalLessons",
     label: "Total Lessons",
     icon: <LessonsIcon />,
-    color: "#2196f3" // blue
+    color: "#2196f3", // blue
   },
   {
     key: "totalSubjects",
     label: "Subjects",
     icon: <SubjectsIcon />,
-    color: "#4caf50" // green
+    color: "#4caf50", // green
   },
   {
     key: "totalContentTypes",
     label: "Content Types",
     icon: <CategoriesIcon />,
-    color: "#9c27b0" // purple
+    color: "#9c27b0", // purple
   },
   {
     key: "totalUsers",
     label: "Total Users",
     icon: <UsersIcon />,
-    color: "#607d8b" // blue grey
+    color: "#607d8b", // blue grey
   },
   {
     key: "totalLikes",
     label: "Total Likes",
     icon: <LikesIcon />,
-    color: "#e91e63" // pink
+    color: "#e91e63", // pink
   },
   {
     key: "totalApproved",
     label: "Approved",
     icon: <ApprovedIcon />,
-    color: "#00bcd4" // cyan
+    color: "#00bcd4", // cyan
   },
   {
     key: "totalPending",
     label: "Pending",
     icon: <PendingIcon />,
-    color: "#ff5722" // deep orange
+    color: "#ff5722", // deep orange
   },
   {
     key: "totalUploads",
     label: "Uploads",
     icon: <UploadsIcon />,
-    color: "#795548" // brown
-  }
+    color: "#795548", // brown
+  },
 ];
 
 const LessonAnalytics = () => {
@@ -173,9 +175,7 @@ const LessonAnalytics = () => {
   const theme = useTheme();
 
   useEffect(() => {
-    getContentAnalytics()
-      .then(setAnalytics)
-      .catch(console.error);
+    getContentAnalytics().then(setAnalytics).catch(console.error);
   }, [getContentAnalytics]);
 
   if (loading) return <LoadingSpinner />;
@@ -194,50 +194,31 @@ const LessonAnalytics = () => {
   const topViewedLessonsKey = Object.keys(analytics).find(
     (key) => key.toLowerCase().includes("top") && Array.isArray(analytics[key])
   );
-  const topViewedLessons = topViewedLessonsKey ? analytics[topViewedLessonsKey] : [];
+  const topViewedLessons = topViewedLessonsKey
+    ? analytics[topViewedLessonsKey]
+    : [];
 
   return (
     <Container maxWidth="xl" sx={{ py: 6 }}>
-      <Stack
-        direction="row"
-        spacing={2}
-        alignItems="center"
-        justifyContent="center"
-        sx={{ mb: 6 }}
-      >
-        <AnalyticsIcon sx={{ fontSize: 48, color: "primary.main" }} />
-        <Typography variant="h3" fontWeight={800} sx={{ color: "primary.main" }}>
-          Content Analytics
-        </Typography>
-      </Stack>
-
-      {/* Summary Stats */}
-      <Grid container spacing={4} sx={{ mb: 8 }}>
-        {statsConfig.map((stat) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={stat.key}>
-            <StatCard color={stat.color}>
-              <StatIconWrapper color={stat.color} className="stat-icon">
-                {React.cloneElement(stat.icon, { sx: { fontSize: 28 } })}
-              </StatIconWrapper>
-              <Typography variant="subtitle1" fontWeight={600} color="text.secondary">
-                {stat.label}
-              </Typography>
-              <Typography variant="h3" fontWeight={800} sx={{ color: stat.color }}>
-                {analytics[stat.key] || 0}
-              </Typography>
-            </StatCard>
-          </Grid>
-        ))}
-      </Grid>
+      
 
       {/* Top Viewed Lessons */}
       {topViewedLessons.length > 0 && (
         <>
           <Divider sx={{ my: 6, borderColor: "divider", borderWidth: 1 }} />
           <Box sx={{ textAlign: "center", mb: 6 }}>
-            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+            <Stack
+              direction="row"
+              spacing={2}
+              justifyContent="center"
+              alignItems="center"
+            >
               <TrendingIcon sx={{ fontSize: 40, color: "primary.main" }} />
-              <Typography variant="h4" fontWeight={700} sx={{ color: "primary.main" }}>
+              <Typography
+                variant="h4"
+                fontWeight={700}
+                sx={{ color: "primary.main" }}
+              >
                 Top Viewed Lessons
               </Typography>
             </Stack>
@@ -253,11 +234,16 @@ const LessonAnalytics = () => {
                       backgroundColor: "action.hover",
                       display: "flex",
                       alignItems: "center",
-                      gap: 2
+                      gap: 2,
                     }}
                   >
                     <LessonsIcon color="primary" sx={{ fontSize: 32 }} />
-                    <Typography variant="h6" fontWeight={700} noWrap sx={{ flexGrow: 1 }}>
+                    <Typography
+                      variant="h6"
+                      fontWeight={700}
+                      noWrap
+                      sx={{ flexGrow: 1 }}
+                    >
                       {lesson.title}
                     </Typography>
                     <Stack direction="row" alignItems="center" spacing={1}>
@@ -268,31 +254,42 @@ const LessonAnalytics = () => {
                     </Stack>
                   </Box>
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="body2" color="text.secondary" mb={3} sx={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      mb={3}
+                      sx={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
                       {lesson.description || "No description available"}
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <SubjectsIcon fontSize="small" color="primary" />
-                          <Typography variant="caption">{lesson.subject || "N/A"}</Typography>
+                          <Typography variant="caption">
+                            {lesson.subject || "N/A"}
+                          </Typography>
                         </Stack>
                       </Grid>
                       <Grid item xs={6}>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <CategoriesIcon fontSize="small" color="primary" />
-                          <Typography variant="caption">{lesson.contentType || "N/A"}</Typography>
+                          <Typography variant="caption">
+                            {lesson.contentType || "N/A"}
+                          </Typography>
                         </Stack>
                       </Grid>
                       <Grid item xs={6}>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <TimeIcon fontSize="small" color="primary" />
-                          <Typography variant="caption">{lesson.duration || "N/A"}</Typography>
+                          <Typography variant="caption">
+                            {lesson.duration || "N/A"}
+                          </Typography>
                         </Stack>
                       </Grid>
                     </Grid>
@@ -303,7 +300,7 @@ const LessonAnalytics = () => {
                       borderTop: `1px solid ${theme.palette.divider}`,
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "center"
+                      alignItems: "center",
                     }}
                   >
                     <Stack direction="row" spacing={1} alignItems="center">
@@ -313,7 +310,8 @@ const LessonAnalytics = () => {
                       </Typography>
                     </Stack>
                     <Typography variant="caption" color="text.secondary">
-                      Last updated: {new Date(lesson.updatedAt).toLocaleDateString()}
+                      Last updated:{" "}
+                      {new Date(lesson.updatedAt).toLocaleDateString()}
                     </Typography>
                   </Box>
                 </LessonCard>
@@ -322,6 +320,33 @@ const LessonAnalytics = () => {
           </Grid>
         </>
       )}
+
+      {/* Summary Stats */}
+      <Grid container spacing={4} sx={{ mb: 8 }}>
+        {statsConfig.map((stat) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={stat.key}>
+            <StatCard color={stat.color}>
+              <StatIconWrapper color={stat.color} className="stat-icon">
+                {React.cloneElement(stat.icon, { sx: { fontSize: 28 } })}
+              </StatIconWrapper>
+              <Typography
+                variant="subtitle1"
+                fontWeight={600}
+                color="text.secondary"
+              >
+                {stat.label}
+              </Typography>
+              <Typography
+                variant="h3"
+                fontWeight={800}
+                sx={{ color: stat.color }}
+              >
+                {analytics[stat.key] || 0}
+              </Typography>
+            </StatCard>
+          </Grid>
+        ))}
+      </Grid>
     </Container>
   );
 };

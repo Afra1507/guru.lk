@@ -16,10 +16,6 @@ import {
   styled,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import DownloadIcon from "@mui/icons-material/Download";
 import SchoolIcon from "@mui/icons-material/School";
 import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
 import AnswerIcon from "@mui/icons-material/QuestionAnswerOutlined";
@@ -29,33 +25,7 @@ import ContentCard from "../components/content/ContentCard";
 import QuestionCard from "../components/forum/QuestionCard";
 import AnswerCard from "../components/forum/AnswerCard";
 import { jwtDecode } from "jwt-decode";
-
-// Animation keyframes
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-3px); }
-  100% { transform: translateY(0px); }
-`;
-
-const pulseAnimation = keyframes`
-  0% { box-shadow: 0 0 0 0 rgba(0, 31, 84, 0.4); }
-  70% { box-shadow: 0 0 0 8px rgba(0, 31, 84, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 31, 84, 0); }
-`;
-
-// Styled components
-const PremiumPaper = styled(Paper)(({ theme }) => ({
-  borderRadius: "12px",
-  transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-  boxShadow: theme.shadows[4],
-  "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: theme.shadows[8],
-    "& .stat-icon": {
-      animation: `${floatAnimation} 2s ease-in-out infinite`,
-    },
-  },
-}));
+import UploadStats from "../components/contributor/UploadStats"; // Import the UploadStats component
 
 const StyledTabs = styled(Tabs)(({ theme }) => ({
   "& .MuiTabs-indicator": {
@@ -81,20 +51,6 @@ const StyledTab = styled(Tab)(({ theme }) => ({
   },
 }));
 
-const StatIcon = styled("div")(({ theme, color }) => ({
-  width: "48px",
-  height: "48px",
-  borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  background: `linear-gradient(135deg, ${color}, ${theme.palette.getContrastText(
-    color
-  )})`,
-  color: "white",
-  boxShadow: theme.shadows[2],
-  marginBottom: theme.spacing(1),
-}));
 
 const DashboardTitle = styled(Typography)(({ theme }) => ({
   background: "linear-gradient(90deg, #001f54, #4fc3f7)",
@@ -124,138 +80,6 @@ function TabPanel(props) {
     </div>
   );
 }
-
-// UploadStats component with premium styling
-const UploadStats = ({ userId }) => {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!userId) {
-      setError("User not logged in.");
-      setLoading(false);
-      return;
-    }
-
-    const fetchStats = async () => {
-      try {
-        setLoading(true);
-        const lessons = await contentService.getLessonsByUploader(userId);
-
-        const totalUploads = lessons.length;
-        const approvedUploads = lessons.filter((l) => l.isApproved).length;
-        const pendingUploads = totalUploads - approvedUploads;
-        const totalViews = lessons.reduce(
-          (sum, l) => sum + (l.viewCount || 0),
-          0
-        );
-        const totalDownloads = lessons.reduce(
-          (sum, l) => sum + (l.downloadCount || 0),
-          0
-        );
-
-        setStats({
-          totalUploads,
-          approvedUploads,
-          pendingUploads,
-          totalViews,
-          totalDownloads,
-        });
-      } catch (err) {
-        setError(err.message || "Failed to fetch stats");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, [userId]);
-
-  if (loading)
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <CircularProgress sx={{ color: "#4fc3f7" }} />
-      </Box>
-    );
-  if (error)
-    return (
-      <Typography color="error" textAlign="center" mt={4}>
-        {error}
-      </Typography>
-    );
-
-  const statItems = [
-    {
-      label: "Total Uploads",
-      value: stats.totalUploads,
-      color: "#9e9e9e",
-      icon: <CloudUploadIcon />,
-    },
-    {
-      label: "Approved Uploads",
-      value: stats.approvedUploads,
-      color: "#4caf50",
-      icon: <CheckCircleIcon />,
-    },
-    {
-      label: "Pending Uploads",
-      value: stats.pendingUploads,
-      color: "#ff9800",
-      icon: <HourglassEmptyIcon />,
-    },
-    {
-      label: "Total Views",
-      value: stats.totalViews,
-      color: "#2196f3",
-      icon: <VisibilityIcon />,
-    },
-    {
-      label: "Total Downloads",
-      value: stats.totalDownloads,
-      color: "#3f51b5",
-      icon: <DownloadIcon />,
-    },
-  ];
-
-  return (
-    <Box sx={{ flexGrow: 1, p: 2 }}>
-      <Grid container spacing={3} justifyContent="center">
-        {statItems.map(({ label, value, color, icon }, idx) => (
-          <Grid key={idx} item xs={12} sm={6} md={4} lg={3}>
-            <PremiumPaper elevation={6} sx={{ p: 3, height: "100%" }}>
-              <Box
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                textAlign="center"
-              >
-                <StatIcon color={color} className="stat-icon">
-                  {React.cloneElement(icon, { sx: { fontSize: 24 } })}
-                </StatIcon>
-                <Typography
-                  variant="subtitle1"
-                  fontWeight="medium"
-                  color="text.secondary"
-                  gutterBottom
-                >
-                  {label}
-                </Typography>
-                <Typography
-                  variant="h4"
-                  fontWeight="bold"
-                  sx={{ color: "#001f54" }}
-                >
-                  {value ?? 0}
-                </Typography>
-              </Box>
-            </PremiumPaper>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
-  );
-};
 
 const ContributorDashboard = () => {
   const [myUploads, setMyUploads] = useState([]);
