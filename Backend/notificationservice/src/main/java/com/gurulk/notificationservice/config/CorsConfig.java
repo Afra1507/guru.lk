@@ -17,7 +17,7 @@ public class CorsConfig {
     config.setAllowCredentials(true); // allow cookies/auth headers
     config.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // frontend URL
     config.setAllowedHeaders(Arrays.asList("*")); // allow all headers
-    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // allow all methods
+    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // allow all methods
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config); // apply to all routes
