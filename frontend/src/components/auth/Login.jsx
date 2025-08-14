@@ -55,7 +55,11 @@ const Login = () => {
       await login(token);
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || translate("loginPage.loginFailed", language) || "Login failed.");
+      setError(
+        err.response?.data?.message ||
+          translate("loginPage.loginFailed", language) ||
+          "Login failed."
+      );
     }
 
     setLoading(false);
@@ -83,7 +87,8 @@ const Login = () => {
           right: "-50%",
           width: "80%",
           height: "80%",
-          background: "radial-gradient(circle, rgba(25,118,210,0.1) 0%, rgba(255,255,255,0) 70%)",
+          background:
+            "radial-gradient(circle, rgba(25,118,210,0.1) 0%, rgba(255,255,255,0) 70%)",
           borderRadius: "50%",
           zIndex: 0,
         },
@@ -94,7 +99,8 @@ const Login = () => {
           left: "-60%",
           width: "100%",
           height: "100%",
-          background: "radial-gradient(circle, rgba(25,118,210,0.08) 0%, rgba(255,255,255,0) 70%)",
+          background:
+            "radial-gradient(circle, rgba(25,118,210,0.08) 0%, rgba(255,255,255,0) 70%)",
           borderRadius: "50%",
           zIndex: 0,
         },
@@ -139,7 +145,8 @@ const Login = () => {
                     height: 80,
                     mx: "auto",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #1976d2 0%, #4dabf5 100%)",
+                    background:
+                      "linear-gradient(135deg, #1976d2 0%, #4dabf5 100%)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -152,13 +159,18 @@ const Login = () => {
                   <RiShieldUserLine size={36} color="white" />
                 </Box>
               </motion.div>
-              
+
               <Grow in timeout={800}>
-                <Typography variant="h5" fontWeight="600" color="text.primary" gutterBottom>
+                <Typography
+                  variant="h5"
+                  fontWeight="600"
+                  color="text.primary"
+                  gutterBottom
+                >
                   {translate("loginPage.welcomeBack", language)}
                 </Typography>
               </Grow>
-              
+
               <Fade in timeout={1000}>
                 <Typography variant="body2" color="text.secondary">
                   {translate("loginPage.pleaseLogin", language)}
@@ -251,7 +263,10 @@ const Login = () => {
                         <IconButton
                           onClick={handleClickShowPassword}
                           edge="end"
-                          aria-label={translate("loginPage.togglePasswordVisibility", language)}
+                          aria-label={translate(
+                            "loginPage.togglePasswordVisibility",
+                            language
+                          )}
                           sx={{
                             color: theme.palette.primary.main,
                             "&:hover": {
@@ -317,8 +332,7 @@ const Login = () => {
                   backgroundColor: "rgba(255,255,255,0.85)",
                   color: "text.secondary",
                 }}
-              >
-              </Typography>
+              ></Typography>
             </Box>
 
             {/* Register link */}

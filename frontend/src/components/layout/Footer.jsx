@@ -34,12 +34,12 @@ const Footer = () => {
   const [language] = useState(initLanguage());
 
   const socialIcons = [
-    { icon: FaFacebook, label: "Facebook", href: "#", color: "#1877F2" },
-    { icon: FaTwitter, label: "Twitter", href: "#", color: "#1DA1F2" },
-    { icon: FaInstagram, label: "Instagram", href: "#", color: "#E4405F" },
-    { icon: FaYoutube, label: "YouTube", href: "#", color: "#FF0000" },
-    { icon: FaGithub, label: "Github", href: "#", color: "#181717" },
-    { icon: FaLinkedin, label: "LinkedIn", href: "#", color: "#0A66C2" },
+    { icon: FaFacebook, label: "Facebook", href: "https://web.facebook.com/profile.php?id=100090786972452", color: "#1877F2" },
+    { icon: FaTwitter, label: "Twitter", href: "https://x.com/Banu0715", color: "#1DA1F2" },
+    { icon: FaInstagram, label: "Instagram", href: "https://www.instagram.com/afrabanu_0715?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==", color: "#E4405F" },
+    { icon: FaYoutube, label: "YouTube", href: "https://www.youtube.com/@apppuuu6", color: "#FF0000" },
+    { icon: FaGithub, label: "Github", href: "https://github.com/Afra1507", color: "#181717" },
+    { icon: FaLinkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/afra-banu-zahir-hussain-a49691221/", color: "#0A66C2" },
   ];
 
   const quickLinks = [
@@ -65,7 +65,7 @@ const Footer = () => {
     },
     {
       label: translate("footer.universityPortal", language),
-      href: "#",
+      href: "https://lms.fas.sjp.ac.lk/",
       icon: <SchoolOutlined fontSize="small" />,
     },
   ];

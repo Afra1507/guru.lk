@@ -28,6 +28,16 @@ export const communityAPI = axios.create({
   withCredentials: true,
 });
 
+// Create axios instance for notification API
+const notificationBaseURL =
+  process.env.REACT_APP_NOTIFICATION_BASE_URL || "http://localhost:8084";
+
+export const notificationAPI = axios.create({
+  baseURL: notificationBaseURL,
+  withCredentials: true,
+});
+
+
 // Request interceptor for both API instances
 const requestInterceptor = (config) => {
   const token = localStorage.getItem("token");
@@ -48,7 +58,7 @@ const responseErrorInterceptor = (error) => {
 };
 
 // Add interceptors to both API instances
-[API, contentAPI,communityAPI].forEach((instance) => {
+[API, contentAPI,communityAPI,notificationAPI].forEach((instance) => {
   instance.interceptors.request.use(requestInterceptor);
   instance.interceptors.response.use(
     (response) => response,

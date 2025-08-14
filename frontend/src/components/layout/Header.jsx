@@ -24,12 +24,13 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import LanguageSelector from "./LanguageSelector";
 import { useAuth } from "../../auth/useAuth";
 import Sidebar from "./Sidebar";
 import { LanguageContext } from "../../context/LanguageContext";
 import { translate } from "../../utils/language";
+import { useNotifications } from "../../context/NotificationContext";
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -40,6 +41,7 @@ const Header = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const menuOpen = Boolean(anchorEl);
+  const { unreadCount } = useNotifications();
 
   const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -56,7 +58,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/login"); // Redirect to logout page
+      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -92,8 +94,12 @@ const Header = () => {
           background: scrolled
             ? "linear-gradient(135deg, rgba(0, 40, 85, 0.95), rgba(0, 40, 85, 0.85))"
             : "linear-gradient(135deg, rgba(0, 40, 85, 0.85), rgba(0, 40, 85, 0.75))",
-          backdropFilter: scrolled ? "blur(25px) brightness(1.15)" : "blur(20px)",
-          WebkitBackdropFilter: scrolled ? "blur(25px) brightness(1.15)" : "blur(20px)",
+          backdropFilter: scrolled
+            ? "blur(25px) brightness(1.15)"
+            : "blur(20px)",
+          WebkitBackdropFilter: scrolled
+            ? "blur(25px) brightness(1.15)"
+            : "blur(20px)",
           border: "1px solid rgba(255, 255, 255, 0.15)",
           boxShadow: scrolled
             ? "0 8px 40px rgba(0,0,0,0.35)"
@@ -212,6 +218,30 @@ const Header = () => {
               onChange={changeLanguage}
             />
 
+            {/* Notifications bell */}
+            <Link to="/notifications" style={{ position: "relative" }}>
+              <IconButton sx={{ color: "#f8f9fa" }}>
+                <NotificationsIcon />
+              </IconButton>
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "4px",
+                    right: "4px",
+                    background: "red",
+                    color: "white",
+                    fontSize: "10px",
+                    fontWeight: "bold",
+                    padding: "2px 6px",
+                    borderRadius: "999px",
+                  }}
+                >
+                  {unreadCount}
+                </span>
+              )}
+            </Link>
+
             {user ? (
               <>
                 <Tooltip title={translate("account", language)}>
@@ -246,7 +276,7 @@ const Header = () => {
                     {user.username}
                   </Button>
                 </Tooltip>
-                
+
                 <Menu
                   anchorEl={anchorEl}
                   open={menuOpen}
@@ -294,30 +324,49 @@ const Header = () => {
                   </MenuItem>
                   <Divider sx={{ bgcolor: "rgba(255,255,255,0.1)", my: 0.5 }} />
                   <MenuItem onClick={handleDashboardRedirect}>
-                    <DashboardIcon sx={{ mr: 1.5, fontSize: "1.1rem", color: "#FFC107" }} />
+                    <DashboardIcon
+                      sx={{ mr: 1.5, fontSize: "1.1rem", color: "#FFC107" }}
+                    />
                     {user.role === "ADMIN"
                       ? translate("dashboardLabels.adminDashboard", language)
                       : user.role === "CONTRIBUTOR"
-                      ? translate("dashboardLabels.contributorDashboard", language)
+                      ? translate(
+                          "dashboardLabels.contributorDashboard",
+                          language
+                        )
                       : translate("dashboardLabels.myDashboard", language)}
                   </MenuItem>
-                  <MenuItem onClick={() => { navigate("/profile"); handleMenuClose(); }}>
-                    <PersonIcon sx={{ mr: 1.5, fontSize: "1.1rem", color: "#FFC107" }} />
+                  <MenuItem
+                    onClick={() => {
+                      navigate("/profile");
+                      handleMenuClose();
+                    }}
+                  >
+                    <PersonIcon
+                      sx={{ mr: 1.5, fontSize: "1.1rem", color: "#FFC107" }}
+                    />
                     {translate("myProfile", language)}
                   </MenuItem>
-                  <MenuItem onClick={() => { alert(translate("noNotifications", language)); handleMenuClose(); }}>
-                    <NotificationsIcon sx={{ mr: 1.5, fontSize: "1.1rem", color: "#FFC107" }} />
+                  <MenuItem
+                    onClick={() => {
+                      navigate("/notifications");
+                      handleMenuClose();
+                    }}
+                  >
+                    <NotificationsIcon
+                      sx={{ mr: 1.5, fontSize: "1.1rem", color: "#FFC107" }}
+                    />
                     {translate("notifications", language)}
                   </MenuItem>
                   <Divider sx={{ bgcolor: "rgba(255,255,255,0.1)", my: 0.5 }} />
-                  <MenuItem 
-                    onClick={handleLogout} 
-                    sx={{ 
+                  <MenuItem
+                    onClick={handleLogout}
+                    sx={{
                       color: "#ff5252",
                       "&:hover": {
                         color: "#ff5252",
                         bgcolor: "rgba(255,82,82,0.1)",
-                      }
+                      },
                     }}
                   >
                     <LogoutIcon sx={{ mr: 1.5, fontSize: "1.1rem" }} />
