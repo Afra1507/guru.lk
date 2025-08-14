@@ -3,6 +3,9 @@ package com.gurulk.authservice.controller;
 import com.gurulk.authservice.dto.*;
 import com.gurulk.authservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,6 +33,18 @@ public class AuthController {
     @GetMapping("/users/{userId}/email")
     public String getUserEmail(@PathVariable Long userId) {
         return authService.getUserEmail(userId);
+    }
+
+    // Get all user IDs by role
+    @GetMapping("/roles/{role}/users")
+    public List<Long> getUserIdsByRole(@PathVariable String role) {
+        return authService.getUserIdsByRole(role);
+    }
+
+    // Get all user IDs
+    @GetMapping("/users/ids")
+    public List<Long> getAllUserIds() {
+        return authService.getAllUserIds();
     }
 
 }

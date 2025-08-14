@@ -18,17 +18,19 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
   List<Notification> findByUserIdAndIsReadFalseOrderByCreatedAtDesc(Long userId);
 
+  List<Notification> findByUserIdOrRoleOrderByCreatedAtDesc(Long userId, String role);
+
   int countByUserIdAndIsReadFalse(Long userId);
 
   List<Notification> findTopByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
   @Transactional
-  @Modifying
-  @Query("UPDATE Notification n SET n.isRead = true WHERE n.notificationId = ?1 AND n.userId = ?2")
+  @Modifying(clearAutomatically = true)
+  @Query("UPDATE Notification n SET n.isRead = true WHERE n.notificationId = :notificationId AND n.userId = :userId")
   int markAsRead(Long notificationId, Long userId);
 
   @Transactional
-  @Modifying
-  @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = ?1 AND n.isRead = false")
+  @Modifying(clearAutomatically = true)
+  @Query("UPDATE Notification n SET n.isRead = true WHERE n.userId = :userId AND n.isRead = false")
   int markAllAsRead(Long userId);
 }

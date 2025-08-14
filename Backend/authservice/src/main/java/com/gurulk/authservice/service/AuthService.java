@@ -161,6 +161,21 @@ public class AuthService {
                 .getEmail();
     }
 
+    // Get all user IDs by role
+    public List<Long> getUserIdsByRole(String role) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole().name().equalsIgnoreCase(role))
+                .map(User::getUserId)
+                .collect(Collectors.toList());
+    }
+
+    // Get all user IDs
+    public List<Long> getAllUserIds() {
+        return userRepository.findAll().stream()
+                .map(User::getUserId)
+                .collect(Collectors.toList());
+    }
+
     private User getCurrentUser() {
         return userRepository.findByUsername(getCurrentUsername())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

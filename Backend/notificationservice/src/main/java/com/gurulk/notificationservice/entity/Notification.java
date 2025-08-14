@@ -21,6 +21,9 @@ public class Notification {
     @Column(nullable = false)
     private Long userId;
 
+    @Column
+    private String role; // ADMIN, CONTRIBUTOR, LEARNER, or null for individual
+
     @Column(nullable = false)
     private String type; // reply, content_update, announcement
 
