@@ -1,0 +1,18 @@
+# Ignore node modules (we install them inside Docker)
+node_modules
+npm-debug.log
+
+# Ignore build output locally
+build
+
+# VSCode config
+.vscode
+
+# Git files
+.git
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+

@@ -45,4 +45,5 @@ spec:
   ports:
     - port: 8084
       targetPort: 8084
-  type: ClusterIP
+      nodePort: 31084   # Exposed port on host/minikube
+  type: NodePort        # Must set NodePort type

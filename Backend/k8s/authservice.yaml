@@ -35,3 +35,5 @@ spec:
   ports:
     - port: 8081
       targetPort: 8081
+      nodePort: 31081   # Exposed port on host/minikube
+  type: NodePort        # Must set NodePort type

@@ -55,7 +55,14 @@ public class SecurityConfig {
         @Bean
         CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
-                configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+                // Use allowedOriginPatterns instead of allowedOrigins
+                configuration.setAllowedOriginPatterns(List.of(
+                                "http://127.0.0.1:*", // allow any localhost port
+                                "http://localhost:3000", // React dev server
+                                "http://localhost:30080", // frontend via NodePort
+                                "http://frontend",
+                                "http://192.168.49.2:*" // frontend service inside cluster
+                ));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(List.of("*"));
                 configuration.setAllowCredentials(true);

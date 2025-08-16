@@ -18,9 +18,9 @@ public class AuthServiceClient {
     public Optional<TokenValidationResponse> validateToken(String token) {
         try {
             ResponseEntity<TokenValidationResponse> response = restTemplate.postForEntity(
-                "http://authservice:8081/auth/validate-token",
-                new TokenValidationRequest(token),
-                TokenValidationResponse.class);
+                    "http://authservice:8081/auth/validate-token",
+                    new TokenValidationRequest(token),
+                    TokenValidationResponse.class);
             return Optional.ofNullable(response.getBody());
         } catch (Exception e) {
             return Optional.empty();
@@ -30,6 +30,6 @@ public class AuthServiceClient {
     public Long extractUserIdFromToken(String token) {
         Optional<TokenValidationResponse> response = validateToken(token);
         return response.map(TokenValidationResponse::getUserId)
-            .orElseThrow(() -> new SecurityException("Invalid token"));
+                .orElseThrow(() -> new SecurityException("Invalid token"));
     }
 }

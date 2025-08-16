@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: afra1507/frontend:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: REACT_APP_AUTH_BASE_URL
+              value: "http://localhost:31081"
+            - name: REACT_APP_CONTENT_BASE_URL
+              value: "http://localhost:31082"
+            - name: REACT_APP_COMMUNITY_BASE_URL
+              value: "http://localhost:31083"
+            - name: REACT_APP_NOTIFICATION_BASE_URL
+              value: "http://localhost:31084"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+  type: NodePort
