@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB = "afra1507"          // Docker Hub username
-        K8S_NAMESPACE = "default"        // Kubernetes namespace
+        DOCKER_HUB = "afra1507"        // Docker Hub username
+        K8S_NAMESPACE = "default"      // Kubernetes namespace
     }
 
     stages {
@@ -19,7 +19,7 @@ pipeline {
                         --ports=127.0.0.1:31083:31083 ^
                         --ports=127.0.0.1:31084:31084
                 """
-                echo "Minikube started successfully!"
+                echo "=== Minikube started successfully! ==="
             }
         }
 
@@ -83,27 +83,22 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo "=== Deploying to Kubernetes ==="
-                script {
-                    // Fetch Gmail credentials from Jenkins
-                    def gmailCreds = credentials('gmail-secret')
-                    def gmailUsername = gmailCreds.username
-                    def gmailPassword = gmailCreds.password
 
-                    echo "Creating Gmail secret in Kubernetes (if not exists)..."
-                    bat """
-                        kubectl create secret generic gmail-secret ^
-                            --from-literal=username=${gmailUsername} ^
-                            --from-literal=password=${gmailPassword} || echo Secret already exists
-                    """
+                echo "Creating Gmail secret in Kubernetes..."
+                bat """
+                    kubectl create secret generic gmail-secret ^
+                        --from-literal=username=mathuthiyagar40@gmail.com ^
+                        --from-literal=password=lomusncdinabctdn ^
+                        --dry-run=client -o yaml | kubectl apply -f -
+                """
 
-                    echo "Applying Backend Kubernetes manifests..."
-                    bat 'kubectl apply -f Backend/k8s'
+                echo "Applying Backend Kubernetes manifests..."
+                bat 'kubectl apply -f Backend/k8s'
 
-                    echo "Applying Frontend Kubernetes manifests..."
-                    bat 'kubectl apply -f Frontend/k8s'
+                echo "Applying Frontend Kubernetes manifests..."
+                bat 'kubectl apply -f Frontend/k8s'
 
-                    echo "=== Deployment Complete ==="
-                }
+                echo "=== Deployment Complete ==="
             }
         }
 
