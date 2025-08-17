@@ -1,6 +1,14 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()   // react to GitHub webhook
+    }
+
+    options {
+        disableConcurrentBuilds()   // avoids overlapping runs
+    }
+
     environment {
         DOCKER_HUB = "afra1507"        // Docker Hub username
         K8S_NAMESPACE = "default"      // Kubernetes namespace
