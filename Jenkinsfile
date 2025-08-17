@@ -4,8 +4,6 @@ pipeline {
     environment {
         DOCKER_HUB = "afra1507"             // Docker Hub username
         K8S_NAMESPACE = "default"           // Kubernetes namespace
-        GMAIL_USERNAME = credentials('gmail-secret').username
-        GMAIL_PASSWORD = credentials('gmail-secret').password
     }
 
     stages {
@@ -54,10 +52,15 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
+                    // Fetch Gmail credentials from Jenkins
+                    def gmailCreds = credentials('gmail-secret')
+                    def gmailUsername = gmailCreds.username
+                    def gmailPassword = gmailCreds.password
+
                     // Create Gmail secret if it doesn't exist
                     sh """kubectl create secret generic gmail-secret \
-                        --from-literal=username=${GMAIL_USERNAME} \
-                        --from-literal=password=${GMAIL_PASSWORD} || echo "Secret already exists"
+                        --from-literal=username=${gmailUsername} \
+                        --from-literal=password=${gmailPassword} || echo "Secret already exists"
                     """
 
                     // Apply Kubernetes manifests
