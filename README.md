@@ -765,7 +765,7 @@ This project was developed for educational purposes as part of the CSC 313 – S
 Email:
 
 ```text
-mathuthiyagar40@gmail.com
+afrabanu.zh@gmail.com
 ```
 
 GitHub Issues:
