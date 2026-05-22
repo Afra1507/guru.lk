@@ -292,7 +292,7 @@ Recommended system requirements:
 
 ```bash
 # Clone repository
-git clone https://github.com/your-repo/guru.lk.git
+git clone https://github.com/Afra1507/guru.lk
 
 cd guru.lk/Backend/authservice
 
@@ -766,12 +766,6 @@ Email:
 
 ```text
 afrabanu.zh@gmail.com
-```
-
-GitHub Issues:
-
-```text
-https://github.com/your-repo/guru.lk/issues
 ```
 
 ---
